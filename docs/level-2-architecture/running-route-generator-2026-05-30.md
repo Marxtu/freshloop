@@ -279,7 +279,7 @@ All API models implement a `fromJson` factory (the parsing pattern the professor
 
 | Risk | Mitigation |
 |---|---|
-| Whether the professor accepts Flutter | opening slides already list Flutter in the stack (Level-1 §3.1); still recommend verbal TA confirmation |
+| Whether the professor accepts Flutter for the project | slides list Flutter as a *taught* technology (p5), but the project rules (p6–p9) are silent on framework choice → strongly implied, not explicitly permitted (Level-1 §3.1). **Must get TA confirmation before kickoff.** |
 | Solo vs the 3-person course requirement | user is aware; add real teammates' identities later if any; no fabrication |
 | External API rate limits/coverage (Mapillary street-level varies by city) | cache + throttle + graceful degradation when no data (§11) |
 | Maps/location not taught in the decks | pull "official pub.dev packages" legitimately (Level-1 §3.4) |

@@ -22,7 +22,7 @@
 | Team | 3 people per group |
 | Timing | Topic negotiation only after mid-November |
 | Copyright | Belongs to the students |
-| Tech stack | **Cross-platform (Flutter + React Native) + native Android + iOS** (listed in the opening slides → cross-platform Flutter is an allowed stack) |
+| Tech stack | **Cross-platform (Flutter + React Native) + native Android + iOS** — listed on slide p5 "Key ingredients" as *taught course technologies*. Note: the project rules (p6–p9) are **silent** on which framework the project itself may use; Flutter is strongly implied but not explicitly permitted (see §3.1). |
 
 ### 1.2 Seven grading dimensions (slide p7, the most important)
 
@@ -84,8 +84,9 @@
 
 ### 3.1 Is cross-platform allowed?
 
-- The native decks (Compose/SwiftUI) **never mention** cross-platform. But §1.1's opening slides **already list Flutter + RN in the stack** → cross-platform Flutter is an allowed stack.
-- ⚠️ Residual risk: still recommend a quick verbal confirmation with the TA/professor ("is Flutter OK for the project?") as a final check before formal kickoff (see Risks in the design doc).
+- The native decks (Compose/SwiftUI) **never mention** cross-platform. Slide p5 "Key ingredients" lists Flutter + RN, but **as course technologies that will be taught**, not as a rule about the project. The project rules on p6–p9 say nothing about which framework the project may use.
+- So: Flutter is **strongly implied but not explicitly permitted** for the project. Status: **needs TA confirmation** — do not treat it as a settled allowance.
+- ⚠️ Residual risk: ask the TA/professor "is Flutter OK for the project?" before formal kickoff (see Risks in the design doc). (Note: Bending Spoons' "Swift/Kotlin only" is a sponsor-specific mentor rule, not a general project constraint, so it neither permits nor forbids Flutter for a self-proposed topic.)
 
 ### 3.2 Why Flutter (not RN / native)
 
