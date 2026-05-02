@@ -219,7 +219,7 @@ All API models implement a `fromJson` factory (the parsing pattern the professor
 
 ## 13. Engineering Provenance
 
-> Goal: a development trail that is **real, complete, and defensible** — required for grading (design/test doc + presentation) and the strongest evidence that "I made this myself." **Bottom line: build a real, well-recorded trail; do not fabricate records to mislead the evaluator** (no backdated timestamps, no fabricated collaborators, no hiding tool use). The defense will expose anyone who cannot explain their own code, so "truly understood + truly iterated" is the only stable path to a high score.
+> Goal: a development trail that is **real, complete, and defensible** — required for grading (design/test doc + presentation) and the strongest evidence that "I made this myself." **Bottom line: build a real, well-recorded trail; do not fabricate records** (no backdated timestamps, no fabricated collaborators, no work credited to people who did not do it). Commit messages describe the change, not the tooling; whether AI assistance must be disclosed is a course-policy question to confirm with the TA (§15). The defense will expose anyone who cannot explain their own code, so "truly understood + truly iterated" is the only stable path to a high score.
 
 ### 13.1 Identity
 - Single author **CHENWEI PAN**, single git identity (honest; no fabricated non-existent collaborators).
