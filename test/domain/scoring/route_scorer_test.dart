@@ -45,4 +45,17 @@ void main() {
       expect(b.explanation, 'Strong on air, hills; weak on scenery.');
     });
   });
+
+  group('RouteScorer.rank', () {
+    test('orders by total, highest first', () {
+      final ranked = _scorer.rank<double>([40, 90, 70], (t) => t);
+      expect(ranked, [90, 70, 40]);
+    });
+    test('is stable for equal totals (preserves input order)', () {
+      final a = (id: 'a', total: 50.0);
+      final b = (id: 'b', total: 50.0);
+      final ranked = _scorer.rank([a, b], (t) => t.total);
+      expect(ranked.map((e) => e.id).toList(), ['a', 'b']);
+    });
+  });
 }
