@@ -41,8 +41,8 @@ inspired by the WHO assessment rubric — so the score is transparent, not a bla
 ## Roadmap
 
 - [x] **M1** — Foundation: app shell + pure-Dart scoring engine
-- [ ] **M2** — External API layer (OpenRouteService, Open-Meteo air/elevation, OSM Overpass, Mapillary/Wikimedia photos)
-- [ ] **M3** — Route-generation UI (params → candidates → route detail with map, elevation chart, photos)
+- [x] **M2** — External data layer: routing (OpenRouteService) + geocoding (Nominatim) + air quality (Open-Meteo) + greenery (OSM Overpass) + photos (Mapillary, Wikimedia), all behind injectable, fully mock-tested clients
+- [ ] **M3** — Route-generation UI (params → candidates → route detail with map, elevation chart, photos) — wires the data layer + scoring together; first real screens for the visual walkthrough
 - [ ] **M4** — Live GPS run tracking + post-run summary
 - [ ] **M5** — Firebase auth/storage, history, favorites, profile
 - [ ] **M6** — Multi-device adaptation, polish, and integration tests
