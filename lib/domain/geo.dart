@@ -40,7 +40,9 @@ BoundingBox boundingBoxOf(List<RoutePoint> points, {double padDeg = 0.002}) {
 /// Evenly downsamples [points] to at most [max] items, always keeping the
 /// first and last. Returns the input unchanged when it already fits.
 List<RoutePoint> subsample(List<RoutePoint> points, int max) {
-  if (points.length <= max || max <= 0) return points;
+  if (max <= 0) return const [];
+  if (points.length <= max) return points;
+  if (max == 1) return [points.first];
   final step = (points.length - 1) / (max - 1);
   final out = <RoutePoint>[];
   for (var i = 0; i < max; i++) {
