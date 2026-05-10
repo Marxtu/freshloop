@@ -66,4 +66,15 @@ The professor's exemplar screens are **map + panel master-detail** (Trenitalia).
 4. Params bottom sheet (sliders + chips + one amber CTA), candidate map-preview cards with staggered reveal.
 5. Every screen reviewed against this direction **and** the UX checklist; then the Chrome screenshot walkthrough (phone + tablet) scores look-&-feel before merge.
 
+## 9. Cross-validation (against other design skills)
+
+Checked this direction against the other available design skills; all converge, none contradict:
+
+- **`frontend-design`** (Anthropic) — source method here: commit to a bold, intentional aesthetic; distinctive (non-default) typography; dominant color + sharp accent; purposeful motion; avoid generic AI aesthetics. ✓ applied.
+- **`theme-factory`** (Anthropic, 10 pro themes) — its nature presets ("Forest Canopy / earth tones", "Botanical Garden / fresh organic") validate the green-led palette as an established professional choice; its discipline (one cohesive palette + font pairing, applied consistently, contrast-checked) matches §2–§3. Also adopted its **"confirm the theme with the user before applying"** step.
+- **`brand-guidelines`** (Anthropic, brand-specific) — not directly applicable (it's Anthropic's own identity), but confirms the right structure: defined colors + heading/body font pairing + a reserved accent + contrast-aware text. ✓ mirrored.
+- No mobile/Flutter-specific design skill exists in the available marketplaces; this direction + the UX checklist are our SSOT.
+
+**User sign-off:** the concrete palette (green `#0E9F6E` seed + amber `#F59E0B` accent) and fonts (Sora + DM Sans) are confirmed with the user before M3.2 implements them ("decide for me, but let me have the final say").
+
 > Note: `frontend-design` targets web (HTML/CSS); only its *design judgment* is applied here — the implementation is Flutter/Material 3. This direction is a starting commitment, refined as real screens are screenshot-reviewed.
