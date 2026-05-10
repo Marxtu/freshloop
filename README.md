@@ -14,9 +14,21 @@ Milano, Prof. Luciano Baresi).
 ## Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/m1-home.png" alt="FreshLoop home screen (M1 foundation)" width="260">
+  <img src="docs/screenshots/theme-a-home.png" alt="FreshLoop app shell with the chosen Theme A" width="260">
 </p>
-<p align="center"><em>Home shell (Material 3 theme). M2 added the external data layer behind the scenes — no UI change yet; the route-generation flow, map, and tracking screens (and more screenshots) arrive in M3.</em></p>
+<p align="center"><em>The app shell with the chosen visual direction ("Theme A") — Sora display + DM Sans body on a trail-green Material 3 surface. The map, params sheet, and candidate cards land in M3.2; more screenshots follow.</em></p>
+
+### Visual direction
+
+Look-&-feel is grounded in the course's design principles. We evaluated three directions and chose **A**:
+
+| | Direction | Palette · Typography | Why |
+|---|---|---|---|
+| **A** ✅ | Fresh-air cartographic | trail-green `#0E9F6E` + amber accent · Sora / DM Sans | sporty & outdoors; clearest CTA, best legibility — closest to the app's purpose |
+| B | Ocean | teal + coral · Outfit / DM Sans | calm/wellness feel; running energy weaker |
+| C | Forest editorial | deep green + clay · Fraunces / DM Sans | most distinctive, but an editorial serif risks mismatch with a running tool |
+
+Full rationale: [visual design direction](docs/level-2-architecture/visual-design-direction-2026-05-31.md) · [UX & grading checklist](docs/level-2-architecture/ux-and-rubric-checklist-2026-05-31.md).
 
 ## Status
 
