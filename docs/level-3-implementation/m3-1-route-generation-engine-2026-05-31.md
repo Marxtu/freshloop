@@ -517,15 +517,18 @@ void main() {
 
     test('emits loading then loaded with routes on success', () async {
       final cubit = RouteGenCubit(_okGenerator());
-      final states = <RouteGenState>[];
-      final sub = cubit.stream.listen(states.add);
+      // Set up the expectation before acting so both emissions are caught
+      // regardless of the broadcast stream's microtask delivery timing.
+      final expectation = expectLater(
+        cubit.stream,
+        emitsInOrder([isA<RouteGenLoading>(), isA<RouteGenLoaded>()]),
+      );
 
       await cubit.generate(_params, candidates: 2);
+      await expectation;
 
-      expect(states.first, isA<RouteGenLoading>());
-      expect(states.last, isA<RouteGenLoaded>());
-      expect((states.last as RouteGenLoaded).routes.length, 2);
-      await sub.cancel();
+      expect(cubit.state, isA<RouteGenLoaded>());
+      expect((cubit.state as RouteGenLoaded).routes.length, 2);
       await cubit.close();
     });
 
