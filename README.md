@@ -22,6 +22,10 @@ Milano, Prof. Luciano Baresi).
 
 Look-&-feel is grounded in the course's design principles. We evaluated three directions and chose **A**:
 
+<p align="center">
+  <img src="docs/screenshots/theme-directions.png" alt="Three evaluated theme directions — A (chosen), B Ocean, C Forest editorial" width="760">
+</p>
+
 | | Direction | Palette · Typography | Why |
 |---|---|---|---|
 | **A** ✅ | Fresh-air cartographic | trail-green `#0E9F6E` + amber accent · Sora / DM Sans | sporty & outdoors; clearest CTA, best legibility — closest to the app's purpose |
