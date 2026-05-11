@@ -1,8 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-/// Centralized Material 3 theme (Color/Typography/Shape), built once.
-/// A single seed colour drives the whole scheme so look & feel stays consistent.
-final ThemeData freshLoopTheme = ThemeData(
-  useMaterial3: true,
-  colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2E7D32)),
-);
+/// FreshLoop palette (visual direction "Theme A").
+class AppColors {
+  AppColors._();
+  static const seed = Color(0xFF0E9F6E); // vivid trail green (primary)
+  static const accent = Color(0xFFF59E0B); // amber — reserved for the primary CTA + top score
+  static const tierGood = Color(0xFF0E9F6E);
+  static const tierPartial = Color(0xFFF59E0B);
+  static const tierPoor = Color(0xFFEF4444);
+}
+
+/// Material 3 theme with the distinctive Sora (display) + DM Sans (body) pairing.
+final ThemeData freshLoopTheme = () {
+  final scheme = ColorScheme.fromSeed(seedColor: AppColors.seed);
+  final base = ThemeData(useMaterial3: true, colorScheme: scheme);
+  return base.copyWith(
+    textTheme: GoogleFonts.dmSansTextTheme(base.textTheme).copyWith(
+      displayLarge: GoogleFonts.sora(textStyle: base.textTheme.displayLarge, fontWeight: FontWeight.w700),
+      displayMedium: GoogleFonts.sora(textStyle: base.textTheme.displayMedium, fontWeight: FontWeight.w700),
+      headlineLarge: GoogleFonts.sora(textStyle: base.textTheme.headlineLarge, fontWeight: FontWeight.w600),
+      headlineMedium: GoogleFonts.sora(textStyle: base.textTheme.headlineMedium, fontWeight: FontWeight.w600),
+      titleLarge: GoogleFonts.sora(textStyle: base.textTheme.titleLarge, fontWeight: FontWeight.w600),
+    ),
+  );
+}();
