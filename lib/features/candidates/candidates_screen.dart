@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../state/route_gen_cubit.dart';
 import '../../state/route_gen_state.dart';
 import 'candidate_card.dart';
@@ -22,7 +23,7 @@ class CandidatesScreen extends StatelessWidget {
               itemBuilder: (context, i) => CandidateCard(
                 route: routes[i],
                 rank: i + 1,
-                onTap: () {}, // route detail = M3.3
+                onTap: () => context.push('/detail', extra: routes[i]),
               ),
             ),
     );
