@@ -9,14 +9,26 @@ import 'photo_carousel.dart';
 
 /// The chosen route in full: the loop on a map, with a draggable sheet holding
 /// the score breakdown, elevation profile, scenery photos, and actions.
-class RouteDetailScreen extends StatelessWidget {
+class RouteDetailScreen extends StatefulWidget {
   final ScoredRoute route;
   final PhotoService photoService;
   const RouteDetailScreen({super.key, required this.route, required this.photoService});
 
   @override
+  State<RouteDetailScreen> createState() => _RouteDetailScreenState();
+}
+
+class _RouteDetailScreenState extends State<RouteDetailScreen> {
+  // Fetch photos once — the DraggableScrollableSheet builder rebuilds on every
+  // scroll frame, so the future must NOT be created there (avoids repeated
+  // network requests and spinner flashes).
+  late final Future<List<ScenePhoto>> _photos =
+      widget.photoService.photosForRoute(widget.route.geometry);
+
+  @override
   Widget build(BuildContext context) {
     final t = Theme.of(context);
+    final route = widget.route;
     final s = route.score;
     final km = (route.geometry.distanceM / 1000).toStringAsFixed(1);
     return Scaffold(
@@ -68,7 +80,7 @@ class RouteDetailScreen extends StatelessWidget {
                   Text('Along the way', style: t.textTheme.titleMedium),
                   const SizedBox(height: 6),
                   FutureBuilder<List<ScenePhoto>>(
-                    future: photoService.photosForRoute(route.geometry),
+                    future: _photos,
                     builder: (context, snap) {
                       if (snap.connectionState != ConnectionState.done) {
                         return const SizedBox(height: 180, child: Center(child: CircularProgressIndicator()));
