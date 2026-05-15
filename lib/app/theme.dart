@@ -23,5 +23,10 @@ final ThemeData freshLoopTheme = () {
       headlineMedium: GoogleFonts.sora(textStyle: base.textTheme.headlineMedium, fontWeight: FontWeight.w600),
       titleLarge: GoogleFonts.sora(textStyle: base.textTheme.titleLarge, fontWeight: FontWeight.w600),
     ),
+    sliderTheme: const SliderThemeData(
+      activeTrackColor: AppColors.seed,
+      thumbColor: AppColors.seed,
+      inactiveTrackColor: Color(0x400E9F6E), // ~25% trail green
+    ),
   );
 }();
