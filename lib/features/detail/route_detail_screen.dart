@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../app/theme.dart';
 import '../../data/photos/scene_photo.dart';
 import '../../domain/models/scored_route.dart';
 import '../../services/photo_service.dart';
@@ -65,7 +66,8 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Text(s.total.toStringAsFixed(0), style: t.textTheme.headlineLarge),
+                      Text(s.total.toStringAsFixed(0),
+                          style: t.textTheme.headlineLarge?.copyWith(color: AppColors.seed)),
                       const SizedBox(width: 6),
                       Text('score', style: t.textTheme.bodySmall),
                       const Spacer(),

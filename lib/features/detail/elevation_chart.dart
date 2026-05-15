@@ -23,11 +23,25 @@ class ElevationChart extends StatelessWidget {
         ),
       );
     }
+    final lo = elevations.reduce((a, b) => a < b ? a : b);
+    final hi = elevations.reduce((a, b) => a > b ? a : b);
+    final labelStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        );
     return SizedBox(
       height: height,
       width: double.infinity,
-      child: CustomPaint(
-        painter: _ElevationPainter(elevations, Theme.of(context).colorScheme.primary),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: CustomPaint(
+              painter: _ElevationPainter(elevations, Theme.of(context).colorScheme.primary),
+            ),
+          ),
+          // Just the peak and valley — no other chart elements (anti-pattern: chart junk).
+          Positioned(top: 2, right: 4, child: Text('${hi.round()} m', style: labelStyle)),
+          Positioned(bottom: 2, right: 4, child: Text('${lo.round()} m', style: labelStyle)),
+        ],
       ),
     );
   }
