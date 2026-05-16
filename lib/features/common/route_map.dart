@@ -5,10 +5,12 @@ import '../../data/routing/route_geometry.dart';
 
 /// A map showing a route polyline (and optionally a start marker) over OSM
 /// tiles. [interactive] is false for small card previews.
+/// [currentLocation] when non-null shows a distinct blue dot at that position.
 class RouteMap extends StatelessWidget {
   final List<RoutePoint> points;
   final bool interactive;
-  const RouteMap({super.key, required this.points, this.interactive = true});
+  final RoutePoint? currentLocation;
+  const RouteMap({super.key, required this.points, this.interactive = true, this.currentLocation});
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +44,21 @@ class RouteMap extends StatelessWidget {
               ),
             ],
           ),
+        if (currentLocation != null)
+          MarkerLayer(markers: [
+            Marker(
+              point: LatLng(currentLocation!.lat, currentLocation!.lng),
+              width: 22,
+              height: 22,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 3),
+                ),
+              ),
+            ),
+          ]),
       ],
     );
   }
