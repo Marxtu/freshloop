@@ -40,11 +40,12 @@ Full rationale: [visual design direction](docs/level-2-architecture/visual-desig
 
 ## Status
 
-**M3 — Route generation: complete (end to end).** The full feature works: M1 scoring engine
-+ M2 external data stack (OpenRouteService, Nominatim, Open-Meteo, OSM Overpass, Mapillary,
-Wikimedia) + M3.1 `RouteGenerator`/`RouteGenCubit` + the M3.2/M3.3 screens — design a run on
-the map, compare ranked candidates, and open a route's detail (elevation profile + scenery
-photos). **76 tests passing**, static analysis clean. Next: M4 live GPS run tracking.
+**M4 — Live run tracking: complete.** Beyond M3 (design & compare routes), you can now tap
+**Start run** to track live — the map follows you with distance / time / pace, then a post-run
+summary shows the trail, stats, and planned-vs-actual. Built on the full data + scoring stack
+(M1–M3), the M4.1 engine (`RunTrackingCubit` + a mockable `LocationSource` over geolocator),
+and the M4.2 screens. **91 tests passing**, static analysis clean. Next: M5 — Firebase
+accounts, history, favourites.
 
 Latest release: **[v0.2.0-m2](https://github.com/Marxtu/freshloop/releases/tag/v0.2.0-m2)** (`freshloop-0.2.0-m2-arm64.apk`).
 
@@ -67,7 +68,8 @@ inspired by the WHO assessment rubric — so the score is transparent, not a bla
 - [x] **M3.1** — Route-generation engine: `RouteGenerator` (orchestrates clients + scorer into ranked candidates) + `RouteGenCubit`
 - [x] **M3.2** — Route-generation UI: map-forward home, params sheet, candidate-comparison cards (Theme A)
 - [x] **M3.3** — Route detail: map + elevation chart + AQI/greenery badges + scenery photo carousel
-- [ ] **M4** — Live GPS run tracking + post-run summary
+- [x] **M4.1** — Run-tracking engine: `RunTrackingCubit` + mockable `LocationSource` (geolocator) + distance math
+- [x] **M4.2** — Tracking UI: live run screen (map-follow + distance/time/pace + stop) + post-run summary; current-location marker
 - [ ] **M5** — Firebase auth/storage, history, favorites, profile
 - [ ] **M6** — Multi-device adaptation, polish, and integration tests
 
