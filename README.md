@@ -14,11 +14,11 @@ Milano, Prof. Luciano Baresi).
 ## Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/m32-home.png" alt="Home — map + params sheet" width="232">
+  <img src="docs/screenshots/home.png" alt="Home — map + params sheet" width="232">
   &nbsp;
-  <img src="docs/screenshots/m3-candidates.png" alt="Candidates — ranked route cards" width="232">
+  <img src="docs/screenshots/candidates.png" alt="Candidates — ranked route cards" width="232">
   &nbsp;
-  <img src="docs/screenshots/m3-detail.png" alt="Route detail — map, elevation, photos" width="232">
+  <img src="docs/screenshots/detail.png" alt="Route detail — map, elevation, photos" width="232">
 </p>
 <p align="center"><em>The route-generation flow (M3) — <b>home</b> (map-forward "design your run" sheet) → <b>candidates</b> (ranked cards: route preview, score, per-axis badges) → <b>route detail</b> (map loop, elevation profile, along-the-way photos). Theme A: Sora / DM Sans, trail-green + amber.</em></p>
 
