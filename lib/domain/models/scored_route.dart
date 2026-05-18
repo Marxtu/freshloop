@@ -22,7 +22,7 @@ class ScoredRoute {
         'score': score.toJson(),
       };
   factory ScoredRoute.fromJson(Map<String, dynamic> j) => ScoredRoute(
-        seed: j['seed'] as int,
+        seed: (j['seed'] as num).toInt(),
         geometry: RouteGeometry.fromJson(j['geometry'] as Map<String, dynamic>),
         score: ScoreBreakdown.fromJson(j['score'] as Map<String, dynamic>),
       );

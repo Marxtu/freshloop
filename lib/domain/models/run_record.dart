@@ -20,6 +20,6 @@ class RunRecord {
   factory RunRecord.fromJson(Map<String, dynamic> j) => RunRecord(
         points: (j['points'] as List).map((e) => RoutePoint.fromJson(e as Map<String, dynamic>)).toList(),
         distanceM: (j['distanceM'] as num).toDouble(),
-        durationS: j['durationS'] as int,
+        durationS: (j['durationS'] as num).toInt(),
       );
 }

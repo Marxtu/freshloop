@@ -14,9 +14,18 @@ class SharedPrefsFavoritesRepository implements FavoritesRepository {
   final SharedPreferences _prefs;
   SharedPrefsFavoritesRepository(this._prefs);
 
-  List<ScoredRoute> _load() => (_prefs.getStringList(_key) ?? const [])
-      .map((s) => ScoredRoute.fromJson(jsonDecode(s) as Map<String, dynamic>))
-      .toList();
+  List<ScoredRoute> _load() {
+    final raw = _prefs.getStringList(_key) ?? const [];
+    final routes = <ScoredRoute>[];
+    for (final s in raw) {
+      try {
+        routes.add(ScoredRoute.fromJson(jsonDecode(s) as Map<String, dynamic>));
+      } catch (_) {
+        // Skip a corrupt or legacy entry rather than failing the whole list.
+      }
+    }
+    return routes;
+  }
 
   Future<void> _store(List<ScoredRoute> routes) =>
       _prefs.setStringList(_key, routes.map((r) => jsonEncode(r.toJson())).toList());
