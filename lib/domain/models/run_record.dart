@@ -11,4 +11,15 @@ class RunRecord {
 
   /// Average pace in seconds per kilometre (0 when no distance was covered).
   double get paceSecPerKm => distanceM <= 0 ? 0 : durationS / (distanceM / 1000);
+
+  Map<String, dynamic> toJson() => {
+        'points': points.map((p) => p.toJson()).toList(),
+        'distanceM': distanceM,
+        'durationS': durationS,
+      };
+  factory RunRecord.fromJson(Map<String, dynamic> j) => RunRecord(
+        points: (j['points'] as List).map((e) => RoutePoint.fromJson(e as Map<String, dynamic>)).toList(),
+        distanceM: (j['distanceM'] as num).toDouble(),
+        durationS: (j['durationS'] as num).toInt(),
+      );
 }

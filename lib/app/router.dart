@@ -3,6 +3,8 @@ import '../domain/models/scored_route.dart';
 import '../features/home/home_screen.dart';
 import '../features/candidates/candidates_screen.dart';
 import '../features/detail/route_detail_screen.dart';
+import '../features/saved/favorites_screen.dart';
+import '../features/saved/history_screen.dart';
 import '../features/tracking/tracking_screen.dart';
 import '../services/location_source.dart';
 import 'dependencies.dart';
@@ -25,5 +27,7 @@ final GoRouter appRouter = GoRouter(
         planned: state.extra as ScoredRoute?,
       ),
     ),
+    GoRoute(path: '/history', builder: (c, s) => HistoryScreen(repo: buildHistoryRepository())),
+    GoRoute(path: '/favorites', builder: (c, s) => const FavoritesScreen()),
   ],
 );
