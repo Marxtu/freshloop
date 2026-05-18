@@ -15,4 +15,16 @@ class ScoreBreakdown {
     required this.total,
     required this.explanation,
   });
+
+  Map<String, dynamic> toJson() => {
+        'air': air.value, 'hills': hills.value, 'scenery': scenery.value,
+        'total': total, 'explanation': explanation,
+      };
+  factory ScoreBreakdown.fromJson(Map<String, dynamic> j) => ScoreBreakdown(
+        air: AxisScore((j['air'] as num).toDouble()),
+        hills: AxisScore((j['hills'] as num).toDouble()),
+        scenery: AxisScore((j['scenery'] as num).toDouble()),
+        total: (j['total'] as num).toDouble(),
+        explanation: j['explanation'] as String,
+      );
 }
