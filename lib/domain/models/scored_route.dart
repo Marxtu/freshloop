@@ -11,6 +11,9 @@ class ScoredRoute {
   const ScoredRoute({required this.seed, required this.geometry, required this.score});
 
   /// Stable identity for favouriting (seed + rounded distance + start point).
+  /// Used directly as a Firestore document ID, so it must stay a legal one:
+  /// no '/', and never solely '.'/'..'. The current format (digits + '|',',','.')
+  /// satisfies that — keep it that way if this ever changes.
   String get routeKey {
     final p = geometry.points.isEmpty ? '0,0' : '${geometry.points.first.lat},${geometry.points.first.lng}';
     return '$seed|${geometry.distanceM.round()}|$p';
