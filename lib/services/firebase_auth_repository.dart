@@ -32,7 +32,13 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> signOut() => _auth.signOut();
+  Future<void> signOut() async {
+    try {
+      await _auth.signOut();
+    } on fb.FirebaseAuthException catch (e) {
+      throw AuthException(_friendly(e));
+    }
+  }
 
   String _friendly(fb.FirebaseAuthException e) => switch (e.code) {
         'invalid-email' => 'That email address is not valid.',
@@ -40,6 +46,10 @@ class FirebaseAuthRepository implements AuthRepository {
         'email-already-in-use' => 'An account already exists for that email.',
         'weak-password' => 'Please choose a stronger password.',
         'network-request-failed' => 'Network error — check your connection.',
+        'too-many-requests' => 'Too many attempts. Please wait and try again.',
+        // Email/Password provider not enabled in the Firebase console — the
+        // classic first-deploy gotcha; surface it clearly instead of "failed".
+        'operation-not-allowed' => 'Email sign-in is not enabled for this app yet.',
         _ => 'Authentication failed. Please try again.',
       };
 }

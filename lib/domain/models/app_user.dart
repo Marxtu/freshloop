@@ -9,4 +9,7 @@ class AppUser {
       other is AppUser && other.uid == uid && other.email == email;
   @override
   int get hashCode => Object.hash(uid, email);
+
+  @override
+  String toString() => 'AppUser($uid, ${email ?? '-'})';
 }
