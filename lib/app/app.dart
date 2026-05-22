@@ -95,22 +95,30 @@ class _FirebaseAppState extends State<_FirebaseApp> {
         BlocProvider(create: (_) => RouteGenCubit(parent.generator ?? buildRouteGenerator())),
         BlocProvider.value(value: _authCubit),
       ],
-      child: BlocBuilder<AuthCubit, AuthState>(
-        builder: (context, auth) {
-          final uid = auth.user?.uid;
-          return KeyedSubtree(
-            // Rebuild the favourites provider against the right repo on uid change.
-            key: ValueKey(uid ?? '_out_'),
-            child: BlocProvider(
-              create: (_) =>
-                  FavoritesCubit(parent.favoritesRepository ?? buildFavoritesRepository())..load(),
-              child: MaterialApp.router(
-                title: 'FreshLoop',
-                theme: freshLoopTheme,
-                routerConfig: routerConfig,
-                debugShowCheckedModeBanner: false,
-              ),
-            ),
+      // The router (and its Navigator) is built once and stays mounted — a
+      // GoRouter can only attach to one Router at a time. The uid-keyed
+      // favourites provider lives in MaterialApp.router's `builder`, which wraps
+      // every page, so it rebinds to the right repository on sign-in/out without
+      // tearing down the router.
+      child: MaterialApp.router(
+        title: 'FreshLoop',
+        theme: freshLoopTheme,
+        routerConfig: routerConfig,
+        debugShowCheckedModeBanner: false,
+        builder: (context, child) {
+          return BlocBuilder<AuthCubit, AuthState>(
+            builder: (context, auth) {
+              final uid = auth.user?.uid;
+              return KeyedSubtree(
+                key: ValueKey(uid ?? '_out_'),
+                child: BlocProvider(
+                  create: (_) =>
+                      FavoritesCubit(parent.favoritesRepository ?? buildFavoritesRepository())
+                        ..load(),
+                  child: child ?? const SizedBox.shrink(),
+                ),
+              );
+            },
           );
         },
       ),
