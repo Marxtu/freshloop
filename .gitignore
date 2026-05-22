@@ -8,9 +8,11 @@
 **/secrets.dart
 **/secrets.json
 lib/config/keys.dart
+# Android/iOS native Firebase config (regenerate via `flutterfire configure`).
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
-firebase_options.dart
+# NOTE: lib/firebase_options.dart is intentionally tracked — Firebase client
+# config is not secret per Google, and committing it lets a clean clone compile.
 
 # ── Flutter / Dart ──
 .dart_tool/

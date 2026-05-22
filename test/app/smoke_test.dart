@@ -6,6 +6,7 @@ import 'package:freshloop/app/dependencies.dart';
 
 void main() {
   setUp(() async {
+    firebaseReady = false; // ensure local mode — no Firebase init in tests
     SharedPreferences.setMockInitialValues({});
     appPrefs = await SharedPreferences.getInstance();
   });

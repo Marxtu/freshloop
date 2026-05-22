@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../state/auth_cubit.dart';
 import '../../state/route_gen_cubit.dart';
 import '../../state/route_gen_state.dart';
 import '../common/route_map.dart';
@@ -17,6 +18,9 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Sign-out is only meaningful in Firebase mode, where an AuthCubit is
+    // provided above. A nullable read returns null in local mode (no throw).
+    final authCubit = context.read<AuthCubit?>();
     return BlocListener<RouteGenCubit, RouteGenState>(
       listener: (context, state) {
         if (state is RouteGenLoaded) {
@@ -69,6 +73,14 @@ class HomeScreen extends StatelessWidget {
                       tooltip: 'Favourite routes',
                       onPressed: () => context.push('/favorites'),
                     ),
+                    if (authCubit != null) ...[
+                      const SizedBox(width: 8),
+                      IconButton.filledTonal(
+                        icon: const Icon(Icons.logout),
+                        tooltip: 'Sign out',
+                        onPressed: () => authCubit.signOut(),
+                      ),
+                    ],
                   ]),
                 ),
               ),
