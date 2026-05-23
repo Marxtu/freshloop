@@ -28,7 +28,14 @@ class CandidateCard extends StatelessWidget {
           children: [
             SizedBox(
               height: 140,
-              child: RouteMap(points: route.geometry.points, interactive: false),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: RouteMap(points: route.geometry.points, interactive: false),
+                  ),
+                  Positioned(top: 10, left: 10, child: _rankBadge(t)),
+                ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(16),
@@ -62,12 +69,46 @@ class CandidateCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  Text(s.explanation, style: t.textTheme.bodyMedium),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: Text(s.explanation, style: t.textTheme.bodyMedium)),
+                      const SizedBox(width: 8),
+                      Icon(Icons.chevron_right, color: t.colorScheme.onSurfaceVariant),
+                    ],
+                  ),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// A pill over the map preview making the rank explicit (the screen ranks
+  /// candidates, so #1 gets the amber "Best match" treatment).
+  Widget _rankBadge(ThemeData t) {
+    final isBest = rank == 1;
+    final bg = isBest ? AppColors.accent : t.colorScheme.surface;
+    final fg = isBest ? Colors.white : t.colorScheme.onSurface;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [BoxShadow(color: Color(0x33000000), blurRadius: 6, offset: Offset(0, 2))],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(isBest ? Icons.star_rounded : Icons.tag, size: 15, color: fg),
+          const SizedBox(width: 3),
+          Text(
+            isBest ? 'Best match' : '$rank',
+            style: t.textTheme.labelMedium?.copyWith(color: fg, fontWeight: FontWeight.w700),
+          ),
+        ],
       ),
     );
   }
