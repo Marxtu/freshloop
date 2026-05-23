@@ -42,8 +42,14 @@ class CandidateCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text('score', style: t.textTheme.bodySmall),
                       const Spacer(),
-                      Text('$km km · ${route.geometry.ascentM.toStringAsFixed(0)} m up',
-                          style: t.textTheme.bodyMedium),
+                      Flexible(
+                        child: Text(
+                          '$km km · ${route.geometry.ascentM.toStringAsFixed(0)} m up',
+                          style: t.textTheme.bodyMedium,
+                          textAlign: TextAlign.end,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
