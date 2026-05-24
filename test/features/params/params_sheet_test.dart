@@ -18,10 +18,10 @@ void main() {
       ),
     ));
 
-    expect(find.text('Generate'), findsOneWidget);
+    expect(find.text('Generate routes'), findsOneWidget);
     expect(find.byType(Slider), findsNWidgets(4)); // distance + 3 weights
 
-    await tester.tap(find.text('Generate'));
+    await tester.tap(find.text('Generate routes'));
     await tester.pump();
 
     expect(captured, isNotNull);

@@ -72,6 +72,26 @@ void main() {
     expect(cubit.state.user?.email, 'a@b.com');
   });
 
+  testWidgets('an auth error is announced via a liveRegion Semantics',
+      (tester) async {
+    final repo = _FakeAuth()..throwOnNext = true;
+    await tester.pumpWidget(_wrap(repo));
+    await tester.enterText(find.widgetWithText(TextFormField, 'Email'), 'a@b.com');
+    await tester.enterText(find.widgetWithText(TextFormField, 'Password'), 'secret1');
+    await tester.tap(find.widgetWithText(FilledButton, 'Sign in'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('bad creds'), findsOneWidget);
+    // The error text is wrapped so screen readers announce it on appearance.
+    final liveRegion = find.ancestor(
+      of: find.text('bad creds'),
+      matching: find.byWidgetPredicate(
+        (w) => w is Semantics && w.properties.liveRegion == true,
+      ),
+    );
+    expect(liveRegion, findsOneWidget);
+  });
+
   testWidgets('the toggle switches the CTA label to Create account',
       (tester) async {
     final repo = _FakeAuth();

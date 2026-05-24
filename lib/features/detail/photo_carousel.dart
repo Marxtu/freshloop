@@ -11,10 +11,23 @@ class PhotoCarousel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (photos.isEmpty) {
-      return SizedBox(
+      final t = Theme.of(context);
+      return Container(
         height: height,
+        decoration: BoxDecoration(
+          color: t.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Center(
-          child: Text('No photos for this area', style: Theme.of(context).textTheme.bodySmall),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.image_outlined, color: t.colorScheme.onSurfaceVariant),
+              const SizedBox(height: 6),
+              Text('No scenery photos along this route yet',
+                  style: t.textTheme.bodySmall?.copyWith(color: t.colorScheme.onSurfaceVariant)),
+            ],
+          ),
         ),
       );
     }

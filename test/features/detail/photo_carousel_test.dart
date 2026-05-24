@@ -8,7 +8,7 @@ void main() {
     await tester.pumpWidget(const MaterialApp(
       home: Scaffold(body: PhotoCarousel(photos: [])),
     ));
-    expect(find.text('No photos for this area'), findsOneWidget);
+    expect(find.text('No scenery photos along this route yet'), findsOneWidget);
   });
 
   testWidgets('builds a page per photo', (tester) async {
