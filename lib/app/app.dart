@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/auth/auth_refresh.dart';
+import '../features/auth/splash_screen.dart';
 import '../services/auth_repository.dart';
 import '../services/favorites_repository.dart';
 import '../services/route_generator.dart';
@@ -108,6 +109,13 @@ class _FirebaseAppState extends State<_FirebaseApp> {
         builder: (context, child) {
           return BlocBuilder<AuthCubit, AuthState>(
             builder: (context, auth) {
+              // While the first auth event is still resolving, show a branded
+              // splash instead of momentarily flashing sign-in or home. The
+              // router's redirect is a no-op for `unknown` (see buildRouter), so
+              // we gate the visible page here. Local mode never reaches this.
+              if (auth.status == AuthStatus.unknown) {
+                return const SplashScreen();
+              }
               final uid = auth.user?.uid;
               return KeyedSubtree(
                 key: ValueKey(uid ?? '_out_'),
