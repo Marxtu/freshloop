@@ -52,14 +52,13 @@ Full rationale: [visual design direction](docs/level-2-architecture/visual-desig
 
 ## Status
 
-**M4 — Live run tracking: complete.** Beyond M3 (design & compare routes), you can now tap
-**Start run** to track live — the map follows you with distance / time / pace, then a post-run
-summary shows the trail, stats, and planned-vs-actual. Built on the full data + scoring stack
-(M1–M3), the M4.1 engine (`RunTrackingCubit` + a mockable `LocationSource` over geolocator),
-and the M4.2 screens. **91 tests passing**, static analysis clean. Next: M5 — Firebase
-accounts, history, favourites.
-
-Latest release: **[v0.2.0-m2](https://github.com/Marxtu/freshloop/releases/tag/v0.2.0-m2)** (`freshloop-0.2.0-m2-arm64.apk`).
+**Complete — all milestones M1–M6 shipped.** The full journey works end to end: **design** a run
+(start + distance + air/hills/scenery weights) → **compare** ranked candidate routes → **inspect**
+a route (map, elevation, along-the-way photos) → **run** it live (map-follow + distance/time/pace)
+→ review a **post-run summary** → and **sign in** to sync **run history & favourite routes** to the
+cloud (Firebase Auth + Firestore, each user isolated by security rules, with an on-device fallback).
+The UI adapts from phone-portrait to tablet/landscape. **123 tests passing**, static analysis clean,
+built incrementally across 14 reviewed PRs.
 
 ## How route scoring works
 
@@ -82,8 +81,10 @@ inspired by the WHO assessment rubric — so the score is transparent, not a bla
 - [x] **M3.3** — Route detail: map + elevation chart + AQI/greenery badges + scenery photo carousel
 - [x] **M4.1** — Run-tracking engine: `RunTrackingCubit` + mockable `LocationSource` (geolocator) + distance math
 - [x] **M4.2** — Tracking UI: live run screen (map-follow + distance/time/pace + stop) + post-run summary; current-location marker
-- [ ] **M5** — Firebase auth/storage, history, favorites, profile
-- [ ] **M6** — Multi-device adaptation, polish, and integration tests
+- [x] **M5.1** — History & favourites behind repository interfaces (on-device persistence)
+- [x] **M5.2** — Email/password auth + Firestore cloud sync (mock-tested), behind the same interfaces
+- [x] **M5.3** — Firebase activated at runtime: auth gate + per-user cloud repos + local fallback (live-verified)
+- [x] **M6** — Multi-device adaptation (grid + side-by-side), polish & accessibility, end-to-end flow test
 
 ## Tech stack
 
