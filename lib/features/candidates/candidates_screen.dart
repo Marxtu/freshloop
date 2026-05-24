@@ -25,7 +25,7 @@ class CandidatesScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 480,
-                    mainAxisExtent: 400,
+                    mainAxisExtent: 460, // headroom for a wrapped badge row + 2-line explanation
                   ),
                   itemCount: routes.length,
                   itemBuilder: (context, i) => CandidateCard(

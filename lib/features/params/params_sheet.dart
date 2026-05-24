@@ -122,7 +122,7 @@ class _ParamsSheetState extends State<ParamsSheet> {
                     ?.copyWith(color: AppColors.seed, fontWeight: FontWeight.w700)),
           ],
         ),
-        SizedBox(height: 36, child: slider),
+        SizedBox(height: 44, child: slider), // keep a >=44px touch target
       ],
     );
   }

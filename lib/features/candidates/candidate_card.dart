@@ -72,7 +72,12 @@ class CandidateCard extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: Text(s.explanation, style: t.textTheme.bodyMedium)),
+                      Expanded(
+                        child: Text(s.explanation,
+                            style: t.textTheme.bodyMedium,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis),
+                      ),
                       const SizedBox(width: 8),
                       Icon(Icons.chevron_right, color: t.colorScheme.onSurfaceVariant),
                     ],
