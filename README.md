@@ -14,9 +14,9 @@ Milano, Prof. Luciano Baresi).
 ## Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/home.png" alt="Home — map + params sheet" width="232">
+  <img src="docs/screenshots/home-v2.png" alt="Home — map + params sheet" width="232">
   &nbsp;
-  <img src="docs/screenshots/candidates.png" alt="Candidates — ranked route cards" width="232">
+  <img src="docs/screenshots/candidates-v2.png" alt="Candidates — ranked route cards" width="232">
   &nbsp;
   <img src="docs/screenshots/detail.png" alt="Route detail — map, elevation, photos" width="232">
 </p>
