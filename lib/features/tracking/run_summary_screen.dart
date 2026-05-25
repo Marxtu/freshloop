@@ -6,6 +6,7 @@ import '../../domain/models/run_record.dart';
 import '../../domain/models/scored_route.dart';
 import '../../services/run_history_repository.dart';
 import '../common/route_map.dart';
+import '../common/stat_trio.dart';
 
 /// Post-run summary: the actual trail, headline stats, and (if the run followed
 /// a planned route) planned-vs-actual distance. Save persists the run to the
@@ -38,19 +39,44 @@ class _RunSummaryScreenState extends State<RunSummaryScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _stat(t, km, 'km'),
-                    _stat(t, formatDuration(widget.record.durationS), 'time'),
-                    _stat(t, formatPace(widget.record.distanceM, widget.record.durationS), 'pace'),
+                    Icon(Icons.check_circle_rounded, color: t.colorScheme.primary, size: 26),
+                    const SizedBox(width: 8),
+                    Text('Run complete', style: t.textTheme.titleLarge),
                   ],
+                ),
+                const SizedBox(height: 16),
+                Card(
+                  margin: EdgeInsets.zero,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                    child: StatTrio([
+                      (km, 'km'),
+                      (formatDuration(widget.record.durationS), 'time'),
+                      (formatPace(widget.record.distanceM, widget.record.durationS), 'pace'),
+                    ]),
+                  ),
                 ),
                 if (widget.planned != null) ...[
                   const SizedBox(height: 12),
-                  Text(
-                    'Planned ${(widget.planned!.geometry.distanceM / 1000).toStringAsFixed(1)} km · '
-                    'ran $km km',
-                    style: t.textTheme.bodyMedium,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: t.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.route_rounded, size: 16, color: t.colorScheme.onSurfaceVariant),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Planned ${(widget.planned!.geometry.distanceM / 1000).toStringAsFixed(1)} km · ran $km km',
+                            style: t.textTheme.bodyMedium,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
                 const SizedBox(height: 20),
@@ -100,11 +126,4 @@ class _RunSummaryScreenState extends State<RunSummaryScreen> {
       ),
     );
   }
-
-  Widget _stat(ThemeData t, String value, String label) => Column(
-        children: [
-          Text(value, style: t.textTheme.headlineSmall),
-          Text(label, style: t.textTheme.bodySmall),
-        ],
-      );
 }
