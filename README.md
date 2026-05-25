@@ -23,18 +23,20 @@ Milano, Prof. Luciano Baresi).
 <p align="center"><em>The route-generation flow (M3) — <b>home</b> (map-forward "design your run" sheet) → <b>candidates</b> (ranked cards: route preview, score, per-axis badges) → <b>route detail</b> (map loop, elevation profile, along-the-way photos). Theme A: Sora / DM Sans, trail-green + amber.</em></p>
 
 <p align="center">
-  <img src="docs/screenshots/tracking.png" alt="Live run tracking" width="232">
+  <img src="docs/screenshots/tracking-v2.png" alt="Live run tracking" width="232">
   &nbsp;
-  <img src="docs/screenshots/summary.png" alt="Post-run summary" width="232">
+  <img src="docs/screenshots/summary-v2.png" alt="Post-run summary" width="232">
 </p>
 <p align="center"><em>Live run (M4) — <b>tracking</b> (the map follows you with live distance/time/pace + a current-location dot) → <b>post-run summary</b> (trail, stats, planned-vs-actual, share).</em></p>
 
 <p align="center">
   <img src="docs/screenshots/signin.png" alt="Branded sign-in / create account" width="232">
   &nbsp;
+  <img src="docs/screenshots/history.png" alt="Run history" width="232">
+  &nbsp;
   <img src="docs/screenshots/favourites.png" alt="Favourite routes" width="232">
 </p>
-<p align="center"><em>Accounts (M5) — <b>sign in / create account</b> → <b>favourite routes</b> (and run history), synced to Firebase under <code>/users/&lt;uid&gt;</code> and isolated per user by Firestore security rules (with on-device fallback when offline/unconfigured).</em></p>
+<p align="center"><em>Accounts (M5) — <b>sign in / create account</b> → <b>run history</b> and <b>favourite routes</b>, synced to Firebase under <code>/users/&lt;uid&gt;</code> and isolated per user by Firestore security rules (with on-device fallback when offline/unconfigured).</em></p>
 
 ### Visual direction
 
