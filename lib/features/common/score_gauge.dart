@@ -18,15 +18,24 @@ class ScoreGauge extends StatelessWidget {
     final t = Theme.of(context);
     final color = emphasize ? AppColors.accent : axisStyle('', tierFromValue(score)).color;
     final stroke = size * 0.11;
+    // One high-impact moment: the ring sweeps to the score on first appear.
+    // The number is the static `child` (not rebuilt each frame) so it reads
+    // immediately and text assertions don't depend on the animation.
     return SizedBox(
       width: size,
       height: size,
-      child: CustomPaint(
-        painter: _GaugePainter(
-          progress: (score / 100).clamp(0, 1).toDouble(),
-          color: color,
-          track: color.withValues(alpha: 0.16),
-          stroke: stroke,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: (score / 100).clamp(0, 1).toDouble()),
+        duration: const Duration(milliseconds: 900),
+        curve: Curves.easeOutCubic,
+        builder: (context, progress, child) => CustomPaint(
+          painter: _GaugePainter(
+            progress: progress,
+            color: color,
+            track: color.withValues(alpha: 0.16),
+            stroke: stroke,
+          ),
+          child: child,
         ),
         child: Center(
           child: Column(
