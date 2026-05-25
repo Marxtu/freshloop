@@ -24,6 +24,10 @@ class OrsRouteClient {
     required double lengthM,
     int seed = 1,
   }) async {
+    if (apiKey.isEmpty) {
+      throw ApiException('OpenRouteService', 401,
+          'API key missing — build/run with --dart-define-from-file=secrets.json');
+    }
     final resp = await _client.post(
       _endpoint,
       headers: {
