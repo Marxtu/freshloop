@@ -66,16 +66,17 @@ class _ParamsSheetState extends State<ParamsSheet> {
               label: '${_distanceKm.toStringAsFixed(1)} km',
               onChanged: (v) => setState(() => _distanceKm = v),
             ),
+            icon: Icons.straighten_rounded,
           ),
           const SizedBox(height: 6),
           Text('What matters most', style: muted),
           const SizedBox(height: 2),
           _sliderRow(t, 'Clean air', _weightLabel(_air),
-              _weightSlider(_air, (v) => setState(() => _air = v))),
+              _weightSlider(_air, (v) => setState(() => _air = v)), icon: axisIcon('air')),
           _sliderRow(t, 'Right hills', _weightLabel(_hills),
-              _weightSlider(_hills, (v) => setState(() => _hills = v))),
+              _weightSlider(_hills, (v) => setState(() => _hills = v)), icon: axisIcon('hills')),
           _sliderRow(t, 'Scenery', _weightLabel(_scenery),
-              _weightSlider(_scenery, (v) => setState(() => _scenery = v))),
+              _weightSlider(_scenery, (v) => setState(() => _scenery = v)), icon: axisIcon('scenery')),
           const SizedBox(height: 12),
           Text('Terrain', style: muted),
           const SizedBox(height: 8),
@@ -108,13 +109,17 @@ class _ParamsSheetState extends State<ParamsSheet> {
     );
   }
 
-  /// Uniform control: a `label … value` header over a full-width slider.
-  Widget _sliderRow(ThemeData t, String label, String value, Widget slider) {
+  /// Uniform control: a `[icon] label … value` header over a full-width slider.
+  Widget _sliderRow(ThemeData t, String label, String value, Widget slider, {IconData? icon}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
+            if (icon != null) ...[
+              Icon(icon, size: 18, color: AppColors.seed),
+              const SizedBox(width: 8),
+            ],
             Text(label, style: t.textTheme.bodyMedium),
             const Spacer(),
             Text(value,
