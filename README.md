@@ -98,8 +98,14 @@ Flutter · flutter_bloc · http · geolocator · flutter_map (OSM) · go_router 
 
 ```bash
 flutter pub get
-flutter test        # 91 unit/widget tests
-flutter run         # on a device/emulator, or: flutter run -d chrome
+flutter test        # 127 unit/widget tests (no network/Firebase — fully mocked)
+
+# Live APIs need keys. Copy the template, fill in your keys, and pass it at
+# run/build time — WITHOUT this flag, route generation fails with a clear
+# "API key missing" error (the keys are compile-time --dart-define values).
+cp secrets.example.json secrets.json
+flutter run -d chrome --dart-define-from-file=secrets.json
+flutter build apk --release --target-platform android-arm64 --dart-define-from-file=secrets.json
 ```
 
 ## Documentation
