@@ -37,11 +37,15 @@ class HomeScreen extends StatelessWidget {
             const Positioned.fill(child: RouteMap(points: [])),
             Align(
               alignment: Alignment.bottomCenter,
-              child: BlocBuilder<RouteGenCubit, RouteGenState>(
-                builder: (context, state) {
-                  final loading = state is RouteGenLoading;
-                  return Card(
-                    margin: const EdgeInsets.all(12),
+              child: ConstrainedBox(
+                // Full-width on phones; a centred panel on wide (tablet / web)
+                // screens instead of stretching edge-to-edge.
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: BlocBuilder<RouteGenCubit, RouteGenState>(
+                  builder: (context, state) {
+                    final loading = state is RouteGenLoading;
+                    return Card(
+                      margin: const EdgeInsets.all(12),
                     child: loading
                         ? const Padding(
                             padding: EdgeInsets.all(32),
@@ -52,10 +56,11 @@ class HomeScreen extends StatelessWidget {
                             startLng: _startLng,
                             onGenerate: (p) => context.read<RouteGenCubit>().generate(p),
                           ),
-                  );
-                },
+                      );
+                    },
+                  ),
+                ),
               ),
-            ),
             Positioned(
               top: 0, right: 0,
               child: SafeArea(
