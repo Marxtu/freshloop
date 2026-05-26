@@ -15,7 +15,11 @@ class RouteMap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final latLngs = points.map((p) => LatLng(p.lat, p.lng)).toList();
-    final center = latLngs.isEmpty ? const LatLng(45.4642, 9.19) : latLngs.first;
+    final center = latLngs.isNotEmpty
+        ? latLngs.first
+        : (currentLocation != null
+            ? LatLng(currentLocation!.lat, currentLocation!.lng)
+            : const LatLng(45.4642, 9.19));
     return FlutterMap(
       options: MapOptions(
         initialCenter: center,

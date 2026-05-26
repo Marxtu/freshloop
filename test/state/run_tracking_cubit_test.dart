@@ -13,6 +13,8 @@ class _FakeSource implements LocationSource {
   Future<bool> ensurePermission() async => granted;
   @override
   Stream<RoutePoint> positions() => _controller.stream;
+  @override
+  Future<RoutePoint?> current() async => granted ? const RoutePoint(lat: 45.0, lng: 9.0) : null;
 }
 
 void main() {

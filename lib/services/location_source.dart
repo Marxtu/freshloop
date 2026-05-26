@@ -9,6 +9,9 @@ abstract class LocationSource {
 
   /// A stream of the user's position as [RoutePoint]s.
   Stream<RoutePoint> positions();
+
+  /// A single current fix (null if permission is denied / unavailable).
+  Future<RoutePoint?> current();
 }
 
 /// Production implementation backed by the `geolocator` plugin.
@@ -32,4 +35,13 @@ class GeolocatorLocationSource implements LocationSource {
           distanceFilter: 5,
         ),
       ).map((p) => RoutePoint(lat: p.latitude, lng: p.longitude, elevation: p.altitude));
+
+  @override
+  Future<RoutePoint?> current() async {
+    if (!await ensurePermission()) return null;
+    final p = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+    );
+    return RoutePoint(lat: p.latitude, lng: p.longitude, elevation: p.altitude);
+  }
 }

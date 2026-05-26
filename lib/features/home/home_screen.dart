@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../data/routing/route_geometry.dart';
+import '../../services/location_source.dart';
 import '../../state/auth_cubit.dart';
 import '../../state/route_gen_cubit.dart';
 import '../../state/route_gen_state.dart';
@@ -8,18 +10,58 @@ import '../common/route_map.dart';
 import '../params/params_sheet.dart';
 
 /// Map-forward home: the map fills the screen; a bottom sheet holds the params.
-/// On a successful generation it navigates to the candidates screen.
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+/// Tries to locate the user on open, and offers a "locate me" button so the
+/// run is designed from the runner's real position (falling back to Milan).
+class HomeScreen extends StatefulWidget {
+  /// Injectable for tests; production uses the real geolocator-backed source.
+  final LocationSource locationSource;
+  const HomeScreen({super.key, this.locationSource = const GeolocatorLocationSource()});
 
-  // Milan Duomo as a sensible default start until live location is wired (M4).
-  static const _startLat = 45.4642;
-  static const _startLng = 9.19;
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  // Milan Duomo as a sensible fallback until a GPS fix arrives.
+  double _lat = 45.4642;
+  double _lng = 9.19;
+  bool _locating = false;
+  bool _located = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _locate(); // best-effort auto-locate on open
+  }
+
+  Future<void> _locate({bool announce = false}) async {
+    if (_locating) return;
+    setState(() => _locating = true);
+    RoutePoint? f;
+    try {
+      f = await widget.locationSource.current();
+    } catch (_) {
+      f = null; // no plugin / denied / timeout — keep the fallback
+    }
+    if (!mounted) return;
+    final fix = f;
+    setState(() {
+      if (fix != null) {
+        _lat = fix.lat;
+        _lng = fix.lng;
+        _located = true;
+      }
+      _locating = false;
+    });
+    if (announce && fix == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Location unavailable — using Milan centre. Check location permission.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Sign-out is only meaningful in Firebase mode, where an AuthCubit is
-    // provided above. A nullable read returns null in local mode (no throw).
     final authCubit = context.read<AuthCubit?>();
     return BlocListener<RouteGenCubit, RouteGenState>(
       listener: (context, state) {
@@ -34,33 +76,55 @@ class HomeScreen extends StatelessWidget {
       child: Scaffold(
         body: Stack(
           children: [
-            const Positioned.fill(child: RouteMap(points: [])),
+            Positioned.fill(
+              child: RouteMap(
+                // Re-centre when the located start changes.
+                key: ValueKey('$_lat,$_lng'),
+                points: const [],
+                currentLocation: RoutePoint(lat: _lat, lng: _lng),
+              ),
+            ),
+            // Locate-me control (top-left, balances the nav icons on the right).
+            Positioned(
+              top: 0, left: 0,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: IconButton.filledTonal(
+                    tooltip: _located ? 'Located — tap to refresh' : 'Use my location',
+                    onPressed: _locating ? null : () => _locate(announce: true),
+                    icon: _locating
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                        : Icon(_located ? Icons.my_location : Icons.location_searching),
+                  ),
+                ),
+              ),
+            ),
             Align(
               alignment: Alignment.bottomCenter,
               child: ConstrainedBox(
-                // Full-width on phones; a centred panel on wide (tablet / web)
-                // screens instead of stretching edge-to-edge.
+                // Full-width on phones; a centred panel on wide (tablet / web) screens.
                 constraints: const BoxConstraints(maxWidth: 480),
                 child: BlocBuilder<RouteGenCubit, RouteGenState>(
                   builder: (context, state) {
                     final loading = state is RouteGenLoading;
                     return Card(
                       margin: const EdgeInsets.all(12),
-                    child: loading
-                        ? const Padding(
-                            padding: EdgeInsets.all(32),
-                            child: Center(child: CircularProgressIndicator()),
-                          )
-                        : ParamsSheet(
-                            startLat: _startLat,
-                            startLng: _startLng,
-                            onGenerate: (p) => context.read<RouteGenCubit>().generate(p),
-                          ),
-                      );
-                    },
-                  ),
+                      child: loading
+                          ? const Padding(
+                              padding: EdgeInsets.all(32),
+                              child: Center(child: CircularProgressIndicator()),
+                            )
+                          : ParamsSheet(
+                              startLat: _lat,
+                              startLng: _lng,
+                              onGenerate: (p) => context.read<RouteGenCubit>().generate(p),
+                            ),
+                    );
+                  },
                 ),
               ),
+            ),
             Positioned(
               top: 0, right: 0,
               child: SafeArea(

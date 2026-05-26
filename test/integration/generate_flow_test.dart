@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -60,22 +59,19 @@ void main() {
 
   testWidgets('home → generate → navigates to ranked candidates', (tester) async {
     await tester.pumpWidget(FreshLoopApp(generator: _okGenerator()));
-    await tester.pumpAndSettle();
+    // Bounded pumps — pumpAndSettle won't settle here: the home "locate me"
+    // spinner animates indefinitely in the test env (geolocator never
+    // resolves). The generate → navigate flow doesn't depend on it.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
     // The primary CTA on the params sheet.
     final generate = find.text('Generate routes');
     expect(generate, findsOneWidget);
     await tester.tap(generate);
 
-    // Drive the async generation to completion. pumpAndSettle would hang if a
-    // periodic timer were running; the map has none here, but fall back to
-    // bounded timed pumps if it ever does.
-    try {
-      await tester.pumpAndSettle(const Duration(milliseconds: 100));
-    } on FlutterError {
-      for (var i = 0; i < 20; i++) {
-        await tester.pump(const Duration(milliseconds: 100));
-      }
+    for (var i = 0; i < 15; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
     }
 
     // Landed on the candidates screen with at least one ranked card.
