@@ -8,7 +8,7 @@ import 'package:freshloop/data/photos/scene_photo.dart';
 
 void main() {
   group('MapillaryPhotoClient.photosInBbox', () {
-    test('sends OAuth header + bbox and parses photos', () async {
+    test('sends OAuth header + bbox, prefers 1024px, and drops panoramas', () async {
       late http.Request captured;
       final mock = MockClient((req) async {
         captured = req;
@@ -17,8 +17,16 @@ void main() {
             'data': [
               {
                 'id': '1',
-                'thumb_256_url': 'https://img/1.jpg',
+                'is_pano': false,
+                'thumb_1024_url': 'https://img/1_1024.jpg',
+                'thumb_256_url': 'https://img/1_256.jpg',
                 'computed_geometry': {'coordinates': [13.38, 52.51]},
+              },
+              {
+                'id': '2',
+                'is_pano': true, // 360° panorama — should be filtered out
+                'thumb_1024_url': 'https://img/2_1024.jpg',
+                'computed_geometry': {'coordinates': [13.39, 52.52]},
               },
             ],
           }),
@@ -29,13 +37,14 @@ void main() {
 
       final photos = await client.photosInBbox(south: 52.5, west: 13.3, north: 52.6, east: 13.4, limit: 5);
 
-      expect(photos.length, 1);
-      expect(photos.first.url, 'https://img/1.jpg');
+      expect(photos.length, 1); // the panorama was dropped
+      expect(photos.first.url, 'https://img/1_1024.jpg'); // 1024 preferred
       expect(photos.first.source, PhotoSource.mapillary);
       expect(captured.headers['Authorization'], 'OAuth MLY|x|y');
       // Mapillary bbox order is west,south,east,north
       expect(captured.url.queryParameters['bbox'], '13.3,52.5,13.4,52.6');
-      expect(captured.url.queryParameters['limit'], '5');
+      // over-fetches (limit * 4) so panoramas can be dropped while still filling slots
+      expect(captured.url.queryParameters['limit'], '20');
     });
 
     test('returns empty list when data is empty', () async {

@@ -20,20 +20,29 @@ class PhotoService {
   }) async {
     const d = 0.0015; // ~150 m bbox half-size for Mapillary (small = avoids 500s)
     final waypoints = subsample(geometry.points, maxWaypoints);
-    final photos = <ScenePhoto>[];
-    for (final wp in waypoints) {
+
+    // Fetch every source/waypoint concurrently — a sequential loop made the
+    // "Along the way" strip slow to appear. Each failure degrades to [].
+    Future<List<ScenePhoto>> safe(Future<List<ScenePhoto>> Function() f) async {
       try {
-        photos.addAll(await mapillary.photosInBbox(
-          south: wp.lat - d, west: wp.lng - d, north: wp.lat + d, east: wp.lng + d,
-          limit: perSource,
-        ));
-      } catch (_) {/* skip this waypoint's street imagery */}
-      try {
-        photos.addAll(await wikimedia.photosNear(
-          lat: wp.lat, lng: wp.lng, radiusM: 250, limit: perSource,
-        ));
-      } catch (_) {/* skip this waypoint's landmarks */}
+        return await f();
+      } catch (_) {
+        return const [];
+      }
     }
+
+    final futures = <Future<List<ScenePhoto>>>[];
+    for (final wp in waypoints) {
+      futures.add(safe(() => mapillary.photosInBbox(
+            south: wp.lat - d, west: wp.lng - d, north: wp.lat + d, east: wp.lng + d,
+            limit: perSource,
+          )));
+      futures.add(safe(() => wikimedia.photosNear(
+            lat: wp.lat, lng: wp.lng, radiusM: 250, limit: perSource,
+          )));
+    }
+    final photos = (await Future.wait(futures)).expand((x) => x).toList();
+
     final seen = <String>{};
     return photos.where((p) => seen.add(p.url)).toList();
   }

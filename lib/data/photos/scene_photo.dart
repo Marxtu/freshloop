@@ -25,7 +25,8 @@ class ScenePhoto {
             as List?) ??
         const [0, 0];
     return ScenePhoto(
-      url: json['thumb_256_url'] as String,
+      // Prefer the crisp 1024px thumb; fall back to 256 if absent.
+      url: (json['thumb_1024_url'] ?? json['thumb_256_url']) as String,
       source: PhotoSource.mapillary,
       lng: (coords[0] as num).toDouble(),
       lat: (coords[1] as num).toDouble(),

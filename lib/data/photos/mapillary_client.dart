@@ -22,8 +22,9 @@ class MapillaryPhotoClient {
   }) async {
     final uri = Uri.https('graph.mapillary.com', '/images', {
       'bbox': '$west,$south,$east,$north',
-      'fields': 'id,thumb_256_url,computed_geometry',
-      'limit': '$limit',
+      'fields': 'id,is_pano,thumb_1024_url,thumb_256_url,computed_geometry',
+      // Over-fetch so we can drop 360° panoramas and still fill `limit` slots.
+      'limit': '${limit * 4}',
     });
     final resp = await _client.get(uri, headers: {'Authorization': 'OAuth $accessToken'});
     if (resp.statusCode != 200) {
@@ -31,7 +32,10 @@ class MapillaryPhotoClient {
     }
     final data = ((jsonDecode(resp.body) as Map<String, dynamic>)['data'] as List?) ?? const [];
     return data
+        // 360° panoramas look distorted shown flat — prefer normal perspective shots.
+        .where((e) => (e as Map<String, dynamic>)['is_pano'] != true)
         .map((e) => ScenePhoto.fromMapillaryJson(e as Map<String, dynamic>))
+        .take(limit)
         .toList();
   }
 }

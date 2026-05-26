@@ -48,6 +48,17 @@ class PhotoCarousel extends StatelessWidget {
                   Image.network(
                     p.url,
                     fit: BoxFit.cover,
+                    loadingBuilder: (context, child, progress) => progress == null
+                        ? child
+                        : Container(
+                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                            child: const Center(
+                              child: SizedBox(
+                                width: 24, height: 24,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            ),
+                          ),
                     errorBuilder: (context, err, trace) =>
                         Container(color: Theme.of(context).colorScheme.surfaceContainerHighest),
                   ),
