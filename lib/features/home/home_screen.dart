@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../app/app_config.dart';
+import '../../data/geocoding/geo_place.dart';
+import '../../data/geocoding/nominatim_client.dart';
 import '../../data/routing/route_geometry.dart';
 import '../../services/location_source.dart';
 import '../../state/auth_cubit.dart';
@@ -9,29 +12,43 @@ import '../../state/route_gen_state.dart';
 import '../common/route_map.dart';
 import '../params/params_sheet.dart';
 
-/// Map-forward home: the map fills the screen; a bottom sheet holds the params.
-/// Tries to locate the user on open, and offers a "locate me" button so the
-/// run is designed from the runner's real position (falling back to Milan).
+/// Map-forward home: search a place or use GPS to choose the start, then design
+/// the run from the bottom sheet.
 class HomeScreen extends StatefulWidget {
   /// Injectable for tests; production uses the real geolocator-backed source.
   final LocationSource locationSource;
-  const HomeScreen({super.key, this.locationSource = const GeolocatorLocationSource()});
+
+  /// Injectable for tests; defaults to the keyless Nominatim geocoder.
+  final NominatimClient? geocoder;
+
+  const HomeScreen({super.key, this.locationSource = const GeolocatorLocationSource(), this.geocoder});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Milan Duomo as a sensible fallback until a GPS fix arrives.
+  late final NominatimClient _geocoder =
+      widget.geocoder ?? NominatimClient(userAgent: AppConfig.nominatimUserAgent);
+  final _searchController = TextEditingController();
+
+  // Milan Duomo as a sensible fallback until GPS or a search picks a start.
   double _lat = 45.4642;
   double _lng = 9.19;
   bool _locating = false;
+  bool _searching = false;
   bool _located = false;
 
   @override
   void initState() {
     super.initState();
     _locate(); // best-effort auto-locate on open
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _locate({bool announce = false}) async {
@@ -41,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       f = await widget.locationSource.current();
     } catch (_) {
-      f = null; // no plugin / denied / timeout — keep the fallback
+      f = null;
     }
     if (!mounted) return;
     final fix = f;
@@ -60,8 +77,40 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _search(String raw) async {
+    final q = raw.trim();
+    if (q.isEmpty || _searching) return;
+    FocusScope.of(context).unfocus();
+    setState(() => _searching = true);
+    GeoPlace? place;
+    try {
+      place = await _geocoder.search(q);
+    } catch (_) {
+      place = null;
+    }
+    if (!mounted) return;
+    final p = place;
+    setState(() {
+      if (p != null) {
+        _lat = p.lat;
+        _lng = p.lng;
+        _located = true;
+      }
+      _searching = false;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(p != null ? 'Start: ${_short(p.label)}' : 'Couldn’t find “$q”'),
+    ));
+  }
+
+  String _short(String label) {
+    final parts = label.split(',');
+    return parts.take(2).join(',').trim();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final t = Theme.of(context);
     final authCubit = context.read<AuthCubit?>();
     return BlocListener<RouteGenCubit, RouteGenState>(
       listener: (context, state) {
@@ -78,24 +127,45 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Positioned.fill(
               child: RouteMap(
-                // Re-centre when the located start changes.
                 key: ValueKey('$_lat,$_lng'),
                 points: const [],
                 currentLocation: RoutePoint(lat: _lat, lng: _lng),
               ),
             ),
-            // Locate-me control (top-left, balances the nav icons on the right).
             Positioned(
-              top: 0, left: 0,
+              top: 0, left: 0, right: 0,
               child: SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: IconButton.filledTonal(
-                    tooltip: _located ? 'Located — tap to refresh' : 'Use my location',
-                    onPressed: _locating ? null : () => _locate(announce: true),
-                    icon: _locating
-                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                        : Icon(_located ? Icons.my_location : Icons.location_searching),
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    children: [
+                      _searchBar(t),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton.filledTonal(
+                            icon: const Icon(Icons.history),
+                            tooltip: 'Run history',
+                            onPressed: () => context.push('/history'),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton.filledTonal(
+                            icon: const Icon(Icons.favorite),
+                            tooltip: 'Favourite routes',
+                            onPressed: () => context.push('/favorites'),
+                          ),
+                          if (authCubit != null) ...[
+                            const SizedBox(width: 8),
+                            IconButton.filledTonal(
+                              icon: const Icon(Icons.logout),
+                              tooltip: 'Sign out',
+                              onPressed: () => authCubit.signOut(),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -103,7 +173,6 @@ class _HomeScreenState extends State<HomeScreen> {
             Align(
               alignment: Alignment.bottomCenter,
               child: ConstrainedBox(
-                // Full-width on phones; a centred panel on wide (tablet / web) screens.
                 constraints: const BoxConstraints(maxWidth: 480),
                 child: BlocBuilder<RouteGenCubit, RouteGenState>(
                   builder: (context, state) {
@@ -125,35 +194,51 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            Positioned(
-              top: 0, right: 0,
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Row(children: [
-                    IconButton.filledTonal(
-                      icon: const Icon(Icons.history),
-                      tooltip: 'Run history',
-                      onPressed: () => context.push('/history'),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton.filledTonal(
-                      icon: const Icon(Icons.favorite),
-                      tooltip: 'Favourite routes',
-                      onPressed: () => context.push('/favorites'),
-                    ),
-                    if (authCubit != null) ...[
-                      const SizedBox(width: 8),
-                      IconButton.filledTonal(
-                        icon: const Icon(Icons.logout),
-                        tooltip: 'Sign out',
-                        onPressed: () => authCubit.signOut(),
-                      ),
-                    ],
-                  ]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _searchBar(ThemeData t) {
+    return Material(
+      elevation: 3,
+      borderRadius: BorderRadius.circular(30),
+      shadowColor: Colors.black26,
+      color: t.colorScheme.surface,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 14, right: 4),
+        child: Row(
+          children: [
+            _searching
+                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                : Icon(Icons.search, color: t.colorScheme.onSurfaceVariant),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                textInputAction: TextInputAction.search,
+                onSubmitted: _search,
+                decoration: const InputDecoration(
+                  hintText: 'Search a place to start from…',
+                  border: InputBorder.none,
+                  filled: false,
+                  isCollapsed: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
             ),
+            _locating
+                ? const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                  )
+                : IconButton(
+                    tooltip: _located ? 'Located — tap for current location' : 'Use my location',
+                    onPressed: () => _locate(announce: true),
+                    icon: Icon(_located ? Icons.my_location : Icons.location_searching,
+                        color: t.colorScheme.primary),
+                  ),
           ],
         ),
       ),
