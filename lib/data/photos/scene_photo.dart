@@ -10,12 +10,17 @@ class ScenePhoto {
   final double lng;
   final String? caption;
 
+  /// True for Mapillary 360° equirectangular panoramas (shown with a badge and
+  /// kept only as a fallback when no normal perspective shots are available).
+  final bool isPano;
+
   const ScenePhoto({
     required this.url,
     required this.source,
     required this.lat,
     required this.lng,
     this.caption,
+    this.isPano = false,
   });
 
   /// Parses one Mapillary `images` entry. `computed_geometry.coordinates` is
@@ -30,6 +35,7 @@ class ScenePhoto {
       source: PhotoSource.mapillary,
       lng: (coords[0] as num).toDouble(),
       lat: (coords[1] as num).toDouble(),
+      isPano: json['is_pano'] == true,
     );
   }
 

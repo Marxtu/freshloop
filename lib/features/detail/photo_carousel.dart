@@ -62,6 +62,26 @@ class PhotoCarousel extends StatelessWidget {
                     errorBuilder: (context, err, trace) =>
                         Container(color: Theme.of(context).colorScheme.surfaceContainerHighest),
                   ),
+                  if (p.isPano)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.55),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.threesixty_rounded, size: 14, color: Colors.white),
+                            SizedBox(width: 4),
+                            Text('360°', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                    ),
                   if (p.caption != null)
                     Positioned(
                       left: 0, right: 0, bottom: 0,

@@ -31,11 +31,11 @@ class MapillaryPhotoClient {
       throw ApiException('Mapillary', resp.statusCode, resp.body);
     }
     final data = ((jsonDecode(resp.body) as Map<String, dynamic>)['data'] as List?) ?? const [];
-    return data
-        // 360° panoramas look distorted shown flat — prefer normal perspective shots.
-        .where((e) => (e as Map<String, dynamic>)['is_pano'] != true)
-        .map((e) => ScenePhoto.fromMapillaryJson(e as Map<String, dynamic>))
-        .take(limit)
-        .toList();
+    final photos =
+        data.map((e) => ScenePhoto.fromMapillaryJson(e as Map<String, dynamic>)).toList();
+    // Prefer normal perspective shots; keep 360° panoramas only to fill the
+    // remaining slots (so dense pano-only areas still show something).
+    photos.sort((a, b) => (a.isPano ? 1 : 0).compareTo(b.isPano ? 1 : 0));
+    return photos.take(limit).toList();
   }
 }
