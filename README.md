@@ -14,7 +14,7 @@ Milano, Prof. Luciano Baresi).
 ## Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/home-v3.png" alt="Home — map + params sheet" width="232">
+  <img src="docs/screenshots/home-v4.png" alt="Home — address search, GPS, map + params sheet" width="232">
   &nbsp;
   <img src="docs/screenshots/candidates-v3.png" alt="Candidates — ranked route cards" width="232">
   &nbsp;
