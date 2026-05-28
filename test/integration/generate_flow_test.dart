@@ -65,9 +65,12 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // The primary CTA on the params sheet.
+    // The primary CTA on the params sheet (now inside a collapsible draggable
+    // sheet — scroll it into view before tapping).
     final generate = find.text('Generate routes');
     expect(generate, findsOneWidget);
+    await tester.ensureVisible(generate);
+    await tester.pump();
     await tester.tap(generate);
 
     for (var i = 0; i < 15; i++) {

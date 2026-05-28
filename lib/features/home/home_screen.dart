@@ -132,6 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 currentLocation: RoutePoint(lat: _lat, lng: _lng),
               ),
             ),
+            _sheet(context),
             Positioned(
               top: 0, left: 0, right: 0,
               child: SafeArea(
@@ -170,31 +171,62 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 480),
-                child: BlocBuilder<RouteGenCubit, RouteGenState>(
-                  builder: (context, state) {
-                    final loading = state is RouteGenLoading;
-                    return Card(
-                      margin: const EdgeInsets.all(12),
-                      child: loading
-                          ? const Padding(
-                              padding: EdgeInsets.all(32),
-                              child: Center(child: CircularProgressIndicator()),
-                            )
-                          : ParamsSheet(
-                              startLat: _lat,
-                              startLng: _lng,
-                              onGenerate: (p) => context.read<RouteGenCubit>().generate(p),
-                            ),
-                    );
-                  },
-                ),
-              ),
-            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// The collapsible "Design your run" sheet. Drag down to a handle to free the
+  /// map (and see the start dot); drag up to set params.
+  Widget _sheet(BuildContext context) {
+    final t = Theme.of(context);
+    return DraggableScrollableSheet(
+      initialChildSize: 0.46,
+      minChildSize: 0.12,
+      maxChildSize: 0.88,
+      snap: true,
+      snapSizes: const [0.12, 0.46, 0.88],
+      builder: (context, scrollController) => Container(
+        decoration: BoxDecoration(
+          color: t.colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          boxShadow: const [BoxShadow(color: Color(0x22000000), blurRadius: 20, offset: Offset(0, -4))],
+        ),
+        child: BlocBuilder<RouteGenCubit, RouteGenState>(
+          builder: (context, state) {
+            final loading = state is RouteGenLoading;
+            return ListView(
+              controller: scrollController,
+              padding: EdgeInsets.zero,
+              children: [
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 10, bottom: 2),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: t.colorScheme.outlineVariant,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                if (loading)
+                  const Padding(padding: EdgeInsets.all(40), child: Center(child: CircularProgressIndicator()))
+                else
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 480),
+                      child: ParamsSheet(
+                        startLat: _lat,
+                        startLng: _lng,
+                        onGenerate: (p) => context.read<RouteGenCubit>().generate(p),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );
