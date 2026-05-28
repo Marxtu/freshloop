@@ -123,11 +123,24 @@ flutter run -d chrome --dart-define-from-file=secrets.json
 flutter build apk --release --target-platform android-arm64 --dart-define-from-file=secrets.json
 ```
 
-## Documentation
+## Development process &amp; provenance
 
-- **Design (SSOT):** [`docs/level-2-architecture/running-route-generator-2026-05-30.md`](docs/level-2-architecture/running-route-generator-2026-05-30.md)
-- **Foundation (course analysis):** [`docs/level-1-foundation/course-materials-analysis-2026-05-30.md`](docs/level-1-foundation/course-materials-analysis-2026-05-30.md)
-- **M1 implementation plan:** [`docs/level-3-implementation/m1-foundation-and-scoring-2026-05-30.md`](docs/level-3-implementation/m1-foundation-and-scoring-2026-05-30.md)
+This was built **incrementally and traceably** by a single author — the whole R&D journey is on
+GitHub, not a single drop. Every milestone followed the same loop: a **design doc → test-driven
+implementation → two independent reviews (specification + code quality) → a reviewed pull request**
+merged to `main`.
+
+- 📋 **[`CHANGELOG.md`](CHANGELOG.md)** — the milestone-by-milestone development log (design phase → M1–M6 → the post-release on-device iteration), each with its PR.
+- 🔀 **[Pull requests (15)](https://github.com/Marxtu/freshloop/pulls?q=is%3Apr+is%3Amerged)** — one per milestone/step: design → implement → review → merge.
+- 🕒 **[Commit history](https://github.com/Marxtu/freshloop/commits/main)** — real incremental commits.
+- 🏷️ **[Releases](https://github.com/Marxtu/freshloop/releases)** — `v0.1.0-m1`, `v0.2.0-m2`, `v1.0.0` (Android APK).
+
+### Documentation (layered)
+
+- **Level 1 — Foundation:** [course-materials analysis](docs/level-1-foundation/course-materials-analysis-2026-05-30.md) — problem framing, rubric, framework decision.
+- **Level 2 — Architecture:** [system design (SSOT)](docs/level-2-architecture/running-route-generator-2026-05-30.md) · [UX &amp; rubric checklist](docs/level-2-architecture/ux-and-rubric-checklist-2026-05-31.md) · [visual direction](docs/level-2-architecture/visual-design-direction-2026-05-31.md)
+- **Level 3 — Implementation:** per-milestone plans in [`docs/level-3-implementation/`](docs/level-3-implementation) (M1 … M6).
+- **Reviews &amp; report:** [UI review](docs/audit/ui-review-2026-05-31.md) · [project report](docs/project-report-2026-05-31.md)
 
 ## Secrets
 
