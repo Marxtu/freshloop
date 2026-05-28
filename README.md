@@ -68,8 +68,16 @@ Full rationale: [visual design direction](docs/level-2-architecture/visual-desig
 a route (map, elevation, along-the-way photos) → **run** it live (map-follow + distance/time/pace)
 → review a **post-run summary** → and **sign in** to sync **run history & favourite routes** to the
 cloud (Firebase Auth + Firestore, each user isolated by security rules, with an on-device fallback).
-The UI adapts from phone-portrait to tablet/landscape. **123 tests passing**, static analysis clean,
-built incrementally across 14 reviewed PRs.
+The UI adapts from phone-portrait to tablet/landscape. **128 tests passing**, static analysis clean,
+built incrementally across reviewed PRs, and **released as v1.0.0** (Android APK).
+
+### Recent updates (post-release, from on-device testing)
+
+- **Start a run anywhere** — a home **address search** (OSM Nominatim) plus a **GPS "locate me"** button set the start point from your real location, not a fixed city centre.
+- **Collapsible map** — the "Design your run" sheet drags down to a handle so the map goes near full-screen (and you can see the start marker), then snaps back up to set params.
+- **Sharper along-the-way photos** — request Mapillary's 1024px thumbnails (was upscaled/blurry); fetched in parallel; 360° panoramas are kept as a badged fallback instead of an empty strip.
+- **Tap to view photos** — full-screen zoom/pan; **360° panoramas open in a real spherical viewer** (drag to look around).
+- **Robustness** — a clear "API key missing — build with `--dart-define-from-file=secrets.json`" error instead of a cryptic ORS 401; the home sheet is width-capped/centred on wide screens.
 
 ## How route scoring works
 
