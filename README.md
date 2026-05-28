@@ -14,7 +14,7 @@ Milano, Prof. Luciano Baresi).
 ## Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/home-v4.png" alt="Home — address search, GPS, map + params sheet" width="232">
+  <img src="docs/screenshots/home-v5.png" alt="Home — address search, GPS, collapsible 'design your run' sheet" width="232">
   &nbsp;
   <img src="docs/screenshots/candidates-v3.png" alt="Candidates — ranked route cards" width="232">
   &nbsp;
@@ -37,6 +37,13 @@ Milano, Prof. Luciano Baresi).
   <img src="docs/screenshots/favourites.png" alt="Favourite routes" width="232">
 </p>
 <p align="center"><em>Accounts (M5) — <b>sign in / create account</b> → <b>run history</b> and <b>favourite routes</b>, synced to Firebase under <code>/users/&lt;uid&gt;</code> and isolated per user by Firestore security rules (with on-device fallback when offline/unconfigured).</em></p>
+
+### Multi-device (tablet / landscape)
+
+<p align="center">
+  <img src="docs/screenshots/tablet-detail.png" alt="Route detail on a tablet — map and detail panel side-by-side" width="760">
+</p>
+<p align="center"><em>The same screens adapt by width (one <code>isWide</code> breakpoint, 720dp). On a wide screen the route detail is a <b>map + detail panel side-by-side</b> (above) and the candidates become a <b>multi-column grid</b>; on phones they're a draggable sheet over the map and a single-column list. This is genuine width-adaptive layout — the course's "multi-device" requirement.</em></p>
 
 ### Visual direction
 
