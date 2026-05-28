@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../data/photos/scene_photo.dart';
+import 'photo_viewer.dart';
 
 /// A swipeable strip of along-route scenery photos with a caption scrim.
 /// Network image failures fall back to a neutral placeholder (graceful — §11).
@@ -40,7 +41,9 @@ class PhotoCarousel extends StatelessWidget {
           final p = photos[i];
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: ClipRRect(
+            child: GestureDetector(
+              onTap: () => openPhotoViewer(context, p),
+              child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: Stack(
                 fit: StackFit.expand,
@@ -101,6 +104,7 @@ class PhotoCarousel extends StatelessWidget {
                     ),
                 ],
               ),
+            ),
             ),
           );
         },
