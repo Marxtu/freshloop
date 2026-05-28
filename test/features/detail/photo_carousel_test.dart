@@ -25,7 +25,7 @@ void main() {
 
   testWidgets('tapping a photo opens the full-screen viewer', (tester) async {
     const photos = [
-      ScenePhoto(url: 'https://img/1.jpg', source: PhotoSource.mapillary, lat: 0, lng: 0, isPano: true),
+      ScenePhoto(url: 'https://img/1.jpg', source: PhotoSource.mapillary, lat: 0, lng: 0),
     ];
     await tester.pumpWidget(const MaterialApp(home: Scaffold(body: PhotoCarousel(photos: photos))));
     await tester.tapAt(tester.getCenter(find.byType(PhotoCarousel)));

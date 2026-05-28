@@ -1,25 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:panorama_viewer/panorama_viewer.dart';
 import '../../data/photos/scene_photo.dart';
 
-/// Full-screen, zoomable/pannable view of a scenery photo. For 360° panoramas
-/// the equirectangular image is laid out at screen height so you can drag
-/// left/right to look all the way around (plus pinch-zoom).
+/// Full-screen photo view. 360° panoramas open in a real spherical viewer
+/// (drag to rotate, no equirectangular distortion); normal photos open in a
+/// zoom/pan viewer.
 class PhotoViewerScreen extends StatelessWidget {
   final ScenePhoto photo;
   const PhotoViewerScreen({super.key, required this.photo});
 
   @override
   Widget build(BuildContext context) {
-    final h = MediaQuery.sizeOf(context).height;
-    final img = Image.network(
-      photo.url,
-      fit: photo.isPano ? BoxFit.fitHeight : BoxFit.contain,
-      errorBuilder: (context, e, s) => const Center(
-        child: Icon(Icons.broken_image_outlined, color: Colors.white54, size: 48),
-      ),
-      loadingBuilder: (context, child, progress) =>
-          progress == null ? child : const Center(child: CircularProgressIndicator()),
-    );
     return Scaffold(
       backgroundColor: Colors.black,
       extendBodyBehindAppBar: true,
@@ -39,16 +30,27 @@ class PhotoViewerScreen extends StatelessWidget {
               ])
             : null,
       ),
-      body: InteractiveViewer(
-        // Panoramas: unconstrained + screen-height so the full 360° width can be
-        // panned horizontally. Normal photos: constrained, contained, zoomable.
-        constrained: !photo.isPano,
-        minScale: 0.8,
-        maxScale: 6,
-        child: photo.isPano
-            ? SizedBox(height: h, child: img)
-            : Center(child: img),
-      ),
+      body: photo.isPano
+          // True spherical panorama: drag to rotate the view in any direction.
+          ? PanoramaViewer(
+              minZoom: 1,
+              maxZoom: 5,
+              child: Image.network(photo.url),
+            )
+          : InteractiveViewer(
+              minScale: 0.8,
+              maxScale: 6,
+              child: Center(
+                child: Image.network(
+                  photo.url,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, e, s) => const Icon(
+                    Icons.broken_image_outlined, color: Colors.white54, size: 48),
+                  loadingBuilder: (context, child, progress) =>
+                      progress == null ? child : const Center(child: CircularProgressIndicator()),
+                ),
+              ),
+            ),
     );
   }
 }
