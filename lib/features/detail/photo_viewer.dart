@@ -11,6 +11,10 @@ class PhotoViewerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The viewer lazy-loads a high-resolution image (so a 360° sphere isn't a
+    // blurry 1024px thumbnail wrapped across the whole view); the carousel keeps
+    // the small thumb. Falls back to the thumb when there's no high-res URL.
+    final src = photo.fullUrl ?? photo.url;
     return Scaffold(
       backgroundColor: Colors.black,
       extendBodyBehindAppBar: true,
@@ -35,14 +39,14 @@ class PhotoViewerScreen extends StatelessWidget {
           ? PanoramaViewer(
               minZoom: 1,
               maxZoom: 5,
-              child: Image.network(photo.url),
+              child: Image.network(src),
             )
           : InteractiveViewer(
               minScale: 0.8,
               maxScale: 6,
               child: Center(
                 child: Image.network(
-                  photo.url,
+                  src,
                   fit: BoxFit.contain,
                   errorBuilder: (context, e, s) => const Icon(
                     Icons.broken_image_outlined, color: Colors.white54, size: 48),

@@ -22,7 +22,7 @@ class MapillaryPhotoClient {
   }) async {
     final uri = Uri.https('graph.mapillary.com', '/images', {
       'bbox': '$west,$south,$east,$north',
-      'fields': 'id,is_pano,thumb_1024_url,thumb_256_url,computed_geometry',
+      'fields': 'id,is_pano,thumb_2048_url,thumb_1024_url,thumb_256_url,computed_geometry',
       // Over-fetch so we can drop 360° panoramas and still fill `limit` slots.
       'limit': '${limit * 4}',
     });

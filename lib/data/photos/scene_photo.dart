@@ -14,6 +14,11 @@ class ScenePhoto {
   /// kept only as a fallback when no normal perspective shots are available).
   final bool isPano;
 
+  /// A higher-resolution URL for the full-screen viewer (lazy-loaded on open).
+  /// The carousel uses the small [url]; the viewer prefers [fullUrl] so a 360°
+  /// panorama isn't a blurry 1024px image wrapped across the whole sphere.
+  final String? fullUrl;
+
   const ScenePhoto({
     required this.url,
     required this.source,
@@ -21,6 +26,7 @@ class ScenePhoto {
     required this.lng,
     this.caption,
     this.isPano = false,
+    this.fullUrl,
   });
 
   /// Parses one Mapillary `images` entry. `computed_geometry.coordinates` is
@@ -32,6 +38,8 @@ class ScenePhoto {
     return ScenePhoto(
       // Prefer the crisp 1024px thumb; fall back to 256 if absent.
       url: (json['thumb_1024_url'] ?? json['thumb_256_url']) as String,
+      // High-res for the viewer (2048 → falls back to 1024).
+      fullUrl: (json['thumb_2048_url'] ?? json['thumb_1024_url']) as String?,
       source: PhotoSource.mapillary,
       lng: (coords[0] as num).toDouble(),
       lat: (coords[1] as num).toDouble(),
@@ -46,6 +54,7 @@ class ScenePhoto {
     final encoded = Uri.encodeComponent(filename);
     return ScenePhoto(
       url: 'https://commons.wikimedia.org/wiki/Special:FilePath/$encoded?width=$width',
+      fullUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/$encoded?width=1600',
       source: PhotoSource.wikimedia,
       lat: (json['lat'] as num).toDouble(),
       lng: (json['lon'] as num).toDouble(),
