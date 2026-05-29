@@ -44,4 +44,41 @@ void main() {
       expect(() => client.search('Berlin'), throwsA(isA<ApiException>()));
     });
   });
+
+  group('NominatimClient.suggest', () {
+    test('returns multiple results and biases to a nearby viewbox', () async {
+      late http.Request captured;
+      final mock = MockClient((req) async {
+        captured = req;
+        return http.Response(
+          jsonEncode([
+            {'lat': '45.46', 'lon': '9.18', 'display_name': 'Carrefour, Via A, Milano'},
+            {'lat': '45.47', 'lon': '9.20', 'display_name': 'Carrefour Express, Via B, Milano'},
+          ]),
+          200,
+        );
+      });
+      final client = NominatimClient(userAgent: 'ua', client: mock);
+
+      final places = await client.suggest('Carrefour', lat: 45.4642, lng: 9.19, limit: 5);
+
+      expect(places.length, 2);
+      expect(places.first.label, startsWith('Carrefour'));
+      expect(captured.url.queryParameters['limit'], '5');
+      // viewbox biases toward the start location, not bounded to it
+      expect(captured.url.queryParameters['viewbox'], isNotNull);
+      expect(captured.url.queryParameters['bounded'], '0');
+    });
+
+    test('omits the viewbox when no location is given', () async {
+      late http.Request captured;
+      final mock = MockClient((req) async {
+        captured = req;
+        return http.Response('[]', 200);
+      });
+      final client = NominatimClient(userAgent: 'ua', client: mock);
+      await client.suggest('Berlin');
+      expect(captured.url.queryParameters.containsKey('viewbox'), isFalse);
+    });
+  });
 }

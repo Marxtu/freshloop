@@ -13,17 +13,30 @@ class NominatimClient {
       : _client = client ?? http.Client();
 
   Future<GeoPlace?> search(String query) async {
-    final uri = Uri.https('nominatim.openstreetmap.org', '/search', {
+    final results = await suggest(query, limit: 1);
+    return results.isEmpty ? null : results.first;
+  }
+
+  /// Returns up to [limit] matches for autocomplete. When [lat]/[lng] are given,
+  /// a viewbox around them biases results toward nearby places (e.g. the nearest
+  /// "Carrefour") without restricting to it.
+  Future<List<GeoPlace>> suggest(String query, {double? lat, double? lng, int limit = 5}) async {
+    final params = <String, String>{
       'q': query,
       'format': 'jsonv2',
-      'limit': '1',
-    });
+      'limit': '$limit',
+    };
+    if (lat != null && lng != null) {
+      const d = 0.15; // ~15 km bias box
+      params['viewbox'] = '${lng - d},${lat - d},${lng + d},${lat + d}';
+      params['bounded'] = '0'; // prefer the box, don't restrict to it
+    }
+    final uri = Uri.https('nominatim.openstreetmap.org', '/search', params);
     final resp = await _client.get(uri, headers: {'User-Agent': userAgent});
     if (resp.statusCode != 200) {
       throw ApiException('Nominatim', resp.statusCode, resp.body);
     }
     final results = jsonDecode(resp.body) as List;
-    if (results.isEmpty) return null;
-    return GeoPlace.fromNominatimJson(results.first as Map<String, dynamic>);
+    return results.map((e) => GeoPlace.fromNominatimJson(e as Map<String, dynamic>)).toList();
   }
 }

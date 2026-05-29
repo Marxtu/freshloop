@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -38,6 +39,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _locating = false;
   bool _searching = false;
   bool _located = false;
+  List<GeoPlace> _suggestions = const [];
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -47,8 +50,41 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
+  }
+
+  /// Debounced autocomplete: fetch nearby-biased place suggestions as the user
+  /// types (skip very short queries; one request ~400 ms after they stop).
+  void _onQueryChanged(String raw) {
+    final q = raw.trim();
+    _debounce?.cancel();
+    if (q.length < 3) {
+      if (_suggestions.isNotEmpty) setState(() => _suggestions = const []);
+      return;
+    }
+    _debounce = Timer(const Duration(milliseconds: 400), () async {
+      List<GeoPlace> r;
+      try {
+        r = await _geocoder.suggest(q, lat: _lat, lng: _lng);
+      } catch (_) {
+        r = const [];
+      }
+      if (mounted) setState(() => _suggestions = r);
+    });
+  }
+
+  void _selectPlace(GeoPlace p) {
+    _debounce?.cancel();
+    FocusScope.of(context).unfocus();
+    _searchController.text = _short(p.label);
+    setState(() {
+      _lat = p.lat;
+      _lng = p.lng;
+      _located = true;
+      _suggestions = const [];
+    });
   }
 
   Future<void> _locate({bool announce = false}) async {
@@ -142,6 +178,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       _searchBar(t),
                       const SizedBox(height: 8),
+                      if (_suggestions.isNotEmpty)
+                        _suggestionsCard(t)
+                      else
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -232,6 +271,37 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _suggestionsCard(ThemeData t) {
+    return Material(
+      elevation: 3,
+      borderRadius: BorderRadius.circular(16),
+      shadowColor: Colors.black26,
+      color: t.colorScheme.surface,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 300),
+        child: ListView.separated(
+          shrinkWrap: true,
+          padding: EdgeInsets.zero,
+          itemCount: _suggestions.length,
+          separatorBuilder: (_, _) => Divider(height: 1, color: t.colorScheme.outlineVariant),
+          itemBuilder: (context, i) {
+            final p = _suggestions[i];
+            return ListTile(
+              dense: true,
+              leading: Icon(Icons.place_outlined, color: t.colorScheme.primary),
+              title: Text(_short(p.label), maxLines: 1, overflow: TextOverflow.ellipsis),
+              subtitle: Text(p.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: t.textTheme.bodySmall?.copyWith(color: t.colorScheme.onSurfaceVariant)),
+              onTap: () => _selectPlace(p),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   Widget _searchBar(ThemeData t) {
     return Material(
       elevation: 3,
@@ -250,7 +320,9 @@ class _HomeScreenState extends State<HomeScreen> {
               child: TextField(
                 controller: _searchController,
                 textInputAction: TextInputAction.search,
-                onSubmitted: _search,
+                onChanged: _onQueryChanged,
+                onSubmitted: (q) =>
+                    _suggestions.isNotEmpty ? _selectPlace(_suggestions.first) : _search(q),
                 decoration: const InputDecoration(
                   hintText: 'Search a place to start from…',
                   border: InputBorder.none,

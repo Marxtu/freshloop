@@ -18,7 +18,7 @@ history — the whole R&D journey is on GitHub, not a single drop.
 The complete app: full M1–M6 roadmap, a visual overhaul, and a round of on-device polish.
 
 ### Post-release iteration (driven by real on-device testing)
-- **Start a run anywhere** — home **address search** (OSM Nominatim) + a **GPS "locate me"** button set the start from the runner's real position instead of a fixed city centre.
+- **Start a run anywhere** — home **address search with live autocomplete** (OSM Nominatim, nearby-biased, debounced) + a **GPS "locate me"** button set the start from the runner's real position instead of a fixed city centre.
 - **Collapsible map sheet** — "Design your run" drags down to a handle so the map goes near full-screen (and the start marker is visible), then snaps back up.
 - **Sharper photos** — Mapillary **1024px** thumbnails (were upscaled/blurry), fetched in parallel; 360° panoramas kept as a **badged fallback** instead of an empty strip.
 - **Tap-to-view photos** — full-screen zoom/pan; **360° panoramas open in a real spherical viewer** (drag to rotate).
