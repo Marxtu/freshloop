@@ -51,6 +51,7 @@ void main() {
       final finished = cubit.state as RunFinished;
       expect(finished.record.distanceM, closeTo(111.2, 1.0));
       expect(finished.record.points.length, 2);
+      expect(finished.record.startedAt, isNotNull); // stamped at start, for history
       await cubit.close();
       await controller.close();
     });

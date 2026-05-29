@@ -15,6 +15,7 @@ class RunTrackingCubit extends Cubit<RunTrackingState> {
   final List<RoutePoint> _points = [];
   final Stopwatch _watch = Stopwatch();
   double _distanceM = 0;
+  DateTime? _startedAt;
 
   RunTrackingCubit(this.source) : super(const RunIdle());
 
@@ -25,6 +26,7 @@ class RunTrackingCubit extends Cubit<RunTrackingState> {
     }
     _points.clear();
     _distanceM = 0;
+    _startedAt = DateTime.now();
     _watch
       ..reset()
       ..start();
@@ -46,6 +48,7 @@ class RunTrackingCubit extends Cubit<RunTrackingState> {
       points: List.of(_points),
       distanceM: _distanceM,
       durationS: _watch.elapsed.inSeconds,
+      startedAt: _startedAt,
     )));
   }
 

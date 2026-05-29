@@ -38,5 +38,21 @@ void main() {
     expect(r.distanceM, 2000);
     expect(r.durationS, 600);
     expect(r.points.length, 1);
+    expect(r.startedAt, isNull); // omitted when absent
+  });
+
+  test('RunRecord round-trips its startedAt, and tolerates older records', () {
+    final rec = RunRecord(
+      points: const [RoutePoint(lat: 1, lng: 2)],
+      distanceM: 2000,
+      durationS: 600,
+      startedAt: DateTime(2026, 5, 28, 14, 32),
+    );
+    expect(RunRecord.fromJson(rec.toJson()).startedAt, DateTime(2026, 5, 28, 14, 32));
+    // a record stored before this field existed has no 'startedAt' key
+    expect(
+      RunRecord.fromJson({'points': const [], 'distanceM': 1, 'durationS': 1}).startedAt,
+      isNull,
+    );
   });
 }

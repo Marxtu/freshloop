@@ -7,6 +7,18 @@ String formatDuration(int seconds) {
   return h > 0 ? '$h:${two(m)}:${two(s)}' : '${two(m)}:${two(s)}';
 }
 
+const _months = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
+/// A short, locale-neutral run date like "28 May 2026, 14:32".
+String formatRunDate(DateTime when) {
+  String two(int n) => n.toString().padLeft(2, '0');
+  return '${when.day} ${_months[when.month - 1]} ${when.year}, '
+      '${two(when.hour)}:${two(when.minute)}';
+}
+
 /// Pace as `m'ss"` per km; `--'--"` when no meaningful distance.
 String formatPace(double distanceM, int seconds) {
   if (distanceM < 1) return "--'--\"";

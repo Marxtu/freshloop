@@ -22,6 +22,8 @@ The complete app: full M1–M6 roadmap, a visual overhaul, and a round of on-dev
 - **Collapsible map sheet** — "Design your run" drags down to a handle so the map goes near full-screen (and the start marker is visible), then snaps back up.
 - **Sharper photos** — Mapillary **1024px** thumbnails (were upscaled/blurry), fetched in parallel; 360° panoramas kept as a **badged fallback** instead of an empty strip.
 - **Tap-to-view photos** — full-screen zoom/pan; **360° panoramas open in a real spherical viewer** (drag to rotate). The viewer **lazy-loads a high-resolution image** (Mapillary 2048px) so panoramas are sharp, while the carousel keeps the light 1024px thumb.
+- **Openable run history** — each past run is **tappable** and opens a detail screen with its **trail on a map**, full stats (distance/time/pace), and **the date it was run** (run records now store a start timestamp; older records degrade gracefully).
+- **Correct Android back navigation** — drilling into a route now **stacks** screens (`push`, not `go`), so the system Back button (and the candidates app-bar arrow) returns to the previous screen instead of exiting the app to the launcher.
 - **Robustness** — clear *"API key missing — build with `--dart-define-from-file=secrets.json`"* error instead of a cryptic ORS 401; home sheet width-capped/centred on wide screens.
 
 ### Visual overhaul — `#15`

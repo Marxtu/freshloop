@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../domain/format.dart';
 import '../../domain/models/run_record.dart';
 import '../../services/run_history_repository.dart';
+import 'run_detail_screen.dart';
 
 class HistoryScreen extends StatelessWidget {
   final RunHistoryRepository repo;
@@ -43,34 +44,47 @@ class HistoryScreen extends StatelessWidget {
             itemBuilder: (context, i) {
               final r = runs[i];
               return Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: t.colorScheme.primary.withValues(alpha: 0.12),
-                          shape: BoxShape.circle,
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  // Tap a past run to open its trail map and full stats.
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => RunDetailScreen(record: r)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: t.colorScheme.primary.withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.directions_run_rounded, color: t.colorScheme.primary),
                         ),
-                        child: Icon(Icons.directions_run_rounded, color: t.colorScheme.primary),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('${(r.distanceM / 1000).toStringAsFixed(2)} km',
-                                style: t.textTheme.titleLarge),
-                            const SizedBox(height: 2),
-                            Text('${formatDuration(r.durationS)} · ${formatPace(r.distanceM, r.durationS)} /km',
-                                style: t.textTheme.bodyMedium?.copyWith(color: t.colorScheme.onSurfaceVariant)),
-                          ],
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('${(r.distanceM / 1000).toStringAsFixed(2)} km',
+                                  style: t.textTheme.titleLarge),
+                              const SizedBox(height: 2),
+                              Text('${formatDuration(r.durationS)} · ${formatPace(r.distanceM, r.durationS)} /km',
+                                  style: t.textTheme.bodyMedium?.copyWith(color: t.colorScheme.onSurfaceVariant)),
+                              if (r.startedAt != null) ...[
+                                const SizedBox(height: 2),
+                                Text(formatRunDate(r.startedAt!),
+                                    style: t.textTheme.bodySmall?.copyWith(color: t.colorScheme.onSurfaceVariant)),
+                              ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                        Icon(Icons.chevron_right_rounded, color: t.colorScheme.onSurfaceVariant),
+                      ],
+                    ),
                   ),
                 ),
               );

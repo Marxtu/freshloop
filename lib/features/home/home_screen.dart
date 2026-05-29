@@ -151,7 +151,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return BlocListener<RouteGenCubit, RouteGenState>(
       listener: (context, state) {
         if (state is RouteGenLoaded) {
-          context.go('/candidates');
+          // push (not go) so candidates stacks on top of home — otherwise the
+          // Android back button on candidates/detail/… has nothing to pop and
+          // exits the app instead of returning to the previous screen.
+          context.push('/candidates');
         } else if (state is RouteGenError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Could not generate a route: ${state.message}')),

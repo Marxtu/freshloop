@@ -20,4 +20,10 @@ void main() {
       expect(formatPace(0, 120), "--'--\"");
     });
   });
+  group('formatRunDate', () {
+    test('"day Mon year, HH:MM" with zero-padded time', () {
+      expect(formatRunDate(DateTime(2026, 5, 28, 14, 32)), '28 May 2026, 14:32');
+      expect(formatRunDate(DateTime(2026, 1, 3, 9, 5)), '3 Jan 2026, 09:05');
+    });
+  });
 }

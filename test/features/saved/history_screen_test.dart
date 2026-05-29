@@ -25,6 +25,27 @@ void main() {
     expect(find.textContaining('25:00'), findsOneWidget);
   });
 
+  testWidgets('shows the run date and opens details on tap', (tester) async {
+    final repo = _FakeRepo([
+      RunRecord(
+        points: const [RoutePoint(lat: 45.0, lng: 9.0), RoutePoint(lat: 45.001, lng: 9.0)],
+        distanceM: 5000,
+        durationS: 1500,
+        startedAt: DateTime(2026, 5, 28, 14, 32),
+      ),
+    ]);
+    await tester.pumpWidget(MaterialApp(home: HistoryScreen(repo: repo)));
+    await tester.pumpAndSettle();
+    expect(find.text('28 May 2026, 14:32'), findsOneWidget); // date surfaced in the list
+
+    await tester.tap(find.text('5.00 km'));
+    // RouteMap tiles never settle under test, so pump a bounded number of frames.
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(find.text('Run details'), findsOneWidget); // navigated into the detail screen
+  });
+
   testWidgets('shows empty state', (tester) async {
     await tester.pumpWidget(MaterialApp(home: HistoryScreen(repo: _FakeRepo([]))));
     await tester.pumpAndSettle();
