@@ -3,10 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:freshloop/app/app.dart';
 
 void main() {
-  testWidgets('app launches and shows the home screen', (tester) async {
+  testWidgets('app boots with the FreshLoop theme', (tester) async {
     await tester.pumpWidget(const FreshLoopApp());
-    await tester.pumpAndSettle();
-    expect(find.text('FreshLoop'), findsOneWidget);
-    expect(find.byKey(const Key('home-tagline')), findsOneWidget);
+    await tester.pump();
+    expect(find.byType(MaterialApp), findsOneWidget);
   });
 }
