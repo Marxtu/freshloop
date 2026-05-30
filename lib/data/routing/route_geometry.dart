@@ -5,6 +5,13 @@ class RoutePoint {
   final double? elevation;
 
   const RoutePoint({required this.lat, required this.lng, this.elevation});
+
+  Map<String, dynamic> toJson() => {'lat': lat, 'lng': lng, if (elevation != null) 'ele': elevation};
+  factory RoutePoint.fromJson(Map<String, dynamic> j) => RoutePoint(
+        lat: (j['lat'] as num).toDouble(),
+        lng: (j['lng'] as num).toDouble(),
+        elevation: j['ele'] == null ? null : (j['ele'] as num).toDouble(),
+      );
 }
 
 /// A route's geometry plus the summary metrics needed for scoring.
@@ -46,4 +53,15 @@ class RouteGeometry {
       ascentM: ((props['ascent'] as num?) ?? 0).toDouble(),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'points': points.map((p) => p.toJson()).toList(),
+        'distanceM': distanceM,
+        'ascentM': ascentM,
+      };
+  factory RouteGeometry.fromJson(Map<String, dynamic> j) => RouteGeometry(
+        points: (j['points'] as List).map((e) => RoutePoint.fromJson(e as Map<String, dynamic>)).toList(),
+        distanceM: (j['distanceM'] as num).toDouble(),
+        ascentM: (j['ascentM'] as num).toDouble(),
+      );
 }

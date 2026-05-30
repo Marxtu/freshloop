@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../app/theme.dart';
 import '../../data/photos/scene_photo.dart';
 import '../../domain/models/scored_route.dart';
 import '../../services/photo_service.dart';
+import '../../state/favorites_cubit.dart';
 import '../common/route_map.dart';
 import '../common/tier_badge.dart';
 import 'elevation_chart.dart';
@@ -49,6 +51,18 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
           Positioned(
             top: 0, left: 0,
             child: SafeArea(child: BackButton(onPressed: () => Navigator.of(context).maybePop())),
+          ),
+          Positioned(
+            top: 0, right: 0,
+            child: SafeArea(child: Builder(builder: (context) {
+              final fav = context.watch<FavoritesCubit>();
+              final isFav = fav.isFavorite(widget.route.routeKey);
+              return IconButton.filledTonal(
+                icon: Icon(isFav ? Icons.favorite : Icons.favorite_border),
+                tooltip: isFav ? 'Remove favourite' : 'Save to favourites',
+                onPressed: () => fav.toggle(widget.route),
+              );
+            })),
           ),
           DraggableScrollableSheet(
             initialChildSize: widget.initialSheetSize,
