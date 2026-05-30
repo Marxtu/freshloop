@@ -38,6 +38,9 @@ void main() {
       expect(s.first.lat, 0);
       expect(s.last.lat, 99);
     });
+    test('max of 1 returns just the first point (no divide-by-zero)', () {
+      expect(subsample(pts, 1), [pts.first]);
+    });
     test('returns input unchanged for empty', () {
       expect(subsample(const [], 5), isEmpty);
     });
