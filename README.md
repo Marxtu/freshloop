@@ -14,9 +14,9 @@ Milano, Prof. Luciano Baresi).
 ## Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/theme-a-home.png" alt="FreshLoop app shell with the chosen Theme A" width="260">
+  <img src="docs/screenshots/m32-home.png" alt="FreshLoop home — map-forward with the route params sheet" width="260">
 </p>
-<p align="center"><em>The app shell with the chosen visual direction ("Theme A") — Sora display + DM Sans body on a trail-green Material 3 surface. The map, params sheet, and candidate cards land in M3.2; more screenshots follow.</em></p>
+<p align="center"><em>The home screen (M3.2): a full-screen map with the "design your run" sheet — distance + air/hills/scenery weight sliders + a terrain choice + the amber Generate action. Theme A (Sora / DM Sans, trail-green + amber). Candidate cards, route detail, and tracking follow.</em></p>
 
 ### Visual direction
 
@@ -36,14 +36,14 @@ Full rationale: [visual design direction](docs/level-2-architecture/visual-desig
 
 ## Status
 
-**M2 — External data layer: complete.** On top of M1 (app shell + pure-Dart scoring engine),
-the full beyond-Firebase data stack is built and mock-tested: routing (OpenRouteService),
-geocoding (Nominatim), air quality (Open-Meteo), greenery (OSM Overpass), and photos
-(Mapillary, Wikimedia). **51 tests passing**, static analysis clean. The data layer is not
-yet wired into the UI — that happens in M3, which adds the first real screens.
+**M3.2 — Route-generation UI: complete.** On top of M1 (scoring engine), M2 (the full
+beyond-Firebase data stack: OpenRouteService, Nominatim, Open-Meteo, OSM Overpass,
+Mapillary, Wikimedia), and M3.1 (the `RouteGenerator` + `RouteGenCubit` engine), the first
+real screens are in: a map-forward home with the params sheet (distance + axis-weight
+sliders + terrain + Generate) and the candidate-comparison cards. **70 tests passing**,
+static analysis clean. Next: M3.3 route detail (elevation chart + photo carousel).
 
-Latest build: **[v0.2.0-m2 release](https://github.com/Marxtu/freshloop/releases/tag/v0.2.0-m2)**
-— `freshloop-0.2.0-m2-arm64.apk` (arm64, debug-signed test build; renders the M1 shell, since M2 added no UI).
+Latest release: **[v0.2.0-m2](https://github.com/Marxtu/freshloop/releases/tag/v0.2.0-m2)** (`freshloop-0.2.0-m2-arm64.apk`).
 
 ## How route scoring works
 
@@ -61,7 +61,9 @@ inspired by the WHO assessment rubric — so the score is transparent, not a bla
 
 - [x] **M1** — Foundation: app shell + pure-Dart scoring engine
 - [x] **M2** — External data layer: routing (OpenRouteService) + geocoding (Nominatim) + air quality (Open-Meteo) + greenery (OSM Overpass) + photos (Mapillary, Wikimedia), all behind injectable, fully mock-tested clients
-- [ ] **M3** — Route-generation UI (params → candidates → route detail with map, elevation chart, photos) — wires the data layer + scoring together; first real screens for the visual walkthrough
+- [x] **M3.1** — Route-generation engine: `RouteGenerator` (orchestrates clients + scorer into ranked candidates) + `RouteGenCubit`
+- [x] **M3.2** — Route-generation UI: map-forward home, params sheet, candidate-comparison cards (Theme A)
+- [ ] **M3.3** — Route detail: map + elevation chart + AQI/greenery badges + scenery photo carousel
 - [ ] **M4** — Live GPS run tracking + post-run summary
 - [ ] **M5** — Firebase auth/storage, history, favorites, profile
 - [ ] **M6** — Multi-device adaptation, polish, and integration tests
@@ -74,7 +76,7 @@ Flutter · flutter_bloc · http · geolocator · flutter_map (OSM) · go_router 
 
 ```bash
 flutter pub get
-flutter test        # 25 unit/widget tests
+flutter test        # 70 unit/widget tests
 flutter run         # on a device/emulator, or: flutter run -d chrome
 ```
 
