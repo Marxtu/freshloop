@@ -14,9 +14,13 @@ Milano, Prof. Luciano Baresi).
 ## Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/m32-home.png" alt="FreshLoop home — map-forward with the route params sheet" width="260">
+  <img src="docs/screenshots/m32-home.png" alt="Home — map + params sheet" width="232">
+  &nbsp;
+  <img src="docs/screenshots/m3-candidates.png" alt="Candidates — ranked route cards" width="232">
+  &nbsp;
+  <img src="docs/screenshots/m3-detail.png" alt="Route detail — map, elevation, photos" width="232">
 </p>
-<p align="center"><em>The home screen (M3.2): a full-screen map with the "design your run" sheet — distance + air/hills/scenery weight sliders + a terrain choice + the amber Generate action. Theme A (Sora / DM Sans, trail-green + amber). Candidate cards, route detail, and tracking follow.</em></p>
+<p align="center"><em>The route-generation flow (M3) — <b>home</b> (map-forward "design your run" sheet) → <b>candidates</b> (ranked cards: route preview, score, per-axis badges) → <b>route detail</b> (map loop, elevation profile, along-the-way photos). Theme A: Sora / DM Sans, trail-green + amber.</em></p>
 
 ### Visual direction
 
@@ -36,12 +40,11 @@ Full rationale: [visual design direction](docs/level-2-architecture/visual-desig
 
 ## Status
 
-**M3.2 — Route-generation UI: complete.** On top of M1 (scoring engine), M2 (the full
-beyond-Firebase data stack: OpenRouteService, Nominatim, Open-Meteo, OSM Overpass,
-Mapillary, Wikimedia), and M3.1 (the `RouteGenerator` + `RouteGenCubit` engine), the first
-real screens are in: a map-forward home with the params sheet (distance + axis-weight
-sliders + terrain + Generate) and the candidate-comparison cards. **70 tests passing**,
-static analysis clean. Next: M3.3 route detail (elevation chart + photo carousel).
+**M3 — Route generation: complete (end to end).** The full feature works: M1 scoring engine
++ M2 external data stack (OpenRouteService, Nominatim, Open-Meteo, OSM Overpass, Mapillary,
+Wikimedia) + M3.1 `RouteGenerator`/`RouteGenCubit` + the M3.2/M3.3 screens — design a run on
+the map, compare ranked candidates, and open a route's detail (elevation profile + scenery
+photos). **76 tests passing**, static analysis clean. Next: M4 live GPS run tracking.
 
 Latest release: **[v0.2.0-m2](https://github.com/Marxtu/freshloop/releases/tag/v0.2.0-m2)** (`freshloop-0.2.0-m2-arm64.apk`).
 
@@ -76,7 +79,7 @@ Flutter · flutter_bloc · http · geolocator · flutter_map (OSM) · go_router 
 
 ```bash
 flutter pub get
-flutter test        # 70 unit/widget tests
+flutter test        # 76 unit/widget tests
 flutter run         # on a device/emulator, or: flutter run -d chrome
 ```
 
