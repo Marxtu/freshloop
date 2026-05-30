@@ -1,6 +1,7 @@
 // One-off manual live check: exercises the REAL clients against the REAL APIs
 // using the keys in the gitignored secrets.json. Not part of the test suite
 // (unit tests stay mocked and deterministic). Run: dart run tool/live_api_check.dart
+// ignore_for_file: avoid_print
 import 'dart:convert';
 import 'dart:io';
 
