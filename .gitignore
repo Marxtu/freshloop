@@ -47,3 +47,6 @@ ios/Flutter/flutter_export_environment.sh
 # ── Misc ──
 *.log
 coverage/
+
+# Local-only web target (review/screenshot aid; product targets are android/ios)
+/web/
