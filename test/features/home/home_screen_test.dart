@@ -35,13 +35,14 @@ RouteGenerator _idleGenerator() => RouteGenerator(
 
 void main() {
   testWidgets('autocomplete suggestions show a distance from the user', (tester) async {
-    // Geocoder returns two Milan places: ~1 km and ~6 km from the fix.
+    // Geocoder returns two Milan places FAR-FIRST (~6 km then ~1 km) so the
+    // distance sort has something to reorder.
     final geocoder = NominatimClient(
       userAgent: 'ua',
       client: MockClient((req) async => http.Response(
             jsonEncode([
-              {'lat': '45.47', 'lon': '9.19', 'display_name': 'Carrefour, Via Soderini, Milano'},
               {'lat': '45.50', 'lon': '9.25', 'display_name': 'Carrefour Express, Via Ponte, Milano'},
+              {'lat': '45.47', 'lon': '9.19', 'display_name': 'Carrefour, Via Soderini, Milano'},
             ]),
             200,
           )),
@@ -65,10 +66,14 @@ void main() {
 
     // Suggestions render (title + subtitle both mention the street)…
     expect(find.textContaining('Via Soderini'), findsWidgets);
-    // …each with a straight-line distance label (km), measured from the fix.
+    // …each with a straight-line distance label, measured from the fix.
     // Test passing also means the trailing label caused no layout overflow.
-    expect(find.textContaining('km'), findsWidgets);
     expect(find.text('1.1 km'), findsOneWidget); // ~0.01° lat ≈ 1.1 km
+    expect(find.text('6.5 km'), findsOneWidget);
+    // …and the list is sorted nearest-first (the 1.1 km row above the 6.5 km row),
+    // even though the geocoder returned them far-first.
+    expect(tester.getTopLeft(find.text('1.1 km')).dy,
+        lessThan(tester.getTopLeft(find.text('6.5 km')).dy));
   });
 
   testWidgets('submitting the search (Enter) is nearby-biased, not global', (tester) async {

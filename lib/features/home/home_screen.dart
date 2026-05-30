@@ -77,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
       } catch (_) {
         r = const [];
       }
-      if (mounted) setState(() => _suggestions = r);
+      if (mounted) setState(() => _suggestions = _byDistance(r));
     });
   }
 
@@ -315,6 +315,17 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  /// Orders suggestions nearest-first by straight-line distance from the user's
+  /// GPS fix, so the closest "Carrefour" is at the top (matching the distance
+  /// labels). Left in the geocoder's order when we have no fix to measure from.
+  List<GeoPlace> _byDistance(List<GeoPlace> places) {
+    final oLat = _myLat, oLng = _myLng;
+    if (oLat == null || oLng == null) return places;
+    final origin = RoutePoint(lat: oLat, lng: oLng);
+    double dist(GeoPlace p) => haversineMeters(origin, RoutePoint(lat: p.lat, lng: p.lng));
+    return [...places]..sort((a, b) => dist(a).compareTo(dist(b)));
   }
 
   /// A compact straight-line distance from the device's GPS fix to [p], shown
