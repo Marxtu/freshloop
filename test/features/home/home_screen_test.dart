@@ -70,4 +70,44 @@ void main() {
     expect(find.textContaining('km'), findsWidgets);
     expect(find.text('1.1 km'), findsOneWidget); // ~0.01° lat ≈ 1.1 km
   });
+
+  testWidgets('submitting the search (Enter) is nearby-biased, not global', (tester) async {
+    final requests = <Uri>[];
+    final geocoder = NominatimClient(
+      userAgent: 'ua',
+      client: MockClient((req) async {
+        requests.add(req.url);
+        return http.Response(
+          jsonEncode([
+            {'lat': '45.47', 'lon': '9.19', 'display_name': 'Carrefour, Milano'},
+          ]),
+          200,
+        );
+      }),
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: BlocProvider(
+        create: (_) => RouteGenCubit(_idleGenerator()),
+        child: HomeScreen(locationSource: _FixedLocation(), geocoder: geocoder),
+      ),
+    ));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.enterText(find.byType(TextField), 'carrefour');
+    // Submit immediately — before the 400ms debounce fires, so the dropdown is
+    // empty and the _search() path runs (the case that used to go global).
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pump(const Duration(milliseconds: 50)); // resolve the search
+
+    expect(requests, isNotEmpty);
+    // It must restrict to the user's box, not do a worldwide search.
+    expect(requests.first.queryParameters.containsKey('viewbox'), isTrue);
+    expect(requests.first.queryParameters['bounded'], '1');
+
+    // Flush the still-pending debounce timer so the test ends cleanly.
+    await tester.pump(const Duration(milliseconds: 450));
+    await tester.pump(const Duration(milliseconds: 50));
+  });
 }

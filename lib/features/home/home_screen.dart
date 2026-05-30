@@ -128,7 +128,10 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _searching = true);
     GeoPlace? place;
     try {
-      place = await _geocoder.search(q);
+      // Nearby-first (same as the dropdown), so submitting "Carrefour" picks one
+      // near the user instead of a global match in another country.
+      final r = await _geocoder.suggest(q, lat: _lat, lng: _lng, limit: 1);
+      place = r.isEmpty ? null : r.first;
     } catch (_) {
       place = null;
     }

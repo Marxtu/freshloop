@@ -54,6 +54,19 @@ void main() {
       expect(called, isFalse);
     });
 
+    test('drops points whose AQI is null instead of failing the whole route', () async {
+      final mock = MockClient((req) async => http.Response(
+            jsonEncode([
+              {'current': {'european_aqi': 40}},
+              {'current': {'european_aqi': null}}, // a gap in the data
+              {'current': {'european_aqi': 50}},
+            ]),
+            200,
+          ));
+      final client = OpenMeteoAirClient(client: mock);
+      expect(await client.sampleAqi(points), [40.0, 50.0]);
+    });
+
     test('throws ApiException on non-200', () async {
       final mock = MockClient((req) async => http.Response('boom', 500));
       final client = OpenMeteoAirClient(client: mock);

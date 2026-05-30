@@ -28,9 +28,12 @@ class OpenMeteoAirClient {
     final decoded = jsonDecode(resp.body);
     // Multiple coords -> array; single coord -> object. Normalize to a list.
     final list = decoded is List ? decoded : [decoded];
+    // Open-Meteo occasionally returns a null AQI for a point; drop those rather
+    // than letting one null throw away every sample for the route (the caller
+    // falls back to a neutral value only when *all* samples are missing).
     return list
-        .map((e) => ((e as Map<String, dynamic>)['current']
-            as Map<String, dynamic>)['european_aqi'] as num)
+        .map((e) => ((e as Map<String, dynamic>)['current'] as Map<String, dynamic>?)?['european_aqi'])
+        .whereType<num>()
         .map((n) => n.toDouble())
         .toList();
   }
