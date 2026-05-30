@@ -11,4 +11,7 @@ class AppConfig {
   /// See https://operations.osmfoundation.org/policies/nominatim/
   static const String nominatimUserAgent =
       String.fromEnvironment('NOMINATIM_USER_AGENT', defaultValue: 'FreshLoop/0.1 (course project)');
+
+  /// Mapillary access token (sent as the `Authorization: OAuth <token>` header).
+  static const String mapillaryToken = String.fromEnvironment('MAPILLARY_TOKEN');
 }
