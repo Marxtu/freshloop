@@ -22,6 +22,13 @@ Milano, Prof. Luciano Baresi).
 </p>
 <p align="center"><em>The route-generation flow (M3) — <b>home</b> (map-forward "design your run" sheet) → <b>candidates</b> (ranked cards: route preview, score, per-axis badges) → <b>route detail</b> (map loop, elevation profile, along-the-way photos). Theme A: Sora / DM Sans, trail-green + amber.</em></p>
 
+<p align="center">
+  <img src="docs/screenshots/tracking.png" alt="Live run tracking" width="232">
+  &nbsp;
+  <img src="docs/screenshots/summary.png" alt="Post-run summary" width="232">
+</p>
+<p align="center"><em>Live run (M4) — <b>tracking</b> (the map follows you with live distance/time/pace + a current-location dot) → <b>post-run summary</b> (trail, stats, planned-vs-actual, share).</em></p>
+
 ### Visual direction
 
 Look-&-feel is grounded in the course's design principles. We evaluated three directions and chose **A**:
@@ -81,7 +88,7 @@ Flutter · flutter_bloc · http · geolocator · flutter_map (OSM) · go_router 
 
 ```bash
 flutter pub get
-flutter test        # 76 unit/widget tests
+flutter test        # 91 unit/widget tests
 flutter run         # on a device/emulator, or: flutter run -d chrome
 ```
 
