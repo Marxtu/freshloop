@@ -6,6 +6,8 @@ import '../../app/app_config.dart';
 import '../../data/geocoding/geo_place.dart';
 import '../../data/geocoding/nominatim_client.dart';
 import '../../data/routing/route_geometry.dart';
+import '../../domain/format.dart';
+import '../../domain/geo.dart';
 import '../../services/location_source.dart';
 import '../../state/auth_cubit.dart';
 import '../../state/route_gen_cubit.dart';
@@ -36,6 +38,10 @@ class _HomeScreenState extends State<HomeScreen> {
   // Milan Duomo as a sensible fallback until GPS or a search picks a start.
   double _lat = 45.4642;
   double _lng = 9.19;
+  // The device's actual GPS fix (null until located) — the origin for the
+  // "distance from you" hints in the suggestion list.
+  double? _myLat;
+  double? _myLng;
   bool _locating = false;
   bool _searching = false;
   bool _located = false;
@@ -102,6 +108,8 @@ class _HomeScreenState extends State<HomeScreen> {
       if (fix != null) {
         _lat = fix.lat;
         _lng = fix.lng;
+        _myLat = fix.lat;
+        _myLng = fix.lng;
         _located = true;
       }
       _locating = false;
@@ -297,11 +305,34 @@ class _HomeScreenState extends State<HomeScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: t.textTheme.bodySmall?.copyWith(color: t.colorScheme.onSurfaceVariant)),
+              trailing: _distanceLabel(t, p),
               onTap: () => _selectPlace(p),
             );
           },
         ),
       ),
+    );
+  }
+
+  /// A compact straight-line distance from the device's GPS fix to [p], shown
+  /// at the trailing edge of a suggestion. Returns null when we have no real
+  /// fix yet, so we never show a misleading distance from the fallback centre.
+  Widget? _distanceLabel(ThemeData t, GeoPlace p) {
+    final oLat = _myLat, oLng = _myLng;
+    if (oLat == null || oLng == null) return null;
+    final meters = haversineMeters(
+      RoutePoint(lat: oLat, lng: oLng),
+      RoutePoint(lat: p.lat, lng: p.lng),
+    );
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.near_me_outlined, size: 14, color: t.colorScheme.primary),
+        const SizedBox(height: 2),
+        Text(formatDistance(meters),
+            style: t.textTheme.labelSmall?.copyWith(
+                color: t.colorScheme.primary, fontWeight: FontWeight.w700)),
+      ],
     );
   }
 

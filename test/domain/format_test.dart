@@ -20,6 +20,15 @@ void main() {
       expect(formatPace(0, 120), "--'--\"");
     });
   });
+  group('formatDistance', () {
+    test('metres under a km, one decimal under 10 km, whole km beyond', () {
+      expect(formatDistance(120), '120 m');
+      expect(formatDistance(999), '999 m');
+      expect(formatDistance(1180), '1.2 km');
+      expect(formatDistance(6500), '6.5 km');
+      expect(formatDistance(12400), '12 km');
+    });
+  });
   group('formatRunDate', () {
     test('"day Mon year, HH:MM" with zero-padded time', () {
       expect(formatRunDate(DateTime(2026, 5, 28, 14, 32)), '28 May 2026, 14:32');

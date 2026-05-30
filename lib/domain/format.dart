@@ -1,3 +1,11 @@
+/// A short straight-line distance: "850 m" under a km, "1.2 km" under 10 km,
+/// "12 km" beyond. Used for "how far is this place from me" hints.
+String formatDistance(double meters) {
+  if (meters < 1000) return '${meters.round()} m';
+  final km = meters / 1000;
+  return km < 10 ? '${km.toStringAsFixed(1)} km' : '${km.round()} km';
+}
+
 /// "mm:ss" under an hour, "h:mm:ss" at/over an hour.
 String formatDuration(int seconds) {
   final h = seconds ~/ 3600;
