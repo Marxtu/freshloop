@@ -65,9 +65,36 @@ void main() {
       expect(places.length, 2);
       expect(places.first.label, startsWith('Carrefour'));
       expect(captured.url.queryParameters['limit'], '5');
-      // viewbox biases toward the start location, not bounded to it
+      // hard-restrict to the nearby box so a generic query returns nearby places
       expect(captured.url.queryParameters['viewbox'], isNotNull);
-      expect(captured.url.queryParameters['bounded'], '0');
+      expect(captured.url.queryParameters['bounded'], '1');
+    });
+
+    test('falls back to an unrestricted search when nothing matches nearby', () async {
+      final requests = <http.Request>[];
+      final mock = MockClient((req) async {
+        requests.add(req);
+        // The nearby (bounded) request finds nothing…
+        if (req.url.queryParameters['bounded'] == '1') {
+          return http.Response('[]', 200);
+        }
+        // …so it retries without the box and finds a place in another city.
+        return http.Response(
+          jsonEncode([
+            {'lat': '52.52', 'lon': '13.40', 'display_name': 'Carrefour, Berlin'},
+          ]),
+          200,
+        );
+      });
+      final client = NominatimClient(userAgent: 'ua', client: mock);
+
+      final places = await client.suggest('Carrefour', lat: 45.4642, lng: 9.19, limit: 5);
+
+      expect(places.length, 1);
+      expect(places.first.label, contains('Berlin'));
+      expect(requests.length, 2); // nearby first, then unrestricted
+      expect(requests.first.url.queryParameters['bounded'], '1');
+      expect(requests.last.url.queryParameters.containsKey('viewbox'), isFalse);
     });
 
     test('omits the viewbox when no location is given', () async {

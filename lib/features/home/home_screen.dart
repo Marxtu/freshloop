@@ -55,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  /// Debounced autocomplete: fetch nearby-biased place suggestions as the user
+  /// Debounced autocomplete: fetch nearby-first place suggestions as the user
   /// types (skip very short queries; one request ~400 ms after they stop).
   void _onQueryChanged(String raw) {
     final q = raw.trim();

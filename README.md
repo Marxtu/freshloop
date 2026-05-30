@@ -80,7 +80,7 @@ built incrementally across reviewed PRs, and **released as v1.0.0** (Android APK
 
 ### Recent updates (post-release, from on-device testing)
 
-- **Start a run anywhere** — a home **address search with live autocomplete** (OSM Nominatim, nearby-biased — type "Carrefour" and pick from a dropdown) plus a **GPS "locate me"** button set the start point from your real location, not a fixed city centre.
+- **Start a run anywhere** — a home **address search with live autocomplete** (OSM Nominatim, **nearby-first** — type "Carrefour" and the dropdown lists the ones *near you*, with a global fallback) plus a **GPS "locate me"** button set the start point from your real location, not a fixed city centre.
 - **Collapsible map** — the "Design your run" sheet drags down to a handle so the map goes near full-screen (and you can see the start marker), then snaps back up to set params.
 - **Sharper along-the-way photos** — request Mapillary's 1024px thumbnails (was upscaled/blurry); fetched in parallel; 360° panoramas are kept as a badged fallback instead of an empty strip.
 - **Tap to view photos** — full-screen zoom/pan; **360° panoramas open in a real spherical viewer** (drag to look around). The viewer **lazy-loads a high-resolution image** — panoramas pull the **original full-resolution** image (2048px is still soft once wrapped on a 360° sphere), with a loading spinner and automatic fall-back if it fails; perspective shots use 2048px. The carousel keeps the light 1024px thumbnail.
