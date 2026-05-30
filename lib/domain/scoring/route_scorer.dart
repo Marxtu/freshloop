@@ -7,9 +7,9 @@ import 'air_score.dart';
 import 'hills_score.dart';
 import 'scenery_score.dart';
 
-/// Combines the three axis sub-scores into an explainable [ScoreBreakdown].
-/// Pure functions — no Flutter, no I/O — so they unit-test cleanly
-/// (design doc section 6).
+/// Combines the three axis sub-scores into an explainable [ScoreBreakdown] and
+/// ranks candidates. Pure functions — no Flutter, no I/O — so they unit-test
+/// cleanly (design doc section 6).
 class RouteScorer {
   const RouteScorer();
 
@@ -52,5 +52,21 @@ class RouteScorer {
     if (weaknesses.isNotEmpty) parts.add('weak on ${weaknesses.join(', ')}');
     if (parts.isEmpty) return 'A balanced route.';
     return '${parts.join('; ')}.';
+  }
+
+  /// Ranks scored items by their total, highest first. Stable for equal totals
+  /// (uses a stable insertion sort so input order is preserved on ties).
+  List<T> rank<T>(List<T> items, double Function(T) totalOf) {
+    final sorted = [...items];
+    for (var i = 1; i < sorted.length; i++) {
+      final current = sorted[i];
+      var j = i - 1;
+      while (j >= 0 && totalOf(sorted[j]) < totalOf(current)) {
+        sorted[j + 1] = sorted[j];
+        j--;
+      }
+      sorted[j + 1] = current;
+    }
+    return sorted;
   }
 }
