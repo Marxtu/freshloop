@@ -52,6 +52,27 @@ class HomeScreen extends StatelessWidget {
                 },
               ),
             ),
+            Positioned(
+              top: 0, right: 0,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Row(children: [
+                    IconButton.filledTonal(
+                      icon: const Icon(Icons.history),
+                      tooltip: 'Run history',
+                      onPressed: () => context.push('/history'),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton.filledTonal(
+                      icon: const Icon(Icons.favorite),
+                      tooltip: 'Favourite routes',
+                      onPressed: () => context.push('/favorites'),
+                    ),
+                  ]),
+                ),
+              ),
+            ),
           ],
         ),
       ),
