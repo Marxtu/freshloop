@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:freshloop/data/routing/route_geometry.dart';
@@ -18,5 +19,19 @@ void main() {
     final all = await repo.all();
     expect(all.length, 2);
     expect(all.first.distanceM, 2000); // newest first
+  });
+
+  test('skips a corrupt entry instead of failing the whole history', () async {
+    SharedPreferences.setMockInitialValues({
+      'run_history_v1': [
+        'not valid json',
+        jsonEncode(const RunRecord(points: [], distanceM: 1500, durationS: 450).toJson()),
+      ],
+    });
+    final repo = SharedPrefsRunHistoryRepository(await SharedPreferences.getInstance());
+
+    final all = await repo.all();
+    expect(all.length, 1);
+    expect(all.first.distanceM, 1500);
   });
 }

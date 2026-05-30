@@ -16,11 +16,15 @@ class SharedPrefsRunHistoryRepository implements RunHistoryRepository {
   @override
   Future<List<RunRecord>> all() async {
     final raw = _prefs.getStringList(_key) ?? const [];
-    return raw
-        .map((s) => RunRecord.fromJson(jsonDecode(s) as Map<String, dynamic>))
-        .toList()
-        .reversed
-        .toList();
+    final records = <RunRecord>[];
+    for (final s in raw) {
+      try {
+        records.add(RunRecord.fromJson(jsonDecode(s) as Map<String, dynamic>));
+      } catch (_) {
+        // Skip a corrupt or legacy entry rather than failing the whole list.
+      }
+    }
+    return records.reversed.toList();
   }
 
   @override

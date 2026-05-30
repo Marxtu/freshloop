@@ -20,9 +20,20 @@ class FavoritesScreen extends StatelessWidget {
               itemBuilder: (context, i) {
                 final ScoredRoute r = routes[i];
                 return ListTile(
+                  isThreeLine: true,
                   title: Text('${r.score.total.toStringAsFixed(0)} · ${(r.geometry.distanceM / 1000).toStringAsFixed(1)} km'),
-                  subtitle: Text(r.score.explanation),
-                  trailing: TierBadge(axis: 'Air', tier: r.score.air.tier),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(r.score.explanation),
+                      const SizedBox(height: 6),
+                      Wrap(spacing: 6, children: [
+                        TierBadge(axis: 'Air', tier: r.score.air.tier),
+                        TierBadge(axis: 'Hills', tier: r.score.hills.tier),
+                        TierBadge(axis: 'Scenery', tier: r.score.scenery.tier),
+                      ]),
+                    ],
+                  ),
                   onTap: () => context.push('/detail', extra: r),
                 );
               },
