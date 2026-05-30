@@ -1,0 +1,49 @@
+# ── Attachments (course material drop dir; large PDFs/zip, not project source) ──
+.cc-connect/
+
+# ── Secrets / API keys (NEVER commit — see design doc §13.7) ──
+.env
+.env.*
+!.env.example
+**/secrets.dart
+**/secrets.json
+lib/config/keys.dart
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+firebase_options.dart
+
+# ── Flutter / Dart ──
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+pubspec.lock
+*.iml
+.idea/
+.vscode/
+
+# ── Android ──
+android/.gradle/
+android/local.properties
+android/key.properties
+*.keystore
+*.jks
+android/app/debug/
+android/app/profile/
+android/app/release/
+
+# ── iOS / macOS ──
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/flutter_export_environment.sh
+**/DerivedData/
+.DS_Store
+
+# ── Misc ──
+*.log
+coverage/
