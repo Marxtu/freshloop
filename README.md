@@ -38,6 +38,13 @@ Milano, Prof. Luciano Baresi).
 </p>
 <p align="center"><em>Accounts (M5) — <b>sign in / create account</b> → <b>run history</b> and <b>favourite routes</b>, synced to Firebase under <code>/users/&lt;uid&gt;</code> and isolated per user by Firestore security rules (with on-device fallback when offline/unconfigured).</em></p>
 
+<p align="center">
+  <img src="docs/screenshots/history-v2.png" alt="Run history — each past run shows its date and is tappable" width="232">
+  &nbsp;
+  <img src="docs/screenshots/run-detail-v1.png" alt="Run details — a past run's trail on a map with full stats" width="232">
+</p>
+<p align="center"><em>Openable run history — each past run shows <b>the date it was run</b> and is tappable; opening it shows the <b>trail on a map</b> with full stats (distance / time / pace).</em></p>
+
 ### Multi-device (tablet / landscape)
 
 <p align="center">
@@ -80,6 +87,20 @@ built incrementally across reviewed PRs, and **released as v1.0.0** (Android APK
 - **Openable run history** — tap any past run to see its **trail on a map**, full stats (distance / time / pace), and **the date it was run** (runs now store a start timestamp).
 - **Correct Android back** — navigating into a route now stacks screens, so the system Back button returns to the previous screen instead of quitting the app.
 - **Robustness** — a clear "API key missing — build with `--dart-define-from-file=secrets.json`" error instead of a cryptic ORS 401; the home sheet is width-capped/centred on wide screens.
+
+## How route generation works
+
+<p align="center">
+  <img src="docs/screenshots/route-gen-flow.png" alt="Route-generation data flow: generate candidates via OpenRouteService → enrich with Open-Meteo AQI and OSM Overpass greenery → score on three axes → rank best-first" width="720">
+</p>
+
+FreshLoop doesn't hand-roll pathfinding — the loop **geometry** is delegated to OpenRouteService's
+round-trip routing. The original part is the **orchestration**: for each of three seeds it requests a
+*differently-shaped* loop of roughly the target length, **enriches** each candidate with live data
+(Open-Meteo AQI, OSM Overpass greenery, and the route's own ascent), **scores** it on three axes, and
+**ranks** the candidates best-first for the comparison screen. Enrichment failures degrade to neutral
+values so a route is still scored; only a routing failure stops generation. See
+[`lib/services/route_generator.dart`](lib/services/route_generator.dart).
 
 ## How route scoring works
 
