@@ -18,6 +18,7 @@ void main() {
               {
                 'id': '2',
                 'is_pano': true, // 360° panorama listed first…
+                'thumb_original_url': 'https://img/2_original.jpg',
                 'thumb_2048_url': 'https://img/2_2048.jpg',
                 'thumb_1024_url': 'https://img/2_1024.jpg',
                 'computed_geometry': {'coordinates': [13.39, 52.52]},
@@ -42,13 +43,15 @@ void main() {
       expect(photos.first.url, 'https://img/1_1024.jpg'); // perspective first, 1024 preferred
       expect(photos.first.isPano, isFalse);
       expect(photos[1].isPano, isTrue); // panorama sorted last
-      // the viewer lazy-loads a high-res image; panorama exposes its 2048px URL
-      expect(photos[1].fullUrl, 'https://img/2_2048.jpg');
-      // a perspective shot without a 2048px URL falls back to its 1024px thumb
-      expect(photos.first.fullUrl, 'https://img/1_1024.jpg');
+      // a panorama wraps the whole sphere, so it exposes the ORIGINAL full-res
+      // image for the viewer (2048px is still too soft at 360°)
+      expect(photos[1].fullUrl, 'https://img/2_original.jpg');
+      // a perspective shot is crisp at 2048px and uses that (no heavy original)
+      expect(photos.first.fullUrl, 'https://img/1_1024.jpg'); // (no 2048 in fixture → 1024)
       expect(photos.first.source, PhotoSource.mapillary);
       expect(captured.headers['Authorization'], 'OAuth MLY|x|y');
-      // requests the 2048px field so the full-screen viewer can render sharp
+      // requests the original + 2048px fields so the full-screen viewer is sharp
+      expect(captured.url.queryParameters['fields'], contains('thumb_original_url'));
       expect(captured.url.queryParameters['fields'], contains('thumb_2048_url'));
       // Mapillary bbox order is west,south,east,north
       expect(captured.url.queryParameters['bbox'], '13.3,52.5,13.4,52.6');

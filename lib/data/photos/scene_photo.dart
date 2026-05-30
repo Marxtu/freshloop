@@ -35,15 +35,21 @@ class ScenePhoto {
     final coords = ((json['computed_geometry'] as Map<String, dynamic>?)?['coordinates']
             as List?) ??
         const [0, 0];
+    final isPano = json['is_pano'] == true;
     return ScenePhoto(
       // Prefer the crisp 1024px thumb; fall back to 256 if absent.
       url: (json['thumb_1024_url'] ?? json['thumb_256_url']) as String,
-      // High-res for the viewer (2048 → falls back to 1024).
-      fullUrl: (json['thumb_2048_url'] ?? json['thumb_1024_url']) as String?,
+      // High-res for the full-screen viewer. A 360° panorama is wrapped across
+      // the whole sphere, so even 2048px looks soft (~5.7 px/°) — use the
+      // original full-res equirectangular image. Perspective shots are crisp at
+      // 2048px, so they don't need the heavier original.
+      fullUrl: (isPano
+              ? (json['thumb_original_url'] ?? json['thumb_2048_url'] ?? json['thumb_1024_url'])
+              : (json['thumb_2048_url'] ?? json['thumb_1024_url'])) as String?,
       source: PhotoSource.mapillary,
       lng: (coords[0] as num).toDouble(),
       lat: (coords[1] as num).toDouble(),
-      isPano: json['is_pano'] == true,
+      isPano: isPano,
     );
   }
 
