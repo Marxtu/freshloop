@@ -93,7 +93,22 @@ class _ParamsSheetState extends State<ParamsSheet> {
         Expanded(
           child: Slider(value: value, max: 3, divisions: 3, onChanged: onChanged),
         ),
+        SizedBox(
+          width: 40,
+          child: Text(
+            _weightLabel(value),
+            textAlign: TextAlign.end,
+            style: Theme.of(context).textTheme.labelSmall,
+          ),
+        ),
       ],
     );
+  }
+
+  static String _weightLabel(double value) {
+    if (value <= 0) return 'off';
+    if (value <= 1) return 'low';
+    if (value <= 2) return 'med';
+    return 'high';
   }
 }
