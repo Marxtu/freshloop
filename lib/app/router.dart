@@ -3,6 +3,8 @@ import '../domain/models/scored_route.dart';
 import '../features/home/home_screen.dart';
 import '../features/candidates/candidates_screen.dart';
 import '../features/detail/route_detail_screen.dart';
+import '../features/tracking/tracking_screen.dart';
+import '../services/location_source.dart';
 import 'dependencies.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -14,6 +16,13 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => RouteDetailScreen(
         route: state.extra! as ScoredRoute,
         photoService: buildPhotoService(),
+      ),
+    ),
+    GoRoute(
+      path: '/tracking',
+      builder: (context, state) => TrackingScreen(
+        locationSource: const GeolocatorLocationSource(),
+        planned: state.extra as ScoredRoute?,
       ),
     ),
   ],
