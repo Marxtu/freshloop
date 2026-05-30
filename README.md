@@ -63,7 +63,7 @@ inspired by the WHO assessment rubric — so the score is transparent, not a bla
 - [x] **M2** — External data layer: routing (OpenRouteService) + geocoding (Nominatim) + air quality (Open-Meteo) + greenery (OSM Overpass) + photos (Mapillary, Wikimedia), all behind injectable, fully mock-tested clients
 - [x] **M3.1** — Route-generation engine: `RouteGenerator` (orchestrates clients + scorer into ranked candidates) + `RouteGenCubit`
 - [x] **M3.2** — Route-generation UI: map-forward home, params sheet, candidate-comparison cards (Theme A)
-- [ ] **M3.3** — Route detail: map + elevation chart + AQI/greenery badges + scenery photo carousel
+- [x] **M3.3** — Route detail: map + elevation chart + AQI/greenery badges + scenery photo carousel
 - [ ] **M4** — Live GPS run tracking + post-run summary
 - [ ] **M5** — Firebase auth/storage, history, favorites, profile
 - [ ] **M6** — Multi-device adaptation, polish, and integration tests
