@@ -69,3 +69,10 @@ flutter run         # on a device/emulator, or: flutter run -d chrome
 
 API keys are never committed. Copy the `.example` templates to local config (gitignored).
 See the design doc §13.7.
+
+To run against live APIs, copy the template to a gitignored `secrets.json`, fill in your keys, and pass it at run/build time:
+
+```bash
+cp secrets.example.json secrets.json
+flutter run --dart-define-from-file=secrets.json
+```
