@@ -12,7 +12,16 @@ import 'photo_carousel.dart';
 class RouteDetailScreen extends StatefulWidget {
   final ScoredRoute route;
   final PhotoService photoService;
-  const RouteDetailScreen({super.key, required this.route, required this.photoService});
+
+  /// Initial height of the detail sheet as a fraction of the screen.
+  final double initialSheetSize;
+
+  const RouteDetailScreen({
+    super.key,
+    required this.route,
+    required this.photoService,
+    this.initialSheetSize = 0.42,
+  });
 
   @override
   State<RouteDetailScreen> createState() => _RouteDetailScreenState();
@@ -40,7 +49,7 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
             child: SafeArea(child: BackButton(onPressed: () => Navigator.of(context).maybePop())),
           ),
           DraggableScrollableSheet(
-            initialChildSize: 0.42,
+            initialChildSize: widget.initialSheetSize,
             minChildSize: 0.2,
             maxChildSize: 0.9,
             builder: (context, controller) => Container(
