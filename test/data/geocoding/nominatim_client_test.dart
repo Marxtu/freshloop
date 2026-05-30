@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:freshloop/data/api_exception.dart';
 import 'package:freshloop/data/geocoding/geo_place.dart';
 import 'package:freshloop/data/geocoding/nominatim_client.dart';
 
@@ -35,6 +36,12 @@ void main() {
       final mock = MockClient((req) async => http.Response('[]', 200));
       final client = NominatimClient(userAgent: 'ua', client: mock);
       expect(await client.search('nowhere-xyz'), isNull);
+    });
+
+    test('throws ApiException on non-200', () async {
+      final mock = MockClient((req) async => http.Response('rate limited', 429));
+      final client = NominatimClient(userAgent: 'ua', client: mock);
+      expect(() => client.search('Berlin'), throwsA(isA<ApiException>()));
     });
   });
 }
