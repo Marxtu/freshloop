@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import '../data/routing/route_geometry.dart';
 
 /// A geographic bounding box (used for area queries like Overpass).
@@ -49,4 +51,17 @@ List<RoutePoint> subsample(List<RoutePoint> points, int max) {
     out.add(points[(i * step).round()]);
   }
   return out;
+}
+
+/// Great-circle distance between two points, in metres (Haversine).
+double haversineMeters(RoutePoint a, RoutePoint b) {
+  const earthRadiusM = 6371000.0;
+  double rad(double deg) => deg * math.pi / 180.0;
+  final dLat = rad(b.lat - a.lat);
+  final dLng = rad(b.lng - a.lng);
+  final lat1 = rad(a.lat);
+  final lat2 = rad(b.lat);
+  final h = math.sin(dLat / 2) * math.sin(dLat / 2) +
+      math.cos(lat1) * math.cos(lat2) * math.sin(dLng / 2) * math.sin(dLng / 2);
+  return earthRadiusM * 2 * math.atan2(math.sqrt(h), math.sqrt(1 - h));
 }
