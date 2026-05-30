@@ -16,15 +16,18 @@ Milano, Prof. Luciano Baresi).
 <p align="center">
   <img src="docs/screenshots/m1-home.png" alt="FreshLoop home screen (M1 foundation)" width="260">
 </p>
-<p align="center"><em>M1 — home shell with the Material 3 theme. The route-generation flow, map, and tracking screens arrive in M3; more screenshots will be added as milestones ship.</em></p>
+<p align="center"><em>Home shell (Material 3 theme). M2 added the external data layer behind the scenes — no UI change yet; the route-generation flow, map, and tracking screens (and more screenshots) arrive in M3.</em></p>
 
 ## Status
 
-**M1 — Foundation + scoring core: complete.** App shell (Material 3 + `go_router`) and a
-fully unit-tested, pure-Dart route-scoring engine. 25 tests passing, static analysis clean.
+**M2 — External data layer: complete.** On top of M1 (app shell + pure-Dart scoring engine),
+the full beyond-Firebase data stack is built and mock-tested: routing (OpenRouteService),
+geocoding (Nominatim), air quality (Open-Meteo), greenery (OSM Overpass), and photos
+(Mapillary, Wikimedia). **51 tests passing**, static analysis clean. The data layer is not
+yet wired into the UI — that happens in M3, which adds the first real screens.
 
-Latest build: **[v0.1.0-m1 release](https://github.com/Marxtu/freshloop/releases/tag/v0.1.0-m1)**
-— `freshloop-0.1.0-m1-arm64.apk` (arm64, debug-signed test build).
+Latest build: **[v0.2.0-m2 release](https://github.com/Marxtu/freshloop/releases/tag/v0.2.0-m2)**
+— `freshloop-0.2.0-m2-arm64.apk` (arm64, debug-signed test build; renders the M1 shell, since M2 added no UI).
 
 ## How route scoring works
 
