@@ -10,7 +10,7 @@ class FreshLoopApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'FreshLoop',
-      theme: buildFreshLoopTheme(),
+      theme: freshLoopTheme,
       routerConfig: appRouter,
       debugShowCheckedModeBanner: false,
     );
