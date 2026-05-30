@@ -31,9 +31,10 @@ void main() {
       expect(g.scenicCount, 1);
       expect(captured.method, 'POST');
       expect(captured.headers['User-Agent'], 'FreshLoop/0.1 test');
-      // bbox order in the query body is south,west,north,east
-      expect(captured.body, contains('52.5,13.3,52.6,13.4'));
-      expect(captured.body, contains('[out:json]'));
+      // The query is sent form-encoded; decode it back before asserting on intent.
+      final sentQuery = Uri.splitQueryString(captured.body)['data']!;
+      expect(sentQuery, contains('52.5,13.3,52.6,13.4')); // bbox order: south,west,north,east
+      expect(sentQuery, contains('[out:json]'));
     });
 
     test('throws ApiException on non-200', () async {

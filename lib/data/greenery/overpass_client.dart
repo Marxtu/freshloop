@@ -35,8 +35,8 @@ class OverpassClient {
         ');out tags;';
     final resp = await _client.post(
       _endpoint,
-      headers: {'User-Agent': userAgent, 'Content-Type': 'application/x-www-form-urlencoded'},
-      body: 'data=$query',
+      headers: {'User-Agent': userAgent},
+      body: {'data': query},
     );
     if (resp.statusCode != 200) {
       throw ApiException('Overpass', resp.statusCode, resp.body);
