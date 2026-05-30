@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../app/theme.dart';
 import '../../data/photos/scene_photo.dart';
 import '../../domain/models/scored_route.dart';
@@ -101,9 +102,9 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
                   ),
                   const SizedBox(height: 16),
                   FilledButton.icon(
-                    onPressed: null, // live tracking arrives in M4
+                    onPressed: () => context.push('/tracking', extra: widget.route),
                     icon: const Icon(Icons.play_arrow),
-                    label: const Text('Start run (M4)'),
+                    label: const Text('Start run'),
                   ),
                 ],
               ),
