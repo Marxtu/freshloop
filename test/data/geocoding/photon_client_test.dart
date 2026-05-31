@@ -84,6 +84,27 @@ void main() {
     });
   });
 
+  group('PhotonClient.reverse', () {
+    test('reverse-geocodes a coordinate to the nearest named place', () async {
+      late http.Request captured;
+      final mock = MockClient((req) async {
+        captured = req;
+        return http.Response(_fc([_feat(9.19, 45.46, {'name': 'Parco Sempione', 'city': 'Milan'})]), 200);
+      });
+      final place = await PhotonClient(userAgent: 'ua', client: mock).reverse(45.46, 9.19);
+      expect(place, isNotNull);
+      expect(place!.label, 'Parco Sempione, Milan');
+      expect(captured.url.path, '/reverse');
+      expect(captured.url.queryParameters['lat'], '45.46');
+      expect(captured.url.queryParameters['lon'], '9.19');
+    });
+
+    test('returns null when nothing is found nearby', () async {
+      final mock = MockClient((req) async => http.Response(_fc(const []), 200));
+      expect(await PhotonClient(userAgent: 'ua', client: mock).reverse(0, 0), isNull);
+    });
+  });
+
   group('PhotonClient.search', () {
     test('returns the first match, or null when empty', () async {
       final hit = MockClient((req) async => http.Response(

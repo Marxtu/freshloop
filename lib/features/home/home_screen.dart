@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
 import '../../app/app_config.dart';
 import '../../data/geocoding/geo_place.dart';
 import '../../data/geocoding/photon_client.dart';
@@ -42,6 +43,10 @@ class _HomeScreenState extends State<HomeScreen> {
   // "distance from you" hints in the suggestion list.
   double? _myLat;
   double? _myLng;
+  // The map's current centre, tracked as the user pans, so search biases to
+  // what they're looking at ("search this area"). Null until the map reports.
+  double? _mapLat;
+  double? _mapLng;
   bool _locating = false;
   bool _searching = false;
   bool _located = false;
@@ -66,14 +71,15 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onQueryChanged(String raw) {
     final q = raw.trim();
     _debounce?.cancel();
-    if (q.length < 3) {
+    if (q.length < 2) {
       if (_suggestions.isNotEmpty) setState(() => _suggestions = const []);
       return;
     }
-    _debounce = Timer(const Duration(milliseconds: 400), () async {
+    _debounce = Timer(const Duration(milliseconds: 250), () async {
+      final lat = _mapLat ?? _lat, lng = _mapLng ?? _lng; // bias to what's on screen
       List<GeoPlace> r;
       try {
-        r = await _geocoder.suggest(q, lat: _lat, lng: _lng);
+        r = await _geocoder.suggest(q, lat: lat, lng: lng);
       } catch (_) {
         r = const [];
       }
@@ -91,6 +97,37 @@ class _HomeScreenState extends State<HomeScreen> {
       _located = true;
       _suggestions = const [];
     });
+  }
+
+  // Track the map centre as the user pans (no rebuild — just remembered for the
+  // next search, so results follow "this area").
+  void _onMapMoved(LatLng c) {
+    _mapLat = c.latitude;
+    _mapLng = c.longitude;
+  }
+
+  /// Long-press anywhere on the map to start a run from there. Sets the point
+  /// immediately and reverse-geocodes a label in the background (best effort).
+  Future<void> _setStartFromMap(LatLng p) async {
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _lat = p.latitude;
+      _lng = p.longitude;
+      _located = true;
+      _suggestions = const [];
+    });
+    GeoPlace? place;
+    try {
+      place = await _geocoder.reverse(p.latitude, p.longitude);
+    } catch (_) {
+      place = null;
+    }
+    if (!mounted) return;
+    final label = place?.label;
+    if (label != null && label.isNotEmpty) _searchController.text = _short(label);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(label != null && label.isNotEmpty ? 'Start: ${_short(label)}' : 'Start set on the map'),
+    ));
   }
 
   Future<void> _locate({bool announce = false}) async {
@@ -128,9 +165,10 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _searching = true);
     GeoPlace? place;
     try {
-      // Nearby-first (same as the dropdown), so submitting "Carrefour" picks one
-      // near the user instead of a global match in another country.
-      final r = await _geocoder.suggest(q, lat: _lat, lng: _lng, limit: 1);
+      // Bias to what's on screen (same as the dropdown), so submitting
+      // "Carrefour" picks one near the user, not a global match.
+      final lat = _mapLat ?? _lat, lng = _mapLng ?? _lng;
+      final r = await _geocoder.suggest(q, lat: lat, lng: lng, limit: 1);
       place = r.isEmpty ? null : r.first;
     } catch (_) {
       place = null;
@@ -180,6 +218,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 key: ValueKey('$_lat,$_lng'),
                 points: const [],
                 currentLocation: RoutePoint(lat: _lat, lng: _lng),
+                onCenterChanged: _onMapMoved,
+                onLongPress: _setStartFromMap,
               ),
             ),
             _sheet(context),
@@ -379,6 +419,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   contentPadding: EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
+            ),
+            ValueListenableBuilder<TextEditingValue>(
+              valueListenable: _searchController,
+              builder: (_, value, _) => value.text.isEmpty
+                  ? const SizedBox.shrink()
+                  : IconButton(
+                      icon: const Icon(Icons.close),
+                      tooltip: 'Clear',
+                      onPressed: () {
+                        _debounce?.cancel();
+                        _searchController.clear();
+                        setState(() => _suggestions = const []);
+                      },
+                    ),
             ),
             _locating
                 ? const Padding(

@@ -10,7 +10,22 @@ class RouteMap extends StatelessWidget {
   final List<RoutePoint> points;
   final bool interactive;
   final RoutePoint? currentLocation;
-  const RouteMap({super.key, required this.points, this.interactive = true, this.currentLocation});
+
+  /// Called with the map centre whenever the camera moves (used to bias search
+  /// to what the user is looking at — "search this area"). Null on previews.
+  final void Function(LatLng center)? onCenterChanged;
+
+  /// Called when the user long-presses the map (used to drop a start point).
+  final void Function(LatLng point)? onLongPress;
+
+  const RouteMap({
+    super.key,
+    required this.points,
+    this.interactive = true,
+    this.currentLocation,
+    this.onCenterChanged,
+    this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +42,9 @@ class RouteMap extends StatelessWidget {
         interactionOptions: InteractionOptions(
           flags: interactive ? InteractiveFlag.all : InteractiveFlag.none,
         ),
+        onLongPress: onLongPress == null ? null : (_, point) => onLongPress!(point),
+        onPositionChanged:
+            onCenterChanged == null ? null : (camera, _) => onCenterChanged!(camera.center),
       ),
       children: [
         TileLayer(

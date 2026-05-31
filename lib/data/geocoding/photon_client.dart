@@ -46,6 +46,23 @@ class PhotonClient {
     return r.isEmpty ? null : r.first;
   }
 
+  /// Reverse-geocodes a coordinate to the nearest named place (for a map
+  /// long-press → "start here"). Returns null when nothing is found.
+  Future<GeoPlace?> reverse(double lat, double lng) async {
+    final uri = Uri.https('photon.komoot.io', '/reverse', {
+      'lat': '$lat',
+      'lon': '$lng',
+      'lang': 'en',
+    });
+    final resp = await _client.get(uri, headers: {'User-Agent': userAgent});
+    if (resp.statusCode != 200) {
+      throw ApiException('Photon', resp.statusCode, resp.body);
+    }
+    final features = ((jsonDecode(resp.body) as Map<String, dynamic>)['features'] as List?) ?? const [];
+    if (features.isEmpty) return null;
+    return _fromFeature(features.first as Map<String, dynamic>);
+  }
+
   /// Photon returns GeoJSON; `geometry.coordinates` is `[lng, lat]`.
   static GeoPlace? _fromFeature(Map<String, dynamic> f) {
     final coords = (f['geometry'] as Map<String, dynamic>?)?['coordinates'] as List?;
