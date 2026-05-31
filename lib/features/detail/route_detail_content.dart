@@ -42,7 +42,7 @@ class RouteDetailContent extends StatelessWidget {
       controller: controller,
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       children: [
-        if (leading != null) leading!,
+        ?leading,
         Row(
           children: [
             Text(s.total.toStringAsFixed(0),
