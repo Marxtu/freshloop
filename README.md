@@ -29,6 +29,11 @@ Milano, Prof. Luciano Baresi).
 </p>
 <p align="center"><em>Live run (M4) — <b>tracking</b> (the map follows you with live distance/time/pace + a current-location dot) → <b>post-run summary</b> (trail, stats, planned-vs-actual, share).</em></p>
 
+<p align="center">
+  <img src="docs/screenshots/accounts.png" alt="Sign-in, run history and favourite routes" width="760">
+</p>
+<p align="center"><em>Accounts (M5) — <b>sign in / create account</b> → <b>run history</b> and <b>favourite routes</b>, synced to Firebase under <code>/users/&lt;uid&gt;</code> and isolated per user by Firestore security rules (with on-device fallback when offline/unconfigured).</em></p>
+
 ### Visual direction
 
 Look-&-feel is grounded in the course's design principles. We evaluated three directions and chose **A**:
