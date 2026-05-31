@@ -14,11 +14,11 @@ Milano, Prof. Luciano Baresi).
 ## Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/home-v2.png" alt="Home — map + params sheet" width="232">
+  <img src="docs/screenshots/home-v3.png" alt="Home — map + params sheet" width="232">
   &nbsp;
-  <img src="docs/screenshots/candidates-v2.png" alt="Candidates — ranked route cards" width="232">
+  <img src="docs/screenshots/candidates-v3.png" alt="Candidates — ranked route cards" width="232">
   &nbsp;
-  <img src="docs/screenshots/detail.png" alt="Route detail — map, elevation, photos" width="232">
+  <img src="docs/screenshots/detail-v3.png" alt="Route detail — map, elevation, photos" width="232">
 </p>
 <p align="center"><em>The route-generation flow (M3) — <b>home</b> (map-forward "design your run" sheet) → <b>candidates</b> (ranked cards: route preview, score, per-axis badges) → <b>route detail</b> (map loop, elevation profile, along-the-way photos). Theme A: Sora / DM Sans, trail-green + amber.</em></p>
 
@@ -30,9 +30,11 @@ Milano, Prof. Luciano Baresi).
 <p align="center"><em>Live run (M4) — <b>tracking</b> (the map follows you with live distance/time/pace + a current-location dot) → <b>post-run summary</b> (trail, stats, planned-vs-actual, share).</em></p>
 
 <p align="center">
-  <img src="docs/screenshots/accounts.png" alt="Sign-in, run history and favourite routes" width="760">
+  <img src="docs/screenshots/signin.png" alt="Branded sign-in / create account" width="232">
+  &nbsp;
+  <img src="docs/screenshots/favourites.png" alt="Favourite routes" width="232">
 </p>
-<p align="center"><em>Accounts (M5) — <b>sign in / create account</b> → <b>run history</b> and <b>favourite routes</b>, synced to Firebase under <code>/users/&lt;uid&gt;</code> and isolated per user by Firestore security rules (with on-device fallback when offline/unconfigured).</em></p>
+<p align="center"><em>Accounts (M5) — <b>sign in / create account</b> → <b>favourite routes</b> (and run history), synced to Firebase under <code>/users/&lt;uid&gt;</code> and isolated per user by Firestore security rules (with on-device fallback when offline/unconfigured).</em></p>
 
 ### Visual direction
 

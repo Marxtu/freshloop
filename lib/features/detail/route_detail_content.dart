@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../app/theme.dart';
 import '../../data/photos/scene_photo.dart';
 import '../../domain/models/scored_route.dart';
-import '../common/tier_badge.dart';
+import '../common/axis_stat.dart';
+import '../common/score_gauge.dart';
 import 'elevation_chart.dart';
 import 'photo_carousel.dart';
 
@@ -44,29 +44,37 @@ class RouteDetailContent extends StatelessWidget {
       children: [
         ?leading,
         Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(s.total.toStringAsFixed(0),
-                style: t.textTheme.headlineLarge?.copyWith(color: AppColors.seed)),
-            const SizedBox(width: 6),
-            Text('score', style: t.textTheme.bodySmall),
-            const Spacer(),
-            Flexible(
-              child: Text(
-                '$km km · ${route.geometry.ascentM.toStringAsFixed(0)} m up',
-                style: t.textTheme.bodyMedium,
-                textAlign: TextAlign.end,
-                overflow: TextOverflow.ellipsis,
+            ScoreGauge(score: s.total, size: 84),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Your route', style: t.textTheme.titleMedium),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Icon(Icons.straighten_rounded, size: 15, color: t.colorScheme.onSurfaceVariant),
+                      const SizedBox(width: 4),
+                      Text('$km km · ${route.geometry.ascentM.toStringAsFixed(0)} m up',
+                          style: t.textTheme.bodyMedium?.copyWith(color: t.colorScheme.onSurfaceVariant)),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(spacing: 6, runSpacing: 6, children: [
+                    AxisStat(axis: 'Air', tier: s.air.tier),
+                    AxisStat(axis: 'Hills', tier: s.hills.tier),
+                    AxisStat(axis: 'Scenery', tier: s.scenery.tier),
+                  ]),
+                ],
               ),
             ),
           ],
         ),
-        const SizedBox(height: 10),
-        Wrap(spacing: 6, children: [
-          TierBadge(axis: 'Air', tier: s.air.tier),
-          TierBadge(axis: 'Hills', tier: s.hills.tier),
-          TierBadge(axis: 'Scenery', tier: s.scenery.tier),
-        ]),
-        const SizedBox(height: 8),
+        const SizedBox(height: 16),
         Text(s.explanation, style: t.textTheme.bodyMedium),
         const SizedBox(height: 16),
         Text('Elevation', style: t.textTheme.titleMedium),
