@@ -38,7 +38,9 @@ class _SignInScreenState extends State<SignInScreen> {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-            child: Form(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Form(
               key: _formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -64,7 +66,10 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                   if (state.error != null) ...[
                     const SizedBox(height: 12),
-                    Text(state.error!, style: TextStyle(color: t.colorScheme.error)),
+                    Semantics(
+                      liveRegion: true,
+                      child: Text(state.error!, style: TextStyle(color: t.colorScheme.error)),
+                    ),
                   ],
                   const SizedBox(height: 20),
                   FilledButton(
@@ -80,6 +85,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                 ],
               ),
+            ),
             ),
           ),
         ),
