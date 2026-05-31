@@ -1,15 +1,22 @@
 # FreshLoop M5.2 — Going live (the remaining gated step)
 
+> **STATUS (M5.3, 2026-05-31): the runtime wiring is DONE.** Project
+> `freshloop-86034` is configured (`lib/firebase_options.dart` committed,
+> `android/app/google-services.json` generated, google-services Gradle plugin
+> applied). M5.3 turned on the M5.2 code: guarded `Firebase.initializeApp`, the
+> auth gate, the uid-scoped cloud repositories, and the sign-out action are all
+> implemented and tested. **Steps 1–4 and 6 below are DONE.** Only the two
+> console actions in step 5 remain — they require the project owner.
+
 > M5.2 built the auth layer (`AppUser`, `AuthRepository`, `AuthCubit`, `SignInScreen`)
 > and Firebase implementations (`FirebaseAuthRepository`, `FirestoreRunHistoryRepository`,
 > `FirestoreFavoritesRepository`), all **mock-tested** with `firebase_auth_mocks` and
-> `fake_cloud_firestore`. The running app was deliberately **left on M5.1 local storage**:
-> `main.dart`, `lib/app/router.dart`, and the existing parts of `lib/app/dependencies.dart`
-> are untouched, there is no call to `Firebase.initializeApp`, and there is no
-> `lib/firebase_options.dart`.
+> `fake_cloud_firestore`. M5.2 deliberately left the running app on M5.1 local storage;
+> **M5.3 wired it all in behind a `firebaseReady` flag** so the app still boots on local
+> storage whenever Firebase is unavailable (tests, web screenshots, fresh clones).
 >
-> This document captures exactly what is left to connect a real Firebase project, so the
-> switch is unambiguous when a project + credentials are available.
+> This document captures the connect-a-real-project steps; the code-side steps are now
+> implemented, with the remaining work being the owner-only console actions.
 
 ## Prerequisites
 
@@ -20,16 +27,22 @@
 
 ## Steps
 
-### 1. Generate `lib/firebase_options.dart`
+### 1. Generate `lib/firebase_options.dart` — DONE
 
-Run `flutterfire configure` (selects the project and platforms). This writes a
-**gitignored** `lib/firebase_options.dart` containing the platform options. Do **not**
-commit it — it carries project identifiers and is regenerated per environment.
+Run `flutterfire configure` (selects the project and platforms). This writes
+`lib/firebase_options.dart` (committed in M5.3 — Firebase client config is **not**
+secret per Google, and committing it lets a clean clone compile) plus the native
+`android/app/google-services.json` (kept **gitignored**; regenerate it via
+`flutterfire configure` for Android builds — `flutter test` and `flutter build web`
+do not need it). **To connect a different project, just re-run `flutterfire configure`**;
+it rewrites `firebase_options.dart`, `firebase.json`, and `google-services.json`.
 
-### 2. Initialise Firebase in `main()` (guarded, with a `firebaseReady` flag)
+### 2. Initialise Firebase in `main()` (guarded, with a `firebaseReady` flag) — DONE
 
-Make `main()` initialise Firebase inside a `try/catch` so the app still boots (on M5.1
-local storage) when no project/credentials are present:
+`main()` initialises Firebase inside a `try/catch` so the app still boots (on M5.1
+local storage) when no project/credentials are present. `firebaseReady` lives in
+`lib/app/dependencies.dart` (default `false`); `main()` sets it `true` only after a
+successful `Firebase.initializeApp`. Implemented as:
 
 ```dart
 import 'package:firebase_core/firebase_core.dart';
@@ -50,60 +63,70 @@ Future<void> main() async {
 }
 ```
 
-### 3. Add an `AuthGate` at the router root
+### 3. Add an `AuthGate` at the router root — DONE
 
-Provide an `AuthCubit` (built from `FirebaseAuthRepository(FirebaseAuth.instance)`) above
-the app, then gate the root on `AuthState.status`:
+Implemented as a go_router `redirect` rather than a wrapper widget. `lib/app/app.dart`
+runs in two modes: **local mode** (`!firebaseReady` and no injected `authRepository`) is
+exactly the M5.1 tree (no `AuthCubit`, no Firebase touched — keeps the smoke test green);
+**Firebase mode** (`firebaseReady`, or an `authRepository` is injected for tests) provides
+an `AuthCubit` above a single, stable `MaterialApp.router`. `appRouter` became
+`buildRouter()` (a function, so no Firebase singleton is read at library-load time). When
+the gate is enabled the `redirect` is driven by the in-scope `AuthCubit` state
+(`signedOut` → `/sign-in`; `signedIn` & at `/sign-in` → `/`; `unknown` → no redirect), and
+a `GoRouterRefreshStream` over the `AuthCubit.stream` re-runs the gate on each auth change.
+Reading the cubit (not `FirebaseAuth.instance`) lets the auth-gate widget test drive the
+gate with an injected fake, with no real Firebase. When `firebaseReady == false` and no
+fake is injected, the gate is skipped entirely (today's behaviour).
 
-- `AuthStatus.unknown` → a splash / loading screen,
-- `AuthStatus.signedOut` → `SignInScreen`,
-- `AuthStatus.signedIn` → the current `HomeScreen` (existing router).
+### 4. Swap the repositories in `dependencies.dart` when signed in — DONE
 
-When `firebaseReady == false`, skip the gate entirely and route straight to the current
-home so the app keeps working with no project.
-
-### 4. Swap the repositories in `dependencies.dart` when signed in
-
-Keep the M5.1 `SharedPrefs*` repositories as the fallback. When Firebase is ready and a
-user is signed in, build the cloud repositories scoped to the user id:
+`buildHistoryRepository()` / `buildFavoritesRepository()` in `lib/app/dependencies.dart`
+short-circuit on `firebaseReady` (so `FirebaseAuth.instance` is never read when Firebase is
+not ready) and return the cloud repository scoped to the signed-in uid, else the M5.1
+`SharedPrefs*` fallback. The app-wide `FavoritesCubit` provider is keyed on the uid (via
+`MaterialApp.router`'s `builder`) so it rebinds to the right repository on sign-in/out:
 
 ```dart
 RunHistoryRepository buildHistoryRepository() {
-  final uid = FirebaseAuth.instance.currentUser?.uid;
-  if (firebaseReady && uid != null) {
-    return FirestoreRunHistoryRepository(FirebaseFirestore.instance, uid);
-  }
-  return SharedPrefsRunHistoryRepository(appPrefs);
+  final uid = firebaseReady ? FirebaseAuth.instance.currentUser?.uid : null;
+  return uid != null
+      ? FirestoreRunHistoryRepository(FirebaseFirestore.instance, uid)
+      : SharedPrefsRunHistoryRepository(appPrefs);
 }
 
 FavoritesRepository buildFavoritesRepository() {
-  final uid = FirebaseAuth.instance.currentUser?.uid;
-  if (firebaseReady && uid != null) {
-    return FirestoreFavoritesRepository(FirebaseFirestore.instance, uid);
-  }
-  return SharedPrefsFavoritesRepository(appPrefs);
+  final uid = firebaseReady ? FirebaseAuth.instance.currentUser?.uid : null;
+  return uid != null
+      ? FirestoreFavoritesRepository(FirebaseFirestore.instance, uid)
+      : SharedPrefsFavoritesRepository(appPrefs);
 }
 ```
 
-(Note: the `/favorites` route currently builds its own repository via the
-`FavoritesCubit` wiring — route both history and favourites through these builders so the
-swap is centralised.)
+The `firebaseReady ? ... : null` short-circuit guarantees `FirebaseAuth.instance` is only
+read when Firebase is initialised. Both history and favourites now route through these
+builders, so the swap is centralised.
 
-### 5. Console + rules
+### 5. Console + rules — REMAINING (project owner)
 
-- Authentication → Sign-in method → enable **Email/Password**.
-- Firestore database is created (prerequisite).
-- Deploy the security rules in `firestore.rules` (at repo root):
+These two actions are not code; they must be done once in the Firebase console / CLI by
+the project owner before sign-in and cloud writes work end-to-end:
+
+- **Authentication → Sign-in method → enable Email/Password.** Until this is on, sign-in
+  surfaces "Email sign-in is not enabled for this app yet" (the `operation-not-allowed`
+  message in `FirebaseAuthRepository`).
+- **Deploy the security rules** in `firestore.rules` (at repo root):
   `firebase deploy --only firestore:rules`
   The rules restrict `/users/{userId}/**` to the owning, authenticated user — matching the
   `/users/{uid}/runs/{autoId}` and `/users/{uid}/favorites/{routeKey}` data model the
-  Firestore repositories write to.
+  Firestore repositories write to. (The Firestore database itself is already created.)
 
-### 6. A sign-out action in the UI
+### 6. A sign-out action in the UI — DONE
 
-Add a sign-out entry somewhere reachable (e.g. a profile/menu item on the home screen)
-that calls `context.read<AuthCubit>().signOut()`. The `AuthGate` then returns the user to
-`SignInScreen` automatically via the auth state stream.
+`HomeScreen` shows a sign-out `IconButton` (`Icons.logout`) in the top-right nav row,
+rendered only in Firebase mode (a nullable `context.read<AuthCubit?>()` returns `null` in
+local mode, so the button is hidden there). It calls `context.read<AuthCubit>().signOut()`;
+the gate's `refreshListenable` then returns the user to `SignInScreen` automatically via
+the auth-state stream.
 
 ## Verification after going live
 

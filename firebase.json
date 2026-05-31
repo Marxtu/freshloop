@@ -1,5 +1,1 @@
-{
-  "firestore": {
-    "rules": "firestore.rules"
-  }
-}
+{"firestore":{"rules":"firestore.rules"},"flutter":{"platforms":{"android":{"default":{"projectId":"freshloop-86034","appId":"1:234827970693:android:b4d94f982a3ecfa52cd1ec","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"freshloop-86034","configurations":{"android":"1:234827970693:android:b4d94f982a3ecfa52cd1ec","web":"1:234827970693:web:96dfff40b70542862cd1ec"}}}}}}
