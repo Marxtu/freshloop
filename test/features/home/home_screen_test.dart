@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:freshloop/data/air/open_meteo_air_client.dart';
-import 'package:freshloop/data/geocoding/nominatim_client.dart';
+import 'package:freshloop/data/geocoding/photon_client.dart';
 import 'package:freshloop/data/greenery/overpass_client.dart';
 import 'package:freshloop/data/routing/ors_route_client.dart';
 import 'package:freshloop/data/routing/route_geometry.dart';
@@ -33,16 +33,25 @@ RouteGenerator _idleGenerator() => RouteGenerator(
       overpass: OverpassClient(userAgent: 'ua', client: MockClient((_) async => http.Response('{}', 200))),
     );
 
+// A Photon GeoJSON feature ([lng, lat] coordinates).
+Map<String, dynamic> _feat(double lng, double lat, Map<String, dynamic> props) => {
+      'type': 'Feature',
+      'geometry': {'type': 'Point', 'coordinates': [lng, lat]},
+      'properties': props,
+    };
+String _fc(List<Map<String, dynamic>> features) =>
+    jsonEncode({'type': 'FeatureCollection', 'features': features});
+
 void main() {
   testWidgets('autocomplete suggestions show a distance from the user', (tester) async {
-    // Geocoder returns two Milan places FAR-FIRST (~6 km then ~1 km) so the
+    // Photon returns two Milan places FAR-FIRST (~6 km then ~1 km) so the
     // distance sort has something to reorder.
-    final geocoder = NominatimClient(
+    final geocoder = PhotonClient(
       userAgent: 'ua',
       client: MockClient((req) async => http.Response(
-            jsonEncode([
-              {'lat': '45.50', 'lon': '9.25', 'display_name': 'Carrefour Express, Via Ponte, Milano'},
-              {'lat': '45.47', 'lon': '9.19', 'display_name': 'Carrefour, Via Soderini, Milano'},
+            _fc([
+              _feat(9.25, 45.50, {'name': 'Carrefour Express', 'street': 'Via Ponte', 'city': 'Milano'}),
+              _feat(9.19, 45.47, {'name': 'Carrefour', 'street': 'Via Soderini', 'city': 'Milano'}),
             ]),
             200,
           )),
@@ -57,7 +66,7 @@ void main() {
     await tester.pump(); // let the auto-locate fix resolve (sets the origin)
     await tester.pump(const Duration(milliseconds: 50));
 
-    await tester.enterText(find.byType(TextField), 'carrefour');
+    await tester.enterText(find.byType(TextField), 'carre');
     await tester.pump(); // register onChanged
     await tester.pump(const Duration(milliseconds: 450)); // fire the 400ms debounce
     for (var i = 0; i < 6; i++) {
@@ -76,18 +85,13 @@ void main() {
         lessThan(tester.getTopLeft(find.text('6.5 km')).dy));
   });
 
-  testWidgets('submitting the search (Enter) is nearby-biased, not global', (tester) async {
+  testWidgets('submitting the search (Enter) is location-biased, not global', (tester) async {
     final requests = <Uri>[];
-    final geocoder = NominatimClient(
+    final geocoder = PhotonClient(
       userAgent: 'ua',
       client: MockClient((req) async {
         requests.add(req.url);
-        return http.Response(
-          jsonEncode([
-            {'lat': '45.47', 'lon': '9.19', 'display_name': 'Carrefour, Milano'},
-          ]),
-          200,
-        );
+        return http.Response(_fc([_feat(9.19, 45.47, {'name': 'Carrefour', 'city': 'Milano'})]), 200);
       }),
     );
 
@@ -100,16 +104,16 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    await tester.enterText(find.byType(TextField), 'carrefour');
+    await tester.enterText(find.byType(TextField), 'carre');
     // Submit immediately — before the 400ms debounce fires, so the dropdown is
     // empty and the _search() path runs (the case that used to go global).
     await tester.testTextInput.receiveAction(TextInputAction.search);
     await tester.pump(const Duration(milliseconds: 50)); // resolve the search
 
     expect(requests, isNotEmpty);
-    // It must restrict to the user's box, not do a worldwide search.
-    expect(requests.first.queryParameters.containsKey('viewbox'), isTrue);
-    expect(requests.first.queryParameters['bounded'], '1');
+    // It must bias to the user's location, not do a worldwide search.
+    expect(requests.first.queryParameters['lat'], isNotNull);
+    expect(requests.first.queryParameters['lon'], isNotNull);
 
     // Flush the still-pending debounce timer so the test ends cleanly.
     await tester.pump(const Duration(milliseconds: 450));

@@ -7,9 +7,10 @@ class AppConfig {
   /// OpenRouteService API key (sent as the `Authorization` header).
   static const String orsApiKey = String.fromEnvironment('ORS_API_KEY');
 
-  /// Contact string used in the required Nominatim `User-Agent` header.
+  /// Contact string sent as the `User-Agent` for the OSM-based geocoders
+  /// (Photon for type-ahead; the policies ask for a descriptive agent).
   /// See https://operations.osmfoundation.org/policies/nominatim/
-  static const String nominatimUserAgent =
+  static const String geocoderUserAgent =
       String.fromEnvironment('NOMINATIM_USER_AGENT', defaultValue: 'FreshLoop/0.1 (course project)');
 
   /// Mapillary access token (sent as the `Authorization: OAuth <token>` header).

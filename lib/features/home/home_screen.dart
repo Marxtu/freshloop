@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../app/app_config.dart';
 import '../../data/geocoding/geo_place.dart';
-import '../../data/geocoding/nominatim_client.dart';
+import '../../data/geocoding/photon_client.dart';
 import '../../data/routing/route_geometry.dart';
 import '../../domain/format.dart';
 import '../../domain/geo.dart';
@@ -21,8 +21,8 @@ class HomeScreen extends StatefulWidget {
   /// Injectable for tests; production uses the real geolocator-backed source.
   final LocationSource locationSource;
 
-  /// Injectable for tests; defaults to the keyless Nominatim geocoder.
-  final NominatimClient? geocoder;
+  /// Injectable for tests; defaults to the keyless Photon (type-ahead) geocoder.
+  final PhotonClient? geocoder;
 
   const HomeScreen({super.key, this.locationSource = const GeolocatorLocationSource(), this.geocoder});
 
@@ -31,8 +31,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late final NominatimClient _geocoder =
-      widget.geocoder ?? NominatimClient(userAgent: AppConfig.nominatimUserAgent);
+  late final PhotonClient _geocoder =
+      widget.geocoder ?? PhotonClient(userAgent: AppConfig.geocoderUserAgent);
   final _searchController = TextEditingController();
 
   // Milan Duomo as a sensible fallback until GPS or a search picks a start.

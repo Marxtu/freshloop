@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:freshloop/data/air/open_meteo_air_client.dart';
-import 'package:freshloop/data/geocoding/nominatim_client.dart';
+import 'package:freshloop/data/geocoding/photon_client.dart';
 import 'package:freshloop/data/greenery/overpass_client.dart';
 import 'package:freshloop/data/photos/mapillary_client.dart';
 import 'package:freshloop/data/photos/wikimedia_client.dart';
@@ -28,9 +28,9 @@ Future<void> main() async {
     }
   }
 
-  await check('Nominatim geocode "Milano"', () async {
-    final p = await NominatimClient(userAgent: ua).search('Milano');
-    return p == null ? 'no result' : '${p.label.split(',').first} (${p.lat}, ${p.lng})';
+  await check('Photon type-ahead "Carre" near Milano', () async {
+    final r = await PhotonClient(userAgent: ua).suggest('Carre', lat: 45.464, lng: 9.190, limit: 3);
+    return r.isEmpty ? 'no result' : '${r.length} hits, first = ${r.first.label.split(',').first} (${r.first.lat}, ${r.first.lng})';
   });
   await check('ORS round-trip ~3km @ Milano', () async {
     final g = await OrsRouteClient(apiKey: ors).roundTrip(lat: 45.464, lng: 9.190, lengthM: 3000, seed: 3);
