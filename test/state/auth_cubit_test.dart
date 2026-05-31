@@ -62,4 +62,18 @@ void main() {
     expect(cubit.state.status, isNot(AuthStatus.signedIn));
     await cubit.close();
   });
+
+  test('sign-out clears the user from state, not just the status', () async {
+    final repo = _FakeAuth();
+    final cubit = AuthCubit(repo);
+    await cubit.signIn(email: 'a@b.com', password: 'pw');
+    await Future<void>.delayed(Duration.zero);
+    expect(cubit.state.user, isNotNull);
+
+    await cubit.signOut();
+    await Future<void>.delayed(Duration.zero);
+    expect(cubit.state.status, AuthStatus.signedOut);
+    expect(cubit.state.user, isNull); // regression: previously retained via copyWith
+    await cubit.close();
+  });
 }

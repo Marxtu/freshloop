@@ -112,3 +112,15 @@ that calls `context.read<AuthCubit>().signOut()`. The `AuthGate` then returns th
   `/users/{uid}/runs` and `/users/{uid}/favorites` in the Firestore console.
 - Sign out → returns to `SignInScreen`; sign in as a different user → sees only their own
   data (per-user isolation, enforced by both the path scoping and the rules).
+
+## Known caveats to handle at go-live
+
+- **`serverTimestamp()` + `orderBy('createdAt')` pending-write ordering.**
+  `FirestoreRunHistoryRepository.save` writes `createdAt: FieldValue.serverTimestamp()`.
+  In the real SDK, a doc read back *immediately* after `save` (before the server write
+  resolves) has a local `createdAt == null`, so a just-saved run can momentarily sort to
+  the bottom (or out of order) under `orderBy('createdAt', descending: true)` until the
+  server round-trip lands. The `fake_cloud_firestore` test resolves it synchronously and
+  doesn't exercise this window. If the history list flickers/misorders right after saving,
+  either read that list with `GetOptions(source: Source.server)`, or sort client-side with
+  a null-last fallback. Not a crash — purely the post-save ordering window.

@@ -32,10 +32,14 @@ class AuthCubit extends Cubit<AuthState> {
 
   AuthCubit(this._repo) : super(const AuthState()) {
     _sub = _repo.authStateChanges().listen((user) {
-      emit(state.copyWith(
+      if (isClosed) return;
+      // The auth stream is authoritative about status + user together, so build
+      // the state directly: this guarantees `user` is cleared to null on sign-out
+      // (a copyWith with `user ?? this.user` could never null it).
+      emit(AuthState(
         status: user == null ? AuthStatus.signedOut : AuthStatus.signedIn,
         user: user,
-        clearError: true,
+        submitting: state.submitting,
       ));
     });
   }
@@ -44,16 +48,20 @@ class AuthCubit extends Cubit<AuthState> {
       _run(() => _repo.signIn(email: email, password: password));
   Future<void> signUp({required String email, required String password}) =>
       _run(() => _repo.signUp(email: email, password: password));
-  Future<void> signOut() => _repo.signOut();
+  Future<void> signOut() => _run(() => _repo.signOut());
 
   Future<void> _run(Future<void> Function() action) async {
+    if (isClosed) return;
     emit(state.copyWith(submitting: true, clearError: true));
     try {
       await action();
+      if (isClosed) return;
       emit(state.copyWith(submitting: false));
     } on AuthException catch (e) {
+      if (isClosed) return;
       emit(state.copyWith(submitting: false, error: e.message));
     } catch (_) {
+      if (isClosed) return;
       emit(state.copyWith(submitting: false, error: 'Something went wrong. Please try again.'));
     }
   }
