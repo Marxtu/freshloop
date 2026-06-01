@@ -2,17 +2,17 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development or superpowers:executing-plans. Steps use checkbox (`- [ ]`) syntax.
 
-**Goal:** Build the along-route scenery-photo clients — **Mapillary** (street-level imagery in a bbox) and **Wikimedia Commons** (geolocated File: media near a point) — each returning a common `ScenePhoto` model, TDD'd with mocked HTTP.
+**Goal:** Build the along-route scenery-photo clients: **Mapillary** (street-level imagery in a bbox) and **Wikimedia Commons** (geolocated File: media near a point), each returning a common `ScenePhoto` model, TDD'd with mocked HTTP.
 
-**Architecture:** Same as M2.1/M2.2 — `lib/data/` clients take an injectable `http.Client`, parse into pure-Dart models, throw `ApiException` on non-200. No new dependencies.
+**Architecture:** Same as M2.1/M2.2: `lib/data/` clients take an injectable `http.Client`, parse into pure-Dart models, throw `ApiException` on non-200. No new dependencies.
 
 **Tech Stack:** Flutter, `http` (+ `package:http/testing.dart`).
 
-**Design SSOT:** [FreshLoop system design](../level-2-architecture/running-route-generator-2026-05-30.md) §5 (photo services), §8 (`ScenePhoto`), §11 (graceful degradation — no photos → empty list).
+**Design SSOT:** [FreshLoop system design](../level-2-architecture/running-route-generator-2026-05-30.md) §5 (photo services), §8 (`ScenePhoto`), §11 (graceful degradation, where no photos means an empty list).
 
 **Verified API shapes:**
 - **Wikimedia Commons geosearch** (keyless, live-verified): `GET https://commons.wikimedia.org/w/api.php?action=query&list=geosearch&gscoord=<lat>|<lng>&gsradius=<m>&gslimit=<n>&gsnamespace=6&format=json` → `{"query":{"geosearch":[{"pageid":..,"title":"File:Name.jpg","lat":..,"lon":..,"dist":..}]}}`. A displayable thumbnail is built directly from the title via `https://commons.wikimedia.org/wiki/Special:FilePath/<urlencoded filename>?width=<w>` (verified to 200 → real image). Requires a `User-Agent`.
-- **Mapillary** (token via `Authorization: OAuth` header; shape from docs — live API was intermittently returning transient 5xx during dev, so it is mock-tested here and live-validated at M3): `GET https://graph.mapillary.com/images?bbox=<west,south,east,north>&fields=id,thumb_256_url,computed_geometry&limit=<n>` → `{"data":[{"id":"..","thumb_256_url":"https://..","computed_geometry":{"type":"Point","coordinates":[lng,lat]}}]}`.
+- **Mapillary** (token via `Authorization: OAuth` header; shape from docs, since the live API was intermittently returning transient 5xx during dev, so it is mock-tested here and live-validated at M3): `GET https://graph.mapillary.com/images?bbox=<west,south,east,north>&fields=id,thumb_256_url,computed_geometry&limit=<n>` → `{"data":[{"id":"..","thumb_256_url":"https://..","computed_geometry":{"type":"Point","coordinates":[lng,lat]}}]}`.
 
 **Notes for the implementer:** Flutter at `$HOME/flutter/bin/flutter` if not on PATH. English, Conventional Commits, no AI/tooling attribution, per-task commits. Touch only the files named. No `package:flutter/` import under `lib/data/`.
 
@@ -78,7 +78,7 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run to verify failure** — `flutter test test/data/photos/scene_photo_test.dart` → FAIL.
+- [ ] **Step 2: Run to verify failure.** Run `flutter test test/data/photos/scene_photo_test.dart`; it should FAIL.
 
 - [ ] **Step 3: Implement**
 
@@ -134,7 +134,7 @@ class ScenePhoto {
 }
 ```
 
-- [ ] **Step 4: Run to verify pass** — PASS (2).
+- [ ] **Step 4: Run to verify pass.** Expect PASS (2).
 
 - [ ] **Step 5: Analyze + commit**
 ```bash
@@ -214,7 +214,7 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run to verify failure** — FAIL.
+- [ ] **Step 2: Run to verify failure.** It should FAIL.
 
 - [ ] **Step 3: Implement**
 
@@ -259,7 +259,7 @@ class MapillaryPhotoClient {
 }
 ```
 
-- [ ] **Step 4: Run to verify pass** — PASS (3).
+- [ ] **Step 4: Run to verify pass.** Expect PASS (3).
 
 - [ ] **Step 5: Analyze + commit**
 ```bash
@@ -336,7 +336,7 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run to verify failure** — FAIL.
+- [ ] **Step 2: Run to verify failure.** It should FAIL.
 
 - [ ] **Step 3: Implement**
 
@@ -387,7 +387,7 @@ class WikimediaPhotoClient {
 }
 ```
 
-- [ ] **Step 4: Run to verify pass** — PASS (3).
+- [ ] **Step 4: Run to verify pass.** Expect PASS (3).
 
 - [ ] **Step 5: Analyze + commit**
 ```bash
@@ -403,8 +403,8 @@ Special:FilePath); return empty on none, throw ApiException on non-200."
 
 ## Task 4: Final verification
 
-- [ ] **Step 1:** `flutter test` → expect 43 (after M2.2) + 8 new (scene_photo 2 + mapillary 3 + wikimedia 3) = **51 tests**, all passing.
-- [ ] **Step 2:** `flutter analyze` → clean.
+- [ ] **Step 1:** Run `flutter test`; expect 43 (after M2.2) + 8 new (scene_photo 2 + mapillary 3 + wikimedia 3) = 51 tests, all passing.
+- [ ] **Step 2:** Run `flutter analyze`; expect it clean.
 - [ ] **Step 3:** `git status` clean; no `package:flutter/` under `lib/data/`; no real secrets tracked.
 
 ---
@@ -413,7 +413,7 @@ Special:FilePath); return empty on none, throw ApiException on non-200."
 
 **Spec coverage:** §5 Mapillary → Task 2; §5 Wikimedia → Task 3; §8 `ScenePhoto` → Task 1; §11 degradation (no photos → empty list; non-200 → ApiException) → Tasks 2-3. With this, the full external-service stack from design §5 is implemented except live wiring (M3).
 
-**Placeholder scan:** none — complete code, live-verified Wikimedia shape (incl. Special:FilePath thumbnail), documented Mapillary shape, exact expected values.
+**Placeholder scan:** none. Complete code, live-verified Wikimedia shape (incl. Special:FilePath thumbnail), documented Mapillary shape, exact expected values.
 
 **Type consistency:** `PhotoSource` enum + `ScenePhoto` factories (Task 1) used by both clients (Tasks 2-3); `MapillaryPhotoClient({accessToken, client})`/`photosInBbox({south,west,north,east,limit})` and `WikimediaPhotoClient({userAgent, client})`/`photosNear({lat,lng,radiusM,limit})` match their tests; `ApiException` reused from M2.1; Mapillary bbox order `west,south,east,north` consistent between client and test.
 

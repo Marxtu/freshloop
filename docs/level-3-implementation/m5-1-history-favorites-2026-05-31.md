@@ -2,15 +2,15 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: superpowers:subagent-driven-development or superpowers:executing-plans. Checkbox (`- [ ]`) steps.
 
-**Goal:** Let users **save runs** (history) and **favorite routes**, persisted **on device** via `shared_preferences`, behind repository interfaces so M5.2 can swap in Firebase without touching the UI.
+**Goal:** Let users save runs (history) and favorite routes, persisted on device via `shared_preferences`, behind repository interfaces so M5.2 can swap in Firebase without touching the UI.
 
-**Architecture:** Pure-Dart `toJson`/`fromJson` on the stored models (domain stays Flutter-free). Abstract `RunHistoryRepository` + `FavoritesRepository` in `lib/services/`, with `SharedPrefs*` implementations (the only `shared_preferences`-touching code). A `FavoritesCubit` exposes the reactive favourite set; history is read on demand. Shared repo/cubit instances provided in `dependencies.dart`. Tests use `SharedPreferences.setMockInitialValues({})` — no real device storage.
+**Architecture:** Pure-Dart `toJson`/`fromJson` on the stored models (domain stays Flutter-free). Abstract `RunHistoryRepository` + `FavoritesRepository` in `lib/services/`, with `SharedPrefs*` implementations (the only `shared_preferences`-touching code). A `FavoritesCubit` exposes the reactive favourite set; history is read on demand. Shared repo/cubit instances provided in `dependencies.dart`. Tests use `SharedPreferences.setMockInitialValues({})`, so they never touch real device storage.
 
 **Tech Stack:** Flutter, flutter_bloc, `shared_preferences`, Dart.
 
 **SSOT:** [system design](../level-2-architecture/running-route-generator-2026-05-30.md) §8 (`RunRecord`, persistence), [UX checklist](../level-2-architecture/ux-and-rubric-checklist-2026-05-31.md). Builds on M1 (`ScoreBreakdown`/`AxisScore`/`Tier`), M3.1 (`ScoredRoute`, `RouteGeometry`/`RoutePoint`), M4.1 (`RunRecord`), M4.2 (run summary "Save").
 
-**Scope:** JSON for stored models + 2 repos (shared_preferences) + FavoritesCubit + History/Favorites screens + wiring (Save run, favourite toggle) + home nav. **Out:** Firebase auth + cloud sync = **M5.2** (same interfaces, Firebase impls); profile/settings = later.
+**Scope:** JSON for stored models + 2 repos (shared_preferences) + FavoritesCubit + History/Favorites screens + wiring (Save run, favourite toggle) + home nav. **Out:** Firebase auth + cloud sync = M5.2 (same interfaces, Firebase impls); profile/settings = later.
 
 **Decisions:** favourite identity = a stable `routeKey` (seed + rounded distance + start lat/lng); history newest-first; storing full geometry/trail is acceptable at this scale.
 
@@ -46,7 +46,7 @@ test/...
 
 **Files:** modify `lib/data/routing/route_geometry.dart`, `lib/domain/models/score_breakdown.dart`, `lib/domain/models/scored_route.dart`, `lib/domain/models/run_record.dart`; create `test/domain/models/json_roundtrip_test.dart`
 
-- [ ] **Step 1: Failing test** — `test/domain/models/json_roundtrip_test.dart`:
+- [ ] **Step 1: Failing test** in `test/domain/models/json_roundtrip_test.dart`:
 ```dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:freshloop/data/routing/route_geometry.dart';
@@ -94,7 +94,7 @@ void main() {
 
 - [ ] **Step 2: Run → FAIL.**
 
-- [ ] **Step 3: Implement.** Add to `lib/data/routing/route_geometry.dart` — a `toJson`/`fromJson` on `RoutePoint` and `RouteGeometry`:
+- [ ] **Step 3: Implement.** Add a `toJson`/`fromJson` on `RoutePoint` and `RouteGeometry` to `lib/data/routing/route_geometry.dart`:
 ```dart
 // In RoutePoint:
   Map<String, dynamic> toJson() => {'lat': lat, 'lng': lng, if (elevation != null) 'ele': elevation};
@@ -175,9 +175,9 @@ git commit -m "feat: add JSON serialization to route + run models (+ routeKey)"
 
 **Files:** modify `pubspec.yaml`; create `lib/services/run_history_repository.dart`, `test/services/run_history_repository_test.dart`
 
-- [ ] **Step 1: Add dep** — `flutter pub add shared_preferences`
+- [ ] **Step 1: Add dep.** `flutter pub add shared_preferences`
 
-- [ ] **Step 2: Failing test** — `test/services/run_history_repository_test.dart`:
+- [ ] **Step 2: Failing test** in `test/services/run_history_repository_test.dart`:
 ```dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -203,7 +203,7 @@ void main() {
 }
 ```
 
-- [ ] **Step 3: Implement** — `lib/services/run_history_repository.dart`:
+- [ ] **Step 3: Implement** `lib/services/run_history_repository.dart`:
 ```dart
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -251,7 +251,7 @@ git commit -m "feat: add RunHistoryRepository with shared_preferences impl"
 
 **Files:** create `lib/services/favorites_repository.dart`, `lib/state/favorites_cubit.dart`, `test/services/favorites_repository_test.dart`, `test/state/favorites_cubit_test.dart`
 
-- [ ] **Step 1: Failing repo test** — `test/services/favorites_repository_test.dart`:
+- [ ] **Step 1: Failing repo test** in `test/services/favorites_repository_test.dart`:
 ```dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -336,7 +336,7 @@ git add lib/services/favorites_repository.dart test/services/favorites_repositor
 git commit -m "feat: add FavoritesRepository with shared_preferences impl"
 ```
 
-- [ ] **Step 3: Failing cubit test** — `test/state/favorites_cubit_test.dart`:
+- [ ] **Step 3: Failing cubit test** in `test/state/favorites_cubit_test.dart`:
 ```dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -409,7 +409,7 @@ git commit -m "feat: add FavoritesCubit (reactive toggle over the repository)"
 
 **Files:** create `lib/features/saved/history_screen.dart`, `lib/features/saved/favorites_screen.dart`; modify `lib/app/dependencies.dart`, `lib/app/router.dart`, `lib/features/home/home_screen.dart`, `lib/features/detail/route_detail_screen.dart`, `lib/features/tracking/run_summary_screen.dart`; create `test/features/saved/history_screen_test.dart`
 
-- [ ] **Step 1: dependencies.dart — shared instances.** Append:
+- [ ] **Step 1: dependencies.dart, shared instances.** Append:
 ```dart
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/run_history_repository.dart';
@@ -453,7 +453,7 @@ class FreshLoopApp extends StatelessWidget {
 ```
 (import `flutter_bloc`'s `MultiBlocProvider`, `FavoritesCubit`, `FavoritesRepository`.)
 
-**Smoke-test fix (verified):** `test/app/smoke_test.dart` pumps `const FreshLoopApp()`, which now builds `FavoritesCubit` → `buildFavoritesRepository()` → reads the late `appPrefs`. Add a `setUp` so the default path works (imports: `shared_preferences`, `package:freshloop/app/dependencies.dart`):
+**Smoke-test fix (verified):** `test/app/smoke_test.dart` pumps `const FreshLoopApp()`, which now builds `FavoritesCubit`, calls `buildFavoritesRepository()`, and reads the late `appPrefs`. Add a `setUp` so the default path works (imports: `shared_preferences`, `package:freshloop/app/dependencies.dart`):
 ```dart
 setUp(() async {
   SharedPreferences.setMockInitialValues({});
@@ -461,7 +461,7 @@ setUp(() async {
 });
 ```
 
-- [ ] **Step 2: HistoryScreen** — `lib/features/saved/history_screen.dart`:
+- [ ] **Step 2: HistoryScreen** in `lib/features/saved/history_screen.dart`:
 ```dart
 import 'package:flutter/material.dart';
 import '../../domain/format.dart';
@@ -505,7 +505,7 @@ class HistoryScreen extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 3: FavoritesScreen** — `lib/features/saved/favorites_screen.dart`:
+- [ ] **Step 3: FavoritesScreen** in `lib/features/saved/favorites_screen.dart`:
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -574,7 +574,7 @@ Positioned(
 Add this as a third child of the existing `Stack` (after the bottom `Align`). `context` already has go_router (`package:go_router/go_router.dart` is imported).
 
 - [ ] **Step 6: Wire Save (summary) + favourite toggle (detail).**
-  - `lib/features/tracking/run_summary_screen.dart` — convert to a `StatefulWidget` (keep the same constructor params + add an optional injectable repo) so Save can flip to "Saved". The existing test pumps `RunSummaryScreen(record: record)` in a bare `MaterialApp` and does **not** tap Save, so it stays green (the repo is only read on tap). Constructor:
+  - `lib/features/tracking/run_summary_screen.dart`: convert to a `StatefulWidget` (keep the same constructor params + add an optional injectable repo) so Save can flip to "Saved". The existing test pumps `RunSummaryScreen(record: record)` in a bare `MaterialApp` and does not tap Save, so it stays green (the repo is only read on tap). Constructor:
 ```dart
 class RunSummaryScreen extends StatefulWidget {
   final RunRecord record;
@@ -598,8 +598,8 @@ OutlinedButton.icon(
   label: Text(_saved ? 'Saved' : 'Save'),
 ),
 ```
-(References to `record`/`planned` become `widget.record`/`widget.planned`. Imports: `../../app/dependencies.dart`, `../../services/run_history_repository.dart`.) `tracking_screen.dart:54` constructs it with `record`/`planned` only — unchanged, defaults to the app repo.
-  - `lib/features/detail/route_detail_screen.dart` — add a favourite toggle as a top-right action mirroring the existing `BackButton` (top-left). Add a third `Positioned` in the `Stack`:
+(References to `record`/`planned` become `widget.record`/`widget.planned`. Imports: `../../app/dependencies.dart`, `../../services/run_history_repository.dart`.) `tracking_screen.dart:54` constructs it with `record`/`planned` only, so it is unchanged and defaults to the app repo.
+  - `lib/features/detail/route_detail_screen.dart`: add a favourite toggle as a top-right action mirroring the existing `BackButton` (top-left). Add a third `Positioned` in the `Stack`:
 ```dart
 Positioned(
   top: 0, right: 0,
@@ -616,7 +616,7 @@ Positioned(
 ```
 (Imports: `package:flutter_bloc/flutter_bloc.dart`, `../../state/favorites_cubit.dart`. The cubit is provided app-wide, so it's in scope under the router.)
 
-- [ ] **Step 7: Widget test** — `test/features/saved/history_screen_test.dart` (in-memory fake repo):
+- [ ] **Step 7: Widget test** in `test/features/saved/history_screen_test.dart` (in-memory fake repo):
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -673,8 +673,8 @@ git commit -m "feat: add history + favorites screens, wiring, and home navigatio
 
 **Spec coverage:** §8 persistence/history/favourites → repos (Tasks 2/3) + screens (Task 4); Save wiring (M4.2 placeholder) → Task 4 step 6; favourite toggle → Task 4 step 6. Deferred: Firebase auth + cloud sync (same interfaces) → M5.2; profile/settings → later.
 
-**Placeholder scan:** none — complete code + exact test expectations.
+**Placeholder scan:** none; complete code plus exact test expectations.
 
 **Type consistency:** `toJson`/`fromJson` round-trip the existing models (RoutePoint/RouteGeometry/ScoreBreakdown/AxisScore/RunRecord/ScoredRoute); `routeKey` used by FavoritesRepository + Cubit; repos behind interfaces (`RunHistoryRepository`/`FavoritesRepository`) so M5.2 swaps Firebase impls; `FavoritesCubit` state is `List<ScoredRoute>`; screens consume `format` helpers (M4.2) + `TierBadge` (M3.2) + go_router `/detail` extra (M3.3). `appPrefs` initialised in `main` before `runApp`.
 
-**Persistence note:** local (shared_preferences); tests use `setMockInitialValues({})`. Real cloud persistence + auth is M5.2 (Firebase) — the repository interfaces are the seam.
+**Persistence note:** local (shared_preferences); tests use `setMockInitialValues({})`. Real cloud persistence + auth is M5.2 (Firebase); the repository interfaces are the seam.

@@ -2,15 +2,15 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: superpowers:subagent-driven-development or superpowers:executing-plans. Checkbox (`- [ ]`) steps.
 
-**Goal:** The brain for live run tracking — no UI yet. A `LocationSource` abstraction over `geolocator` (so it's mockable), a haversine distance helper, a `RunRecord`, and a `RunTrackingCubit` that consumes a position stream, accumulates distance, and finishes with a record. Fully unit-tested with a fake location source (no GPS, no plugin in tests).
+**Goal:** The brain for live run tracking, no UI yet. A `LocationSource` abstraction over `geolocator` (so it's mockable), a haversine distance helper, a `RunRecord`, and a `RunTrackingCubit` that consumes a position stream, accumulates distance, and finishes with a record. Fully unit-tested with a fake location source (no GPS, no plugin in tests).
 
-**Architecture:** `lib/services/location_source.dart` defines the interface + a `GeolocatorLocationSource` (the only geolocator-touching code; not unit-tested — verified by analyze). `lib/state/run_tracking_cubit.dart` holds the live state. Distance is computed in `lib/domain/geo.dart` (pure). The Cubit cancels its stream subscription in `close()` (the resource-lifecycle discipline the course stresses).
+**Architecture:** `lib/services/location_source.dart` defines the interface + a `GeolocatorLocationSource` (the only geolocator-touching code; not unit-tested, verified by analyze). `lib/state/run_tracking_cubit.dart` holds the live state. Distance is computed in `lib/domain/geo.dart` (pure). The Cubit cancels its stream subscription in `close()` (the resource-lifecycle discipline the course stresses).
 
 **Tech Stack:** Flutter, flutter_bloc, `geolocator`, Dart.
 
 **SSOT:** [system design](../level-2-architecture/running-route-generator-2026-05-30.md) §3 (tracking flow), §7 (Cubit + GPS lifecycle), §8 (`RunRecord`). Builds on M3.1 (`RoutePoint`, geo helpers).
 
-**Scope:** distance math + RunRecord + LocationSource + RunTrackingCubit. **Out:** tracking screen + post-run summary UI + Android location-permission manifest + wiring "Start run" → M4.2.
+**Scope:** distance math + RunRecord + LocationSource + RunTrackingCubit. **Out:** tracking screen + post-run summary UI + Android location-permission manifest + wiring "Start run", all deferred to M4.2.
 
 **Notes:** Flutter at `$HOME/flutter/bin/flutter`. English, Conventional Commits, no AI/tooling attribution. **Run `flutter test` + `flutter analyze` green before each commit.** `lib/domain` stays Flutter-free; `lib/state` may use flutter_bloc; only `location_source.dart` imports geolocator. Tests must not touch the plugin/GPS.
 
@@ -36,7 +36,7 @@ test/state/run_tracking_cubit_test.dart
 
 **Files:** modify `lib/domain/geo.dart`; create `test/domain/geo_haversine_test.dart`
 
-- [ ] **Step 1: Failing test** — `test/domain/geo_haversine_test.dart`:
+- [ ] **Step 1: Failing test** in `test/domain/geo_haversine_test.dart`:
 ```dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:freshloop/data/routing/route_geometry.dart';
@@ -64,7 +64,7 @@ void main() {
 
 - [ ] **Step 2: Run → FAIL.**
 
-- [ ] **Step 3: Implement** — add to `lib/domain/geo.dart` (add `import 'dart:math' as math;` at top):
+- [ ] **Step 3: Implement.** Add to `lib/domain/geo.dart` (add `import 'dart:math' as math;` at top):
 ```dart
 /// Great-circle distance between two points, in metres (Haversine).
 double haversineMeters(RoutePoint a, RoutePoint b) {
@@ -92,7 +92,7 @@ git commit -m "feat: add haversineMeters distance helper"
 
 **Files:** `lib/domain/models/run_record.dart`, `test/domain/models/run_record_test.dart`
 
-- [ ] **Step 1: Failing test** — `test/domain/models/run_record_test.dart`:
+- [ ] **Step 1: Failing test** in `test/domain/models/run_record_test.dart`:
 ```dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:freshloop/data/routing/route_geometry.dart';
@@ -114,7 +114,7 @@ void main() {
 
 - [ ] **Step 2: Run → FAIL.**
 
-- [ ] **Step 3: Implement** — `lib/domain/models/run_record.dart`:
+- [ ] **Step 3: Implement** in `lib/domain/models/run_record.dart`:
 ```dart
 import '../../data/routing/route_geometry.dart';
 
@@ -144,9 +144,9 @@ git commit -m "feat: add RunRecord with average-pace helper"
 
 **Files:** modify `pubspec.yaml`; create `lib/services/location_source.dart`
 
-- [ ] **Step 1: Add geolocator** — `flutter pub add geolocator`
+- [ ] **Step 1: Add geolocator.** `flutter pub add geolocator`
 
-- [ ] **Step 2: Implement** — `lib/services/location_source.dart`:
+- [ ] **Step 2: Implement** in `lib/services/location_source.dart`:
 ```dart
 import 'package:geolocator/geolocator.dart';
 import '../data/routing/route_geometry.dart';
@@ -185,7 +185,7 @@ class GeolocatorLocationSource implements LocationSource {
 }
 ```
 
-- [ ] **Step 3:** `flutter analyze` (clean) + `flutter test` (still green; no new test — the geolocator wrapper is verified by analyze, exercised via the Cubit's fake source in Task 4). Commit:
+- [ ] **Step 3:** `flutter analyze` (clean) + `flutter test` (still green; no new test, since the geolocator wrapper is verified by analyze and exercised via the Cubit's fake source in Task 4). Commit:
 ```bash
 git add pubspec.yaml lib/services/location_source.dart
 git commit -m "feat: add LocationSource abstraction over geolocator"
@@ -197,7 +197,7 @@ git commit -m "feat: add LocationSource abstraction over geolocator"
 
 **Files:** `lib/state/run_tracking_state.dart`, `lib/state/run_tracking_cubit.dart`, `test/state/run_tracking_cubit_test.dart`
 
-- [ ] **Step 1: Failing test** — `test/state/run_tracking_cubit_test.dart`:
+- [ ] **Step 1: Failing test** in `test/state/run_tracking_cubit_test.dart`:
 ```dart
 import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
@@ -259,7 +259,7 @@ void main() {
 
 - [ ] **Step 2: Run → FAIL.**
 
-- [ ] **Step 3: Implement the states** — `lib/state/run_tracking_state.dart`:
+- [ ] **Step 3: Implement the states** in `lib/state/run_tracking_state.dart`:
 ```dart
 import '../domain/models/run_record.dart';
 import '../data/routing/route_geometry.dart';
@@ -289,7 +289,7 @@ class RunFinished extends RunTrackingState {
 }
 ```
 
-- [ ] **Step 4: Implement the Cubit** — `lib/state/run_tracking_cubit.dart`:
+- [ ] **Step 4: Implement the Cubit** in `lib/state/run_tracking_cubit.dart`:
 ```dart
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -370,7 +370,7 @@ git commit -m "feat: add RunTrackingCubit (distance accumulation + lifecycle)"
 
 **Spec coverage:** §3 tracking (accumulate distance from GPS) → Cubit (Task 4); §7 GPS lifecycle (cancel subscription on close) → Task 4 `close()`; §8 `RunRecord` → Task 2; distance math → Task 1. Deferred: tracking screen + post-run summary + Android permission manifest + "Start run" wiring → M4.2.
 
-**Placeholder scan:** none — complete code + exact test expectations (haversine numbers verified by formula).
+**Placeholder scan:** none. Complete code plus exact test expectations (haversine numbers verified by formula).
 
 **Type consistency:** `RoutePoint` (M3.1) used across haversine/LocationSource/Cubit; `haversineMeters` (Task 1) used by the Cubit (Task 4); `RunRecord` (Task 2) produced by the Cubit; `LocationSource` interface (Task 3) implemented by `GeolocatorLocationSource` and the test's `_FakeSource`; states (`RunIdle`/`RunPermissionDenied`/`RunInProgress`/`RunFinished`) match the Cubit + tests.
 

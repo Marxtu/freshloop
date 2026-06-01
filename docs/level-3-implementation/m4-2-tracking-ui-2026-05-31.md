@@ -2,15 +2,15 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: superpowers:subagent-driven-development or superpowers:executing-plans. Checkbox (`- [ ]`) steps.
 
-**Goal:** Make "Start run" real — a live tracking screen (map follows you, live distance/time/pace, Stop) and a post-run summary (trail, stats, planned-vs-actual), wired from the route detail. Also surfaces the current-location marker on maps (the deferred review items).
+**Goal:** Make "Start run" real: a live tracking screen (map follows you, live distance/time/pace, Stop) and a post-run summary (trail, stats, planned-vs-actual), wired from the route detail. Also surfaces the current-location marker on maps (the deferred review items).
 
 **Architecture:** UI in `lib/features/tracking/`. `TrackingScreen` owns a `RunTrackingCubit` (M4.1) built from an injectable `LocationSource` (default `GeolocatorLocationSource`); a 1 s ticker drives the elapsed-time display; the map shows the planned loop + the live trail + a current-position marker. On finish it pushes `RunSummaryScreen`. Pure `format` helpers handle time/pace. Widget tests use a fake `LocationSource` (no GPS); the geolocator path is analyze-only.
 
 **Tech Stack:** Flutter, flutter_bloc, flutter_map, geolocator, `share_plus`.
 
-**SSOT:** [system design](../level-2-architecture/running-route-generator-2026-05-30.md) §3/§4 (tracking + summary), §7 (GPS lifecycle), [UX checklist](../level-2-architecture/ux-and-rubric-checklist-2026-05-31.md) (§5 tracking/summary; "always know where I am" → current marker; no idiot boxes → confirm only discard). Builds on M4.1 (`RunTrackingCubit`, `RunRecord`, `LocationSource`), M3 (`RouteMap`, `ScoredRoute`).
+**SSOT:** [system design](../level-2-architecture/running-route-generator-2026-05-30.md) §3/§4 (tracking + summary), §7 (GPS lifecycle), [UX checklist](../level-2-architecture/ux-and-rubric-checklist-2026-05-31.md) (§5 tracking/summary; "always know where I am", hence the current marker; no idiot boxes, so we confirm only discard). Builds on M4.1 (`RunTrackingCubit`, `RunRecord`, `LocationSource`), M3 (`RouteMap`, `ScoredRoute`).
 
-**Scope:** format helpers + RouteMap current-marker + TrackingScreen + RunSummaryScreen + wiring + Android permission. **Out:** saving runs to history (Save is a disabled placeholder → M5).
+**Scope:** format helpers + RouteMap current-marker + TrackingScreen + RunSummaryScreen + wiring + Android permission. **Out:** saving runs to history (Save is a disabled placeholder until M5).
 
 **Notes:** Flutter at `$HOME/flutter/bin/flutter`. English, Conventional Commits, no AI/tooling attribution. **Run `flutter test` + `flutter analyze` green before each commit.** `lib/domain` stays Flutter-free. Widget tests must not hit GPS/network; cancel timers on dispose so no test has pending timers.
 
@@ -37,7 +37,7 @@ test/features/tracking/run_summary_screen_test.dart
 
 **Files:** `lib/domain/format.dart`, `test/domain/format_test.dart`
 
-- [ ] **Step 1: Failing test** — `test/domain/format_test.dart`:
+- [ ] **Step 1: Failing test** in `test/domain/format_test.dart`:
 ```dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:freshloop/domain/format.dart';
@@ -66,7 +66,7 @@ void main() {
 
 - [ ] **Step 2: Run → FAIL.**
 
-- [ ] **Step 3: Implement** — `lib/domain/format.dart`:
+- [ ] **Step 3: Implement** in `lib/domain/format.dart`:
 ```dart
 /// "mm:ss" under an hour, "h:mm:ss" at/over an hour.
 String formatDuration(int seconds) {
@@ -119,7 +119,7 @@ if (currentLocation != null)
 ```
 Update the constructor to `const RouteMap({super.key, required this.points, this.interactive = true, this.currentLocation});`.
 
-- [ ] **Step 2:** `flutter analyze` (clean) + `flutter test` (84 still pass — additive change). Commit:
+- [ ] **Step 2:** `flutter analyze` (clean) + `flutter test` (84 still pass, since this is an additive change). Commit:
 ```bash
 git add lib/features/common/route_map.dart
 git commit -m "feat: optional current-location marker on RouteMap"
@@ -131,7 +131,7 @@ git commit -m "feat: optional current-location marker on RouteMap"
 
 **Files:** `lib/features/tracking/tracking_screen.dart`, `test/features/tracking/tracking_screen_test.dart`
 
-- [ ] **Step 1: Failing widget test** — `test/features/tracking/tracking_screen_test.dart`:
+- [ ] **Step 1: Failing widget test** in `test/features/tracking/tracking_screen_test.dart`:
 ```dart
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -191,7 +191,7 @@ void main() {
 
 - [ ] **Step 2: Run → FAIL.**
 
-- [ ] **Step 3: Implement** — `lib/features/tracking/tracking_screen.dart`:
+- [ ] **Step 3: Implement** in `lib/features/tracking/tracking_screen.dart`:
 ```dart
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -336,7 +336,7 @@ git commit -m "feat: add live TrackingScreen (map follow + distance/time/pace + 
 
 **Files:** `lib/features/tracking/run_summary_screen.dart`, `test/features/tracking/run_summary_screen_test.dart`
 
-- [ ] **Step 1: Failing widget test** — `test/features/tracking/run_summary_screen_test.dart`:
+- [ ] **Step 1: Failing widget test** in `test/features/tracking/run_summary_screen_test.dart`:
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -364,7 +364,7 @@ void main() {
 
 - [ ] **Step 2: Run → FAIL.**
 
-- [ ] **Step 3: Implement** — `lib/features/tracking/run_summary_screen.dart`:
+- [ ] **Step 3: Implement** in `lib/features/tracking/run_summary_screen.dart`:
 ```dart
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
@@ -481,7 +481,7 @@ GoRoute(
 ),
 ```
 
-- [ ] **Step 2: Enable "Start run"** in `lib/features/detail/route_detail_screen.dart` — replace the disabled button:
+- [ ] **Step 2: Enable "Start run"** in `lib/features/detail/route_detail_screen.dart`. Replace the disabled button:
 ```dart
                   FilledButton.icon(
                     onPressed: null, // live tracking arrives in M4
@@ -524,7 +524,7 @@ git commit -m "feat: wire Start run to tracking + add Android location permissio
 
 **Spec coverage:** §3/§4 tracking + summary → Tasks 3/4; §7 GPS lifecycle (cubit + ticker cancelled on dispose) → Task 3 `dispose`; current-location marker (review L1/M9) → Task 2 + tracking map; "Start run" wiring (review M8) → Task 5; "no idiot boxes" → Stop has no confirm dialog. Deferred: saving runs → M5 (Save disabled).
 
-**Placeholder scan:** none — complete code + exact test expectations (distance/pace/duration values verified).
+**Placeholder scan:** none. Complete code plus exact test expectations (distance/pace/duration values verified).
 
 **Type consistency:** `RunTrackingCubit`/states/`RunRecord`/`LocationSource` (M4.1) used in TrackingScreen; `formatDuration`/`formatPace` (Task 1) used in both screens + tested; `RouteMap` gains `currentLocation` (Task 2) used by TrackingScreen; `ScoredRoute` (M3.1) passed via go_router extra; `GeolocatorLocationSource` (M4.1) in the route builder. share_plus API call flagged for version-check in Task 4.
 

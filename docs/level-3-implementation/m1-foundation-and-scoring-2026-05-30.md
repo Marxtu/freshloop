@@ -2,17 +2,17 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Stand up a launching Material 3 Flutter app shell (theme + routing + home) and a fully unit-tested, pure-Dart route-scoring engine — the product's heart.
+**Goal:** Stand up a launching Material 3 Flutter app shell (theme + routing + home) and a fully unit-tested, pure-Dart route-scoring engine, the product's heart.
 
-**Architecture:** Standard Flutter *Application* scaffold. A `domain/` layer with **zero Flutter imports** holds the models and scoring functions (pure Dart → cleanest TDD, runs under `flutter test` with no device/Android SDK). The app shell is wired with `go_router` + a centralized Material 3 theme. Cross-screen state management (Cubit) is intentionally deferred to M3, when there is cross-screen state to manage (YAGNI).
+**Architecture:** Standard Flutter *Application* scaffold. A `domain/` layer with **zero Flutter imports** holds the models and scoring functions (pure Dart, so TDD is cleanest, and it runs under `flutter test` with no device/Android SDK). The app shell is wired with `go_router` + a centralized Material 3 theme. Cross-screen state management (Cubit) is intentionally deferred to M3, when there is cross-screen state to manage (YAGNI).
 
 **Tech Stack:** Flutter (stable), Dart, `flutter_test`, `go_router`.
 
-**Design SSOT:** [FreshLoop system design](../level-2-architecture/running-route-generator-2026-05-30.md) — scoring is §6, architecture §7, look&feel §10. Provenance rules (English commits/comments, conventional commits, small steps, no secrets): design §13.
+**Design SSOT:** [FreshLoop system design](../level-2-architecture/running-route-generator-2026-05-30.md). Scoring is §6, architecture §7, look&feel §10. Provenance rules (English commits/comments, conventional commits, small steps, no secrets): design §13.
 
 **Scope of M1:** project setup + app shell + scoring engine only. External APIs (M2), map/route-generation UI (M3), GPS tracking (M4), Firebase (M5), multi-device polish (M6) are **out of scope** here.
 
-**Environment note:** M1 only needs the Dart/Flutter SDK. `flutter test` runs on the Dart VM — **no Android SDK, no emulator, no JDK 17 required**. Device/emulator builds (and the JDK 17 + Android SDK they need) are set up in a later plan.
+**Environment note:** M1 only needs the Dart/Flutter SDK. `flutter test` runs on the Dart VM, so there is no Android SDK, no emulator, and no JDK 17 required. Device/emulator builds (and the JDK 17 + Android SDK they need) are set up in a later plan.
 
 ---
 
@@ -69,14 +69,14 @@ Run: `flutter --version`
 - If it prints a version (stable channel), **skip to Task 2**.
 - If "command not found", continue.
 
-- [ ] **Step 2: Install the Flutter SDK (Linux/container — reproducible clone method)**
+- [ ] **Step 2: Install the Flutter SDK (Linux/container, reproducible clone method)**
 
 ```bash
 git clone https://github.com/flutter/flutter.git -b stable "$HOME/flutter"
 export PATH="$HOME/flutter/bin:$PATH"
 echo 'export PATH="$HOME/flutter/bin:$PATH"' >> "$HOME/.bashrc"
 ```
-(macOS/Windows alternative: follow https://docs.flutter.dev/get-started/install — then resume at Step 3.)
+(macOS/Windows alternative: follow https://docs.flutter.dev/get-started/install and then resume at Step 3.)
 
 - [ ] **Step 3: Verify the SDK works (downloads the bundled Dart SDK on first run)**
 
@@ -86,7 +86,7 @@ Expected: prints `Flutter <version> ... channel stable` and a Dart version. (Thi
 - [ ] **Step 4: Confirm the test runner is usable**
 
 Run: `flutter doctor`
-Expected: the "Flutter" line is a checkmark. Android/Xcode lines may show ✗ — **that is fine for M1** (we only run `flutter test`, which needs no device toolchain).
+Expected: the "Flutter" line is a checkmark. Android/Xcode lines may show ✗, which is fine for M1 (we only run `flutter test`, which needs no device toolchain).
 
 ---
 
@@ -164,7 +164,7 @@ void main() {
 rm test/widget_test.dart
 flutter test test/app/smoke_test.dart
 ```
-Expected: FAIL — `Target of URI doesn't exist: 'package:freshloop/app/app.dart'` (file not created yet).
+Expected: FAIL, with `Target of URI doesn't exist: 'package:freshloop/app/app.dart'` (file not created yet).
 
 - [ ] **Step 3: Create the Material 3 theme**
 
@@ -310,7 +310,7 @@ void main() {
 - [ ] **Step 2: Run to verify failure**
 
 Run: `flutter test test/domain/models/tier_test.dart`
-Expected: FAIL — URI `package:freshloop/domain/models/tier.dart` doesn't exist.
+Expected: FAIL, because URI `package:freshloop/domain/models/tier.dart` doesn't exist.
 
 - [ ] **Step 3: Implement**
 
@@ -376,7 +376,7 @@ void main() {
 - [ ] **Step 2: Run to verify failure**
 
 Run: `flutter test test/domain/scoring/air_score_test.dart`
-Expected: FAIL — URI doesn't exist.
+Expected: FAIL, because the URI doesn't exist.
 
 - [ ] **Step 3: Implement**
 
@@ -448,7 +448,7 @@ void main() {
 - [ ] **Step 2: Run to verify failure**
 
 Run: `flutter test test/domain/scoring/hills_score_test.dart`
-Expected: FAIL — URI doesn't exist.
+Expected: FAIL, because the URI doesn't exist.
 
 - [ ] **Step 3: Implement**
 
@@ -516,7 +516,7 @@ void main() {
 - [ ] **Step 2: Run to verify failure**
 
 Run: `flutter test test/domain/scoring/scenery_score_test.dart`
-Expected: FAIL — URI doesn't exist.
+Expected: FAIL, because the URI doesn't exist.
 
 - [ ] **Step 3: Implement**
 
@@ -586,7 +586,7 @@ void main() {
 - [ ] **Step 2: Run to verify failure**
 
 Run: `flutter test test/domain/models/score_weights_test.dart`
-Expected: FAIL — URI doesn't exist.
+Expected: FAIL, because the URI doesn't exist.
 
 - [ ] **Step 3: Implement `ScoreWeights`**
 
@@ -758,7 +758,7 @@ void main() {
 - [ ] **Step 2: Run to verify failure**
 
 Run: `flutter test test/domain/scoring/route_scorer_test.dart`
-Expected: FAIL — URI `route_scorer.dart` doesn't exist.
+Expected: FAIL, because URI `route_scorer.dart` doesn't exist.
 
 - [ ] **Step 3: Implement `RouteScorer` (score + explanation; rank added in Task 10)**
 
@@ -863,7 +863,7 @@ Append a new group inside the existing `main()` in `test/domain/scoring/route_sc
 - [ ] **Step 2: Run to verify failure**
 
 Run: `flutter test test/domain/scoring/route_scorer_test.dart`
-Expected: FAIL — `rank` is not defined on `RouteScorer`.
+Expected: FAIL, because `rank` is not defined on `RouteScorer`.
 
 - [ ] **Step 3: Implement `rank`**
 
@@ -931,6 +931,6 @@ git tag -a m1-foundation -m "M1: foundation + scoring core complete"
 
 **Spec coverage vs design doc:** §6 scoring → Tasks 4–10 (air/hills/scenery/scorer/rank, 3-tier, explanation). §7 architecture (Flutter, go_router, pure-Dart domain, Cubit deferred) → Tasks 2–3 + domain layout. §10 look&feel (Material 3 centralized theme) → Task 3. §12 test campaign (unit + widget) → every task is TDD; widget smoke test in Task 3. **Deferred (by design, tracked in roadmap):** external APIs §5 → M2; map/route-gen UI §3–4 screens → M3; GPS §6 screen → M4; Firebase/history/favorites/profile → M5; multi-device adaptive layouts §9 → M6.
 
-**Placeholder scan:** none — every code/test step contains complete content and real expected values.
+**Placeholder scan:** none. Every code/test step contains complete content and real expected values.
 
 **Type consistency:** `Tier`/`tierFromValue` (Task 4) used by `AxisScore` (Task 8) and `RouteScorer` (Task 9). `RouteScoreInputs`, `ScoreWeights`, `ScoreBreakdown` (Task 8) consumed by `RouteScorer.score` (Task 9). `score`/`rank` names match between tasks 9–10 and tests. Sub-score signatures (`airScore(List<double>)`, `hillsScore({actualAscentM,targetAscentM})`, `sceneryScore({greenRatio,scenicWaypoints})`) are identical where defined (Tasks 5–7) and where called (Task 9).

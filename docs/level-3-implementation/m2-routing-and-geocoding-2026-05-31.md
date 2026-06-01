@@ -2,13 +2,13 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build the first slice of the external data layer — app config (API keys via dart-define), a shared API-error type + injectable HTTP client convention, the OpenRouteService round-trip **routing** client, and the Nominatim **geocoding** client — each fully unit-tested with mocked HTTP.
+**Goal:** Build the first slice of the external data layer: app config (API keys via dart-define), a shared API-error type plus an injectable HTTP client convention, the OpenRouteService round-trip **routing** client, and the Nominatim **geocoding** client, each fully unit-tested with mocked HTTP.
 
-**Architecture:** `lib/data/` holds API clients. Each client takes an injectable `http.Client` (defaulting to a real one) so tests inject `MockClient` from `package:http/testing.dart` (part of the `http` package — no new dependency). Clients return pure-Dart domain models (`fromJson` factories) and throw a shared `ApiException` on non-200. Keys are read via `String.fromEnvironment` (compile-time, from `--dart-define-from-file=secrets.json`); tests pass keys directly so no env is needed.
+**Architecture:** `lib/data/` holds API clients. Each client takes an injectable `http.Client` (defaulting to a real one) so tests inject `MockClient` from `package:http/testing.dart` (part of the `http` package, so no new dependency). Clients return pure-Dart domain models (`fromJson` factories) and throw a shared `ApiException` on non-200. Keys are read via `String.fromEnvironment` (compile-time, from `--dart-define-from-file=secrets.json`); tests pass keys directly so no env is needed.
 
 **Tech Stack:** Flutter, `http` (+ `package:http/testing.dart`), Dart.
 
-**Design SSOT:** [FreshLoop system design](../level-2-architecture/running-route-generator-2026-05-30.md) — external services §5, architecture/data-flow §7, data models §8, error handling §11, secrets §13.7.
+**Design SSOT:** [FreshLoop system design](../level-2-architecture/running-route-generator-2026-05-30.md). External services §5, architecture/data-flow §7, data models §8, error handling §11, secrets §13.7.
 
 **Scope of M2.1:** config + ORS routing + Nominatim geocoding only. The enrichment clients (Open-Meteo air/elevation, OSM Overpass greenery) are **M2.2**; photo clients (Mapillary, Wikimedia) are **M2.3**; assembling everything into `RouteScoreInputs` for the M1 scorer is **M3**. Out of scope here.
 
@@ -101,11 +101,11 @@ cp secrets.example.json secrets.json   # secrets.json is gitignored
 flutter run --dart-define-from-file=secrets.json
 \`\`\`
 ```
-(Use a real fenced block in the README — the `\`\`\`` above is escaped only for this plan.)
+(Use a real fenced block in the README; the `\`\`\`` above is escaped only for this plan.)
 
 - [ ] **Step 5: Verify analysis is clean and commit**
 
-Run: `flutter analyze` → "No issues found!".
+Run: `flutter analyze`; expect "No issues found!".
 ```bash
 git add lib/app/app_config.dart secrets.example.json .gitignore README.md
 git commit -m "feat: add app config for API keys via dart-define
@@ -141,7 +141,7 @@ class ApiException implements Exception {
 
 - [ ] **Step 2: Analyze + commit**
 
-Run: `flutter analyze` → clean.
+Run: `flutter analyze`; expect it clean.
 ```bash
 git add lib/data/api_exception.dart
 git commit -m "feat: add ApiException for non-200 API responses"
@@ -218,7 +218,7 @@ void main() {
 - [ ] **Step 2: Run to verify failure**
 
 Run: `flutter test test/data/routing/route_geometry_test.dart`
-Expected: FAIL — URI `route_geometry.dart` doesn't exist.
+Expected: FAIL, because URI `route_geometry.dart` doesn't exist.
 
 - [ ] **Step 3: Implement the models**
 
@@ -348,7 +348,7 @@ void main() {
 - [ ] **Step 6: Run to verify failure**
 
 Run: `flutter test test/data/routing/ors_route_client_test.dart`
-Expected: FAIL — URI `ors_route_client.dart` doesn't exist.
+Expected: FAIL, because URI `ors_route_client.dart` doesn't exist.
 
 - [ ] **Step 7: Implement the client**
 
@@ -413,7 +413,7 @@ Expected: PASS (2 tests).
 
 - [ ] **Step 9: Analyze + commit**
 
-Run: `flutter analyze` → clean.
+Run: `flutter analyze`; expect it clean.
 ```bash
 git add lib/data/routing/ test/data/routing/
 git commit -m "feat: add OpenRouteService round-trip routing client
@@ -481,7 +481,7 @@ void main() {
 - [ ] **Step 2: Run to verify failure**
 
 Run: `flutter test test/data/geocoding/nominatim_client_test.dart`
-Expected: FAIL — URIs don't exist.
+Expected: FAIL, because the URIs don't exist.
 
 - [ ] **Step 3: Implement the model**
 
@@ -548,7 +548,7 @@ Expected: PASS (2 tests).
 
 - [ ] **Step 6: Analyze + commit**
 
-Run: `flutter analyze` → clean.
+Run: `flutter analyze`; expect it clean.
 ```bash
 git add lib/data/geocoding/ test/data/geocoding/
 git commit -m "feat: add Nominatim geocoding client
@@ -563,9 +563,9 @@ return null on no match and throw ApiException on non-200."
 
 **Files:** none
 
-- [ ] **Step 1: Full suite** — `flutter test` → expect 25 (M1) + 7 new (route_geometry 3 + ors 2 + nominatim 2) = **32 tests**, all passing.
-- [ ] **Step 2: Analyze** — `flutter analyze` → "No issues found!".
-- [ ] **Step 3: Secret + tree check** — `git status` clean; `git ls-files | grep secrets` shows ONLY `secrets.example.json` (never `secrets.json`); confirm no key strings in tracked files.
+- [ ] **Step 1: Full suite.** Run `flutter test`; expect 25 (M1) + 7 new (route_geometry 3 + ors 2 + nominatim 2) = 32 tests, all passing.
+- [ ] **Step 2: Analyze.** Run `flutter analyze`; expect "No issues found!".
+- [ ] **Step 3: Secret + tree check.** `git status` clean; `git ls-files | grep secrets` shows ONLY `secrets.example.json` (never `secrets.json`); confirm no key strings in tracked files.
 
 ---
 
@@ -573,7 +573,7 @@ return null on no match and throw ApiException on non-200."
 
 **Spec coverage:** design §5 ORS routing → Task 3; Nominatim → Task 4; secrets §13.7 (gitignored keys + template + dart-define) → Task 1; §11 error handling (non-200 → ApiException, empty → null) → Tasks 2-4. Deferred by design: air/elevation/Overpass → M2.2; photos → M2.3; assembling `RouteScoreInputs` + UI → M3.
 
-**Placeholder scan:** none — every step has complete code, real mock JSON, and exact expected values.
+**Placeholder scan:** none. Every step has complete code, real mock JSON, and exact expected values.
 
 **Type consistency:** `RoutePoint`/`RouteGeometry` (Task 3) match between model, client, and tests; `ApiException(service, statusCode, body)` signature (Task 2) used identically in Tasks 3-4; `GeoPlace.fromNominatimJson` (Task 4) matches its usage; `OrsRouteClient({apiKey, client})` and `NominatimClient({userAgent, client})` constructor shapes match their tests. `MockClient`/`http.Response` come from `package:http/testing.dart` + `package:http`, already available.
 

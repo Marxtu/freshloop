@@ -6,7 +6,7 @@
 > applied). M5.3 turned on the M5.2 code: guarded `Firebase.initializeApp`, the
 > auth gate, the uid-scoped cloud repositories, and the sign-out action are all
 > implemented and tested. **Steps 1–4 and 6 below are DONE.** Only the two
-> console actions in step 5 remain — they require the project owner.
+> console actions in step 5 remain; they require the project owner.
 
 > M5.2 built the auth layer (`AppUser`, `AuthRepository`, `AuthCubit`, `SignInScreen`)
 > and Firebase implementations (`FirebaseAuthRepository`, `FirestoreRunHistoryRepository`,
@@ -30,10 +30,10 @@
 ### 1. Generate `lib/firebase_options.dart` — DONE
 
 Run `flutterfire configure` (selects the project and platforms). This writes
-`lib/firebase_options.dart` (committed in M5.3 — Firebase client config is **not**
+`lib/firebase_options.dart` (committed in M5.3; Firebase client config is **not**
 secret per Google, and committing it lets a clean clone compile) plus the native
 `android/app/google-services.json` (kept **gitignored**; regenerate it via
-`flutterfire configure` for Android builds — `flutter test` and `flutter build web`
+`flutterfire configure` for Android builds, since `flutter test` and `flutter build web`
 do not need it). **To connect a different project, just re-run `flutterfire configure`**;
 it rewrites `firebase_options.dart`, `firebase.json`, and `google-services.json`.
 
@@ -67,7 +67,7 @@ Future<void> main() async {
 
 Implemented as a go_router `redirect` rather than a wrapper widget. `lib/app/app.dart`
 runs in two modes: **local mode** (`!firebaseReady` and no injected `authRepository`) is
-exactly the M5.1 tree (no `AuthCubit`, no Firebase touched — keeps the smoke test green);
+exactly the M5.1 tree (no `AuthCubit`, no Firebase touched, which keeps the smoke test green);
 **Firebase mode** (`firebaseReady`, or an `authRepository` is injected for tests) provides
 an `AuthCubit` above a single, stable `MaterialApp.router`. `appRouter` became
 `buildRouter()` (a function, so no Firebase singleton is read at library-load time). When
@@ -116,7 +116,7 @@ the project owner before sign-in and cloud writes work end-to-end:
   message in `FirebaseAuthRepository`).
 - **Deploy the security rules** in `firestore.rules` (at repo root):
   `firebase deploy --only firestore:rules`
-  The rules restrict `/users/{userId}/**` to the owning, authenticated user — matching the
+  The rules restrict `/users/{userId}/**` to the owning, authenticated user, matching the
   `/users/{uid}/runs/{autoId}` and `/users/{uid}/favorites/{routeKey}` data model the
   Firestore repositories write to. (The Firestore database itself is already created.)
 
@@ -131,9 +131,9 @@ the auth-state stream.
 ## Verification after going live
 
 - `flutter analyze` clean; `flutter test` green (the mock-based tests are unaffected).
-- Sign up → land on home; record a run / favourite a route → it appears under
+- Sign up, then land on home; record a run or favourite a route, and it appears under
   `/users/{uid}/runs` and `/users/{uid}/favorites` in the Firestore console.
-- Sign out → returns to `SignInScreen`; sign in as a different user → sees only their own
+- Sign out, which returns to `SignInScreen`; sign in as a different user, who sees only their own
   data (per-user isolation, enforced by both the path scoping and the rules).
 
 ## Known caveats to handle at go-live
@@ -146,4 +146,4 @@ the auth-state stream.
   server round-trip lands. The `fake_cloud_firestore` test resolves it synchronously and
   doesn't exercise this window. If the history list flickers/misorders right after saving,
   either read that list with `GetOptions(source: Source.server)`, or sort client-side with
-  a null-last fallback. Not a crash — purely the post-save ordering window.
+  a null-last fallback. Not a crash, purely the post-save ordering window.

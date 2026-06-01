@@ -2,8 +2,8 @@
 
 > Level-2 architecture. This document is the design SSOT (single source of truth) for **FreshLoop**. All implementation should trace back here; the factual basis is in [Course Materials Analysis](../level-1-foundation/course-materials-analysis-2026-05-30.md).
 >
-> - Project: FreshLoop (product working name, changeable) — an app that helps you **design** a run, not yet another run tracker
-> - Course: PoliMi — *Design and Implementation of Mobile Applications* (Prof. Baresi), final project
+> - Project: FreshLoop (product working name, changeable): an app that helps you **design** a run, not yet another run tracker
+> - Course: PoliMi, *Design and Implementation of Mobile Applications* (Prof. Baresi), final project
 > - Author: CHENWEI PAN (solo, wearing all three roles: routing / data / client)
 > - Date: 2026-05-30
 > - Status: Design aligned; pending Level-3 implementation plan
@@ -14,7 +14,7 @@
 
 **One-line definition**: Given a start point + target distance, the app generates 2–3 **loop running routes**, ranks them by a quality score over **air quality + elevation + scenery/greenery**, attaches along-route scenery photos; once chosen, the user can follow the route, record it via GPS, see a post-run summary, and export a report.
 
-**Core thesis**: Not run tracking (Strava/Nike Run Club are everywhere → red line 2), but run *design* → sits in the empty lane between sponsor cases, originality is clean.
+**Core thesis**: Not run tracking (Strava/Nike Run Club are everywhere, so that hits red line 2), but run *design*, which sits in the empty lane between sponsor cases where originality is clean.
 
 **Mapping to the rubric** (basis in Level-1 §1.2):
 
@@ -33,7 +33,7 @@
 ## 2. Scope
 
 **In (MVP, must-do)**
-- Loop route generation (start + distance → 2–3 candidates)
+- Loop route generation (start + distance yields 2–3 candidates)
 - Three-dimension quality scoring (air/elevation/scenery) + 3-tier badges + total + one-line explanation (borrow the WHO pattern)
 - Along-route scenery photo carousel (key waypoints, not every meter)
 - Elevation profile chart, route map rendering
@@ -100,7 +100,7 @@ Home/drawer → Profile/settings (units, default preferences)
 | Run weather hint | **Open-Meteo Weather** | feels-like / rain hint |
 | Account/storage (baseline, not a "highlight service") | **Firebase Auth + Firestore** | users, favorites, history |
 
-> Secret management: see §13.7 — repo holds only `.example` templates; real keys live in gitignored config.
+> Secret management: see §13.7. The repo holds only `.example` templates; real keys live in gitignored config.
 
 ---
 
@@ -110,20 +110,20 @@ Borrows the WHO "3-tier scoring + report" pattern (Level-1 §2.1).
 
 - **Input**: a candidate route's sampled point sequence.
 - **Three sub-scores** (each normalized to 0–100):
-  - **Air** = (weighted) mean of AQI samples along the route → lower is better
-  - **Elevation** = closeness of actual cumulative ascent to the user's target ascent (beginners want flat, training wants hills — by preference, not "flatter is always better")
+  - **Air** = (weighted) mean of AQI samples along the route, where lower is better
+  - **Elevation** = closeness of actual cumulative ascent to the user's target ascent (beginners want flat, training wants hills, so it's by preference, not "flatter is always better")
   - **Scenery** = greenery/water coverage ratio within the route buffer + number of scenic waypoints passed
 - **Total** = the three sub-scores weighted by the user's **axis weights** (adjustable on the params screen).
-- **3-tier badges**: each sub-score maps to Meets +++ / Partial ++ / Does not meet +, with a **one-line explanation** ("70% of this route runs through parks, air is excellent") → explainable, not a black box.
+- **3-tier badges**: each sub-score maps to Meets +++ / Partial ++ / Does not meet +, with a **one-line explanation** ("70% of this route runs through parks, air is excellent"), so it's explainable, not a black box.
 - **Ranking**: sort the 2–3 candidates by total.
 
-> Scoring logic is **decoupled** from external data fetching: scoring is a pure function (sampled data in → score out), easy to unit-test and mock.
+> Scoring logic is **decoupled** from external data fetching: scoring is a pure function (sampled data in, score out), easy to unit-test and mock.
 
 ---
 
 ## 7. Tech Stack & Architecture
 
-**Tech stack (finalized)**: Flutter · `flutter_bloc`(Cubit) · `http` · `geolocator` · `flutter_map`(+OSM tiles) · `go_router` · Firebase(Auth/Firestore) · `share_plus`. Rationale in Level-1 §3.
+**Tech stack (finalized)**: Flutter, `flutter_bloc`(Cubit), `http`, `geolocator`, `flutter_map`(+OSM tiles), `go_router`, Firebase(Auth/Firestore), `share_plus`. Rationale in Level-1 §3.
 
 **Layered architecture (high cohesion / low coupling)**:
 
@@ -140,9 +140,9 @@ External      ORS / Open-Meteo / Overpass / Mapillary / Wikimedia / OSM / Fireba
 ```
 
 **State-management strategy** (the way the professor taught, Level-1 §3.3)
-- Per-screen ephemeral state (toggles, sliders, inputs) → `setState`
-- Sibling sharing → state hoisting + `ValueChanged` callbacks
-- Cross-screen app state (candidate routes, run session, history) → `Cubit`/`flutter_bloc`
+- Per-screen ephemeral state (toggles, sliders, inputs) uses `setState`
+- Sibling sharing uses state hoisting + `ValueChanged` callbacks
+- Cross-screen app state (candidate routes, run session, history) uses `Cubit`/`flutter_bloc`
 - **Do not introduce Riverpod/Provider** (not taught; importing it would read as "not course-produced")
 
 **Data flow (generate route)**
@@ -188,7 +188,7 @@ All API models implement a `fromJson` factory (the parsing pattern the professor
 
 - **Material 3**: `ThemeData` + `ColorScheme.fromSeed` centralized theme (Color/Typography/Shape), `useMaterial3: true`.
 - **Follow MAD principles** (professor's later slides):
-  - Visibility of system status → progress + skeletons during generation/fetch; live feedback during tracking
+  - Visibility of system status: progress + skeletons during generation/fetch; live feedback during tracking
   - Consistency, recognition over recall (remember default preferences), immediate feedback (SnackBar/animation), error prevention (param validation, undoable actions)
 - **Accessibility**: sufficient contrast, dynamic type support, semantic labels (Semantics).
 - **Restraint**: map-first, layered information, avoid the anti-patterns the professor named.
@@ -212,14 +212,14 @@ All API models implement a `fromJson` factory (the parsing pattern the professor
 
 - **Unit (`test`)**: scoring algorithm (pure function, many scenarios), unit conversion, `fromJson` parsing for each API model, data repositories with a mocked `http` layer.
 - **Widget (`flutter_test`/`WidgetTester`)**: params screen, candidate comparison, route detail, tracking-screen key interactions (`find` + `expect` + `pump`).
-- **Integration (`integration_test`)**: golden path — generate → detail → track (mocked location) → save.
+- **Integration (`integration_test`)**: the golden path, generate then detail then track (mocked location) then save.
 - Maps onto the testing pyramid the course taught (Level-1 §3.5). Tests are added incrementally with features, forming a demonstrable test campaign.
 
 ---
 
 ## 13. Engineering Provenance
 
-> Goal: a development trail that is **real, complete, and defensible** — required for grading (design/test doc + presentation) and the strongest evidence that "I made this myself." **Bottom line: build a real, well-recorded trail; do not fabricate records** (no backdated timestamps, no fabricated collaborators, no work credited to people who did not do it). Commit messages describe the change, not the tooling; whether AI assistance must be disclosed is a course-policy question to confirm with the TA (§15). The defense will expose anyone who cannot explain their own code, so "truly understood + truly iterated" is the only stable path to a high score.
+> Goal: a development trail that is **real, complete, and defensible**. This is required for grading (design/test doc + presentation) and is the strongest evidence that "I made this myself." **Bottom line: build a real, well-recorded trail; do not fabricate records** (no backdated timestamps, no fabricated collaborators, no work credited to people who did not do it). Commit messages describe the change, not the tooling; whether AI assistance must be disclosed is a course-policy question to confirm with the TA (§15). The defense will expose anyone who cannot explain their own code, so "truly understood + truly iterated" is the only stable path to a high score.
 
 ### 13.1 Identity
 - Single author **CHENWEI PAN**, single git identity (honest; no fabricated non-existent collaborators).
@@ -227,7 +227,7 @@ All API models implement a `fromJson` factory (the parsing pattern the professor
 - Commit email must be linked to the GitHub account (**to be written into** `git config user.email` after the user confirms it; see §13.8 TODO).
 
 ### 13.2 What push preserves (fact)
-- `git push` uploads **all commits** on the branch (messages, author, author date, every diff), not just the final state → committing locally first and pushing once at the end still gives GitHub the full history, timeline, per-line blame, and contributor graph.
+- `git push` uploads **all commits** on the branch (messages, author, author date, every diff), not just the final state. So committing locally first and pushing once at the end still gives GitHub the full history, timeline, per-line blame, and contributor graph.
 
 ### 13.3 Branch strategy
 - `main` is the integration branch; each feature on a `feature/<slug>` branch (even solo, branches narrate feature evolution).
@@ -243,11 +243,11 @@ All API models implement a `fromJson` factory (the parsing pattern the professor
 - Do not `rebase`/`amend`/force-push `main` after it is pushed (rewrites history, drops original commits).
 
 ### 13.6 The design process is part of the trail (user requirement)
-- The **early design chain** (research → brainstorming/selection → tech decisions) is committed as **distinct design-phase commits**: the Level-1 course-materials analysis, this design document, and the §14 design-evolution log.
+- The **early design chain** (research, then brainstorming/selection, then tech decisions) is committed as **distinct design-phase commits**: the Level-1 course-materials analysis, this design document, and the §14 design-evolution log.
 - Let the git history show the real order: "research first, then decide, then implement."
 
 ### 13.7 Secret safety (push = publish)
-- API keys (ORS/Mapillary/Firebase config) **never enter the repo**; once in history, deleting the file does not remove it, and public repos get indexed/cached → a leak must be revoked/rotated.
+- API keys (ORS/Mapillary/Firebase config) **never enter the repo**; once in history, deleting the file does not remove it, and public repos get indexed/cached, so a leak must be revoked/rotated.
 - Repo holds only `*.example` templates; real keys live in `.gitignore`d local config / environment variables; `.gitignore` covers `.env`, `secrets`, Firebase config files.
 
 ### 13.8 GitHub-side provenance signals (enable later)
@@ -279,7 +279,7 @@ All API models implement a `fromJson` factory (the parsing pattern the professor
 
 | Risk | Mitigation |
 |---|---|
-| Whether the professor accepts Flutter for the project | slides list Flutter as a *taught* technology (p5), but the project rules (p6–p9) are silent on framework choice → strongly implied, not explicitly permitted (Level-1 §3.1). **Must get TA confirmation before kickoff.** |
+| Whether the professor accepts Flutter for the project | slides list Flutter as a *taught* technology (p5), but the project rules (p6–p9) are silent on framework choice, so it's strongly implied, not explicitly permitted (Level-1 §3.1). **Must get TA confirmation before kickoff.** |
 | Solo vs the 3-person course requirement | user is aware; add real teammates' identities later if any; no fabrication |
 | External API rate limits/coverage (Mapillary street-level varies by city) | cache + throttle + graceful degradation when no data (§11) |
 | Maps/location not taught in the decks | pull "official pub.dev packages" legitimately (Level-1 §3.4) |

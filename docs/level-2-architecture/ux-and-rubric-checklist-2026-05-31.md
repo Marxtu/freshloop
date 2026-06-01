@@ -1,8 +1,8 @@
 # FreshLoop — UX & Grading Checklist (enforced on every UI milestone)
 
-> Level-2 architecture. The single, checkable standard that every screen (M3 onward) is **built against and reviewed against**. Grounded in the professor's own course material — not generic advice. Sources: opening slides `dima1.pdf` p6–9 (rubric) and p26–39 ("MAD: Mobile Application Design"); see [Course Materials Analysis](../level-1-foundation/course-materials-analysis-2026-05-30.md) and the design SSOT [FreshLoop system design](running-route-generator-2026-05-30.md) §10.
+> Level-2 architecture. The single, checkable standard that every screen (M3 onward) is **built against and reviewed against**. Grounded in the professor's own course material, not generic advice. Sources: opening slides `dima1.pdf` p6–9 (rubric) and p26–39 ("MAD: Mobile Application Design"); see [Course Materials Analysis](../level-1-foundation/course-materials-analysis-2026-05-30.md) and the design SSOT [FreshLoop system design](running-route-generator-2026-05-30.md) §10.
 >
-> - Author: CHENWEI PAN · Date: 2026-05-31
+> - Author: CHENWEI PAN. Date: 2026-05-31
 > - How to use: the M3+ implementer builds each screen to satisfy §2–§4; the reviewer audits each screen against this file; the Chrome screenshot walkthrough scores screens against §2–§5. A screen is "done" only when it passes §1 gates + has no §3 anti-pattern.
 
 ---
@@ -11,13 +11,13 @@
 
 From `dima1.pdf` p7. Every UI milestone must keep these moving:
 
-1. **# screens & functionality** — each screen earns its place with real function.
-2. **Used external services** — surfaces beyond-Firebase data (routes, AQI, greenery, photos) visibly.
-3. **Look and feel** — see §2–§4 below.
-4. **"Multi-device" support** — genuine width-adaptive layout (phone + tablet/landscape), not a scaled-up phone screen.
-5. **Test campaign** — widget tests for each screen's key states/interactions.
-6. **Design/Test document** — this file + the design SSOT are part of it.
-7. **Professional presentation** — polished, demoable, explainable.
+1. **# screens & functionality**: each screen earns its place with real function.
+2. **Used external services**: surfaces beyond-Firebase data (routes, AQI, greenery, photos) visibly.
+3. **Look and feel**: see §2–§4 below.
+4. **"Multi-device" support**: genuine width-adaptive layout (phone + tablet/landscape), not a scaled-up phone screen.
+5. **Test campaign**: widget tests for each screen's key states/interactions.
+6. **Design/Test document**: this file and the design SSOT are part of it.
+7. **Professional presentation**: polished, demoable, explainable.
 
 **Hard no's (red lines, p6 + the two "dreams"):** no social network; not just Firebase CRUD (external APIs must be front-and-center); nothing that already exists on the market; nothing commercial.
 
@@ -31,11 +31,11 @@ Prof. Baresi, "A few design principles" (p35). These are the primary look-&-feel
 |---|---|
 | **"Simply my life"** | The app does the hard part: enter start + distance and it designs the run. No manual route drawing, no jargon. Sensible defaults everywhere. |
 | **"Keep it brief"** | Minimal input per screen. Params screen asks only what's needed (distance + 3 weight sliders + loop type). No walls of text; short labels. |
-| **"Pictures are faster than words"** | Lead with the **map**, **scenery photos**, **elevation profile**, and **tier badges/color** — not paragraphs. Numbers get an icon + color, not a sentence. |
-| **"Decide for me but let me have the final say"** | The app **generates & ranks** candidate routes (decides), but the user **chooses** among them and can adjust weights/distance and re-generate (final say). This is literally FreshLoop's core loop — make it obvious. |
+| **"Pictures are faster than words"** | Lead with the **map**, **scenery photos**, **elevation profile**, and **tier badges/color**, not paragraphs. Numbers get an icon + color, not a sentence. |
+| **"Decide for me but let me have the final say"** | The app **generates & ranks** candidate routes (decides), but the user **chooses** among them and can adjust weights/distance and re-generate (final say). This is literally FreshLoop's core loop, so make it obvious. |
 | **"I should always know where I am"** | Every screen has a clear title; current GPS location always visible on maps; back/route is obvious; generation/tracking show explicit state ("Generating…", "2.1 km of 5 km"). Never a dead-end or ambiguous screen. |
 
-Plus the ethos (p27, p29): **"Simple, cheap, addicting"** and **"Quality!!!!"** — favor a focused, delightful core loop over feature sprawl.
+Plus the ethos (p27, p29): **"Simple, cheap, addicting"** and **"Quality!!!!"**. Favor a focused, delightful core loop over feature sprawl.
 
 ---
 
@@ -48,7 +48,7 @@ Prof. Baresi, "Anti-patterns" (p36, citing Theresa Neil's Mobile Design Pattern 
 | **Metaphor mismatch** | UI element doesn't match its real-world meaning | A map looks/behaves like a map; a slider means "more/less"; badges mean quality. No clever-but-confusing metaphors. |
 | **Idiot boxes** | Pointless confirmation dialogs ("Are you sure?") | No gratuitous confirmations. Use undo (SnackBar) instead of "Are you sure?". Only confirm truly destructive, irreversible actions. |
 | **Too many chart elements** | Cluttered, over-decorated charts | The elevation profile shows one clean line + minimal axes. AQI/score visuals stay simple. No chart junk. |
-| **Oceans of buttons** | A grid/wall of buttons (the eBay example) | The params screen uses **sliders, chips, and a single primary CTA** — not a grid of buttons. One clear primary action per screen. |
+| **Oceans of buttons** | A grid/wall of buttons (the eBay example) | The params screen uses **sliders, chips, and a single primary CTA**, not a grid of buttons. One clear primary action per screen. |
 
 ---
 
@@ -56,10 +56,10 @@ Prof. Baresi, "Anti-patterns" (p36, citing Theresa Neil's Mobile Design Pattern 
 
 - **Material 3**: one centralized `ThemeData` (`ColorScheme.fromSeed`, `useMaterial3`); use M3 components (Cards for candidates, Chips for weights/badges, `NavigationBar`/`Drawer`, `FilledButton` for the primary CTA). Consistent spacing scale (8/16/24).
 - **Touch targets** ≥ 48×48 dp (Fitts's law; thumb-friendly).
-- **Contrast** ≥ WCAG AA (4.5:1 body text, 3:1 large text / icons) — verify badge and on-map text legibility.
-- **Don't rely on color alone** — pair tier color with a label/icon (accessibility; also helps the AQI/score read).
-- **Dynamic type** — layouts survive larger system font sizes (no clipping).
-- **Semantics** — meaningful `Semantics`/labels on icon-only controls and images.
+- **Contrast** ≥ WCAG AA (4.5:1 body text, 3:1 large text / icons); verify badge and on-map text legibility.
+- **Don't rely on color alone**: pair tier color with a label/icon (accessibility; also helps the AQI/score read).
+- **Dynamic type**: layouts survive larger system font sizes (no clipping).
+- **Semantics**: meaningful `Semantics`/labels on icon-only controls and images.
 - **Feedback & status** (echoes "always know where I am"): progress indicators + skeletons during API calls; clear empty states ("No photos for this area"); friendly, actionable error states (design §11), never a raw exception.
 - **Choice economy** (Hick's law / "keep it brief"): limit simultaneous choices; 2–3 route candidates, not ten.
 
@@ -87,5 +87,5 @@ Each M3 screen must satisfy its row before it's "done":
 
 1. **Build** each screen to its §5 row + §2 principles, avoiding all §3 anti-patterns, meeting §4 standards.
 2. **Review** (spec+quality subagent) audits the screen against §1–§4 and flags any anti-pattern as a must-fix.
-3. **Visual walkthrough** (Chrome web build → headless screenshot, phone + tablet widths) scores each screen against §2–§5 with the screenshot-critique loop (frontend-design judgment + this checklist).
+3. **Visual walkthrough** (Chrome web build, then headless screenshot at phone + tablet widths) scores each screen against §2–§5 with the screenshot-critique loop (frontend-design judgment + this checklist).
 4. A screen ships only when gates pass and no anti-pattern remains.

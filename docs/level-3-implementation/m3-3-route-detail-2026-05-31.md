@@ -2,17 +2,17 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: superpowers:subagent-driven-development or superpowers:executing-plans. Checkbox (`- [ ]`) steps.
 
-**Goal:** The route-detail screen behind a candidate tap — the loop on a map, a clean elevation profile, the per-axis badges + explanation, and a scenery photo carousel — wired from the candidate cards.
+**Goal:** The route-detail screen behind a candidate tap: the loop on a map, a clean elevation profile, the per-axis badges + explanation, and a scenery photo carousel, all wired from the candidate cards.
 
-**Architecture:** A dep-free `ElevationChart` (CustomPainter — one clean line, no chart junk per the UX checklist). A `PhotoService` (orchestrates the M2.3 Mapillary + Wikimedia clients over a few route waypoints, dedups, degrades gracefully). A `PhotoCarousel` widget. `RouteDetailScreen` composes them, takes a `ScoredRoute`, and fetches photos via `FutureBuilder`. Candidate cards navigate to it with go_router `extra`.
+**Architecture:** A dep-free `ElevationChart` (CustomPainter, one clean line, no chart junk per the UX checklist). A `PhotoService` (orchestrates the M2.3 Mapillary + Wikimedia clients over a few route waypoints, dedups, degrades gracefully). A `PhotoCarousel` widget. `RouteDetailScreen` composes them, takes a `ScoredRoute`, and fetches photos via `FutureBuilder`. Candidate cards navigate to it with go_router `extra`.
 
-**Tech Stack:** Flutter, flutter_map, flutter_bloc, http, `share_plus` (share action). No charting dependency — elevation is hand-painted.
+**Tech Stack:** Flutter, flutter_map, flutter_bloc, http, `share_plus` (share action). No charting dependency; elevation is hand-painted.
 
 **SSOT:** [visual direction](../level-2-architecture/visual-design-direction-2026-05-31.md) (route detail row), [UX checklist](../level-2-architecture/ux-and-rubric-checklist-2026-05-31.md) (§5 route detail; no chart junk; pictures > words), [system design](../level-2-architecture/running-route-generator-2026-05-30.md) §4. Builds on M2.3 (`MapillaryPhotoClient`, `WikimediaPhotoClient`, `ScenePhoto`), M3.1 (`ScoredRoute`, geo `subsample`), M3.2 (`RouteMap`, `TierBadge`, candidates screen, `dependencies.dart`).
 
-**Scope:** elevation chart + photo service + carousel + detail screen + nav wiring. **Out:** live run tracking ("Start run" is a disabled/placeholder action → M4); export/share may be a simple share_plus text.
+**Scope:** elevation chart + photo service + carousel + detail screen + nav wiring. **Out:** live run tracking ("Start run" is a disabled/placeholder action, deferred to M4); export/share may be a simple share_plus text.
 
-**Notes:** Flutter at `$HOME/flutter/bin/flutter`. English, Conventional Commits, no AI/tooling attribution. **Run `flutter test` + `flutter analyze` green before each commit.** Widget tests must not hit the network (inject fakes / canned data).
+**Notes:** Flutter at `$HOME/flutter/bin/flutter`. English, Conventional Commits, no AI/tooling attribution. Run `flutter test` + `flutter analyze` green before each commit. Widget tests must not hit the network (inject fakes or canned data).
 
 ---
 
@@ -39,7 +39,7 @@ test/features/detail/photo_carousel_test.dart
 
 **Files:** `lib/services/photo_service.dart`, `test/services/photo_service_test.dart`
 
-- [ ] **Step 1: Failing test** — `test/services/photo_service_test.dart`:
+- [ ] **Step 1: Failing test.** `test/services/photo_service_test.dart`:
 ```dart
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
@@ -102,9 +102,9 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run → FAIL.**
+- [ ] **Step 2: Run, expect FAIL.**
 
-- [ ] **Step 3: Implement** — `lib/services/photo_service.dart`:
+- [ ] **Step 3: Implement.** `lib/services/photo_service.dart`:
 ```dart
 import '../data/photos/mapillary_client.dart';
 import '../data/photos/scene_photo.dart';
@@ -148,7 +148,7 @@ class PhotoService {
 }
 ```
 
-- [ ] **Step 4: Run → PASS (2).** `flutter analyze`. Commit:
+- [ ] **Step 4: Run, expect PASS (2).** `flutter analyze`. Commit:
 ```bash
 git add lib/services/photo_service.dart test/services/photo_service_test.dart
 git commit -m "feat: add PhotoService merging Mapillary + Wikimedia along a route"
@@ -160,7 +160,7 @@ git commit -m "feat: add PhotoService merging Mapillary + Wikimedia along a rout
 
 **Files:** `lib/features/detail/elevation_chart.dart`, `test/features/detail/elevation_chart_test.dart`
 
-- [ ] **Step 1: Failing test** — `test/features/detail/elevation_chart_test.dart`:
+- [ ] **Step 1: Failing test.** `test/features/detail/elevation_chart_test.dart`:
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -190,9 +190,9 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run → FAIL.**
+- [ ] **Step 2: Run, expect FAIL.**
 
-- [ ] **Step 3: Implement** — `lib/features/detail/elevation_chart.dart`:
+- [ ] **Step 3: Implement.** `lib/features/detail/elevation_chart.dart`:
 ```dart
 import 'package:flutter/material.dart';
 import '../../data/routing/route_geometry.dart';
@@ -271,7 +271,7 @@ class _ElevationPainter extends CustomPainter {
 }
 ```
 
-- [ ] **Step 4: Run → PASS (2).** `flutter analyze`. Commit:
+- [ ] **Step 4: Run, expect PASS (2).** `flutter analyze`. Commit:
 ```bash
 git add lib/features/detail/elevation_chart.dart test/features/detail/elevation_chart_test.dart
 git commit -m "feat: add dep-free ElevationChart (single clean profile line)"
@@ -283,7 +283,7 @@ git commit -m "feat: add dep-free ElevationChart (single clean profile line)"
 
 **Files:** `lib/features/detail/photo_carousel.dart`, `test/features/detail/photo_carousel_test.dart`
 
-- [ ] **Step 1: Failing test** — `test/features/detail/photo_carousel_test.dart`:
+- [ ] **Step 1: Failing test.** `test/features/detail/photo_carousel_test.dart`:
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -311,9 +311,9 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run → FAIL.**
+- [ ] **Step 2: Run, expect FAIL.**
 
-- [ ] **Step 3: Implement** — `lib/features/detail/photo_carousel.dart`:
+- [ ] **Step 3: Implement.** `lib/features/detail/photo_carousel.dart`:
 ```dart
 import 'package:flutter/material.dart';
 import '../../data/photos/scene_photo.dart';
@@ -383,7 +383,7 @@ class PhotoCarousel extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 4: Run → PASS (2).** `flutter analyze`. Commit:
+- [ ] **Step 4: Run, expect PASS (2).** `flutter analyze`. Commit:
 ```bash
 git add lib/features/detail/photo_carousel.dart test/features/detail/photo_carousel_test.dart
 git commit -m "feat: add PhotoCarousel for along-route scenery photos"
@@ -393,9 +393,9 @@ git commit -m "feat: add PhotoCarousel for along-route scenery photos"
 
 ## Task 4: `RouteDetailScreen` + navigation wiring
 
-**Files:** `lib/features/detail/route_detail_screen.dart`, `lib/app/dependencies.dart` (+ buildPhotoService), `lib/app/router.dart` (+ '/detail'), `lib/features/candidates/candidates_screen.dart` (onTap → push)
+**Files:** `lib/features/detail/route_detail_screen.dart`, `lib/app/dependencies.dart` (+ buildPhotoService), `lib/app/router.dart` (+ '/detail'), `lib/features/candidates/candidates_screen.dart` (onTap pushes the route)
 
-- [ ] **Step 1: Implement `buildPhotoService()`** — append to `lib/app/dependencies.dart`:
+- [ ] **Step 1: Implement `buildPhotoService()`.** Append to `lib/app/dependencies.dart`:
 ```dart
 import '../data/photos/mapillary_client.dart';
 import '../data/photos/wikimedia_client.dart';
@@ -408,7 +408,7 @@ PhotoService buildPhotoService() => PhotoService(
 ```
 (Add `static const String mapillaryToken = String.fromEnvironment('MAPILLARY_TOKEN');` to `AppConfig` in `lib/app/app_config.dart` if not present.)
 
-- [ ] **Step 2: Implement `RouteDetailScreen`** — `lib/features/detail/route_detail_screen.dart`:
+- [ ] **Step 2: Implement `RouteDetailScreen`.** `lib/features/detail/route_detail_screen.dart`:
 ```dart
 import 'package:flutter/material.dart';
 import '../../data/photos/scene_photo.dart';
@@ -523,7 +523,7 @@ onTap: () => context.push('/detail', extra: routes[i]),
 ```
 (import `package:go_router/go_router.dart`.)
 
-- [ ] **Step 4:** `flutter test` (existing suite still green — no test mounts the live `/detail` route) + `flutter analyze` (clean). Commit:
+- [ ] **Step 4:** `flutter test` (existing suite still green, since no test mounts the live `/detail` route) + `flutter analyze` (clean). Commit:
 ```bash
 git add lib/features/detail/route_detail_screen.dart lib/app/dependencies.dart lib/app/app_config.dart lib/app/router.dart lib/features/candidates/candidates_screen.dart
 git commit -m "feat: add RouteDetailScreen and wire candidate tap to it"
@@ -533,17 +533,17 @@ git commit -m "feat: add RouteDetailScreen and wire candidate tap to it"
 
 ## Task 5: Final verification
 
-- [ ] **Step 1:** `flutter test` → expect 70 (after M3.2) + photo_service 2 + elevation_chart 2 + photo_carousel 2 = **76 tests**, all passing.
-- [ ] **Step 2:** `flutter analyze` → clean.
+- [ ] **Step 1:** `flutter test` should report 70 (after M3.2) + photo_service 2 + elevation_chart 2 + photo_carousel 2 = 76 tests, all passing.
+- [ ] **Step 2:** `flutter analyze` clean.
 - [ ] **Step 3:** `git status` clean; `lib/domain` still Flutter-free; no real secrets tracked.
 
 ---
 
 ## Self-Review (author)
 
-**Spec coverage:** UX checklist §5 route detail (map + clean elevation + badges + explanation + photo carousel + action) → Task 4; "no chart junk" → dep-free single-line ElevationChart (Task 2); "pictures > words" → photo carousel (Tasks 1/3); graceful degradation §11 → PhotoService try/catch + carousel empty/error states. Deferred: "Start run" live tracking → M4 (disabled button).
+**Spec coverage:** UX checklist §5 route detail (map + clean elevation + badges + explanation + photo carousel + action) is Task 4; "no chart junk" is the dep-free single-line ElevationChart (Task 2); "pictures > words" is the photo carousel (Tasks 1/3); graceful degradation §11 is PhotoService try/catch plus carousel empty/error states. Deferred: "Start run" live tracking goes to M4 (disabled button).
 
-**Placeholder scan:** none — complete widget code + exact test expectations.
+**Placeholder scan:** none. Complete widget code plus exact test expectations.
 
 **Type consistency:** `ScoredRoute`/`ScoreBreakdown`/`Tier` (M1/M3.1) used in detail + badges; `RouteGeometry`/`RoutePoint` in chart + map + PhotoService; `subsample` (M3.1 geo) in PhotoService; `MapillaryPhotoClient`/`WikimediaPhotoClient`/`ScenePhoto` (M2.3) in PhotoService/carousel; `RouteMap`/`TierBadge` (M3.2) reused; go_router `extra` passes `ScoredRoute`; `AppConfig.mapillaryToken` added. `withValues(alpha:)` is the current (non-deprecated) Color API.
 

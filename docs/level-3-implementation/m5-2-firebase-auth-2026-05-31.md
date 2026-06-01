@@ -4,13 +4,13 @@
 
 **Goal:** Add email/password **authentication** and a **cloud** implementation of the M5.1 history/favourites repositories (Firestore), behind interfaces, so a signed-in user's data syncs to the cloud.
 
-**Build strategy (important):** This is built **without any real Firebase project or credential** — all Firebase code is unit/widget-tested with **mocks** (`firebase_auth_mocks`, `fake_cloud_firestore`). The running app is **NOT switched to Firebase in this pass**: `main()`, the router, and `dependencies.dart` are left untouched, so the app keeps running on M5.1 local storage and web screenshots keep working. "Going live" (real `firebase_options.dart` + guarded `Firebase.initializeApp` + an `AuthGate` + repo swap + console toggles + rules deploy) is a separate, well-defined final step gated on the user's project — captured in `docs/level-3-implementation/m5-2-going-live.md` (Task 6).
+**Build strategy (important):** This is built without any real Firebase project or credential. All Firebase code is unit/widget-tested with mocks (`firebase_auth_mocks`, `fake_cloud_firestore`). The running app is **NOT switched to Firebase in this pass**: `main()`, the router, and `dependencies.dart` are left untouched, so the app keeps running on M5.1 local storage and web screenshots keep working. "Going live" (real `firebase_options.dart` + guarded `Firebase.initializeApp` + an `AuthGate` + repo swap + console toggles + rules deploy) is a separate, well-defined final step gated on the user's project. It is captured in `docs/level-3-implementation/m5-2-going-live.md` (Task 6).
 
 **Two phases:**
-- **Phase A — backend-agnostic auth layer** (NO firebase deps): `AppUser`, `AuthRepository` interface, `AuthCubit`, `SignInScreen`. Tested with a hand-written fake repo. *This survives even if the backend later becomes Supabase — only the impl changes.*
-- **Phase B — Firebase implementations**: add firebase deps; `FirebaseAuthRepository` + `FirestoreRunHistoryRepository` + `FirestoreFavoritesRepository` (implement the existing `RunHistoryRepository`/`FavoritesRepository` interfaces from M5.1). Tested with `firebase_auth_mocks` + `fake_cloud_firestore`.
+- **Phase A, backend-agnostic auth layer** (NO firebase deps): `AppUser`, `AuthRepository` interface, `AuthCubit`, `SignInScreen`. Tested with a hand-written fake repo. *This survives even if the backend later becomes Supabase; only the impl changes.*
+- **Phase B, Firebase implementations**: add firebase deps; `FirebaseAuthRepository` + `FirestoreRunHistoryRepository` + `FirestoreFavoritesRepository` (implement the existing `RunHistoryRepository`/`FavoritesRepository` interfaces from M5.1). Tested with `firebase_auth_mocks` + `fake_cloud_firestore`.
 
-**SSOT:** [system design](../level-2-architecture/running-route-generator-2026-05-30.md) §8; builds on M5.1 ([plan](m5-1-history-favorites-2026-05-31.md)) — reuses `RunRecord`/`ScoredRoute` `toJson`/`fromJson` and the `RunHistoryRepository`/`FavoritesRepository` interfaces. Firestore data model matches the published security rules: `/users/{uid}/runs/{autoId}` and `/users/{uid}/favorites/{routeKey}`.
+**SSOT:** [system design](../level-2-architecture/running-route-generator-2026-05-30.md) §8; builds on M5.1 ([plan](m5-1-history-favorites-2026-05-31.md)), reusing `RunRecord`/`ScoredRoute` `toJson`/`fromJson` and the `RunHistoryRepository`/`FavoritesRepository` interfaces. Firestore data model matches the published security rules: `/users/{uid}/runs/{autoId}` and `/users/{uid}/favorites/{routeKey}`.
 
 **Notes:** Flutter at `$HOME/flutter/bin/flutter`. English only; Conventional Commits; **no AI/tooling attribution**. **`flutter test` + `flutter analyze` green before every commit.** `lib/domain` stays Flutter-free. Do NOT create `firebase_options.dart` (it's gitignored and we have no real values yet) and do NOT call `Firebase.initializeApp` anywhere in this pass.
 
@@ -22,11 +22,11 @@
 
 - [ ] **Step 1:** `flutter pub add firebase_core firebase_auth cloud_firestore`
 - [ ] **Step 2:** `flutter pub add dev:fake_cloud_firestore dev:firebase_auth_mocks`
-- [ ] **Step 3:** `flutter pub get` then `flutter analyze` — confirm the project still compiles with the new deps and **the existing 100 tests still pass** (`flutter test`). The plugins must not break host-VM tests (they don't touch native in `flutter test`).
-- [ ] **Step 4:** If `fake_cloud_firestore` / `firebase_auth_mocks` cannot co-resolve with the latest firebase plugins, pin the firebase plugins down to the newest versions the mocks support (check the mocks' pubspec constraints), re-resolve, and **note the chosen versions in the commit message**. If it still cannot resolve, STOP and report the conflict — do not hack around it.
+- [ ] **Step 3:** `flutter pub get` then `flutter analyze`. Confirm the project still compiles with the new deps and **the existing 100 tests still pass** (`flutter test`). The plugins must not break host-VM tests (they don't touch native in `flutter test`).
+- [ ] **Step 4:** If `fake_cloud_firestore` / `firebase_auth_mocks` cannot co-resolve with the latest firebase plugins, pin the firebase plugins down to the newest versions the mocks support (check the mocks' pubspec constraints), re-resolve, and **note the chosen versions in the commit message**. If it still cannot resolve, STOP and report the conflict; do not hack around it.
 - [ ] **Step 5:** Commit: `git commit -am "build: add firebase + mock test dependencies"`
 
-> Phase A (Tasks 1–3) has **no** dependency on Task 0 succeeding — if Task 0's mocks won't resolve, still complete Phase A (it uses only a hand-written fake), and report Phase B blocked.
+> Phase A (Tasks 1–3) has **no** dependency on Task 0 succeeding. If Task 0's mocks won't resolve, still complete Phase A (it uses only a hand-written fake), and report Phase B blocked.
 
 ---
 
@@ -80,7 +80,7 @@ class AuthException implements Exception {
 
 **Files:** create `lib/state/auth_cubit.dart`, `test/state/auth_cubit_test.dart`
 
-- [ ] **Step 1: Failing test** — `test/state/auth_cubit_test.dart` with a hand-written fake repo:
+- [ ] **Step 1: Failing test** in `test/state/auth_cubit_test.dart` with a hand-written fake repo:
 ```dart
 import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
@@ -223,7 +223,7 @@ class AuthCubit extends Cubit<AuthState> {
 
 **Files:** create `lib/features/auth/sign_in_screen.dart`, `test/features/auth/sign_in_screen_test.dart`
 
-- [ ] **Step 1: Implement** `lib/features/auth/sign_in_screen.dart` — email + password, a sign-in / create-account toggle, a primary CTA (amber accent, the reserved CTA colour), loading + error states. Reads `AuthCubit` via `context`:
+- [ ] **Step 1: Implement** `lib/features/auth/sign_in_screen.dart`: email + password, a sign-in / create-account toggle, a primary CTA (amber accent, the reserved CTA colour), loading + error states. Reads `AuthCubit` via `context`:
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -315,7 +315,7 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 }
 ```
-- [ ] **Step 2: Widget test** — `test/features/auth/sign_in_screen_test.dart` (provide a fake `AuthCubit` via a fake repo, reuse the `_FakeAuth` pattern from Task 2 — copy it in):
+- [ ] **Step 2: Widget test** in `test/features/auth/sign_in_screen_test.dart` (provide a fake `AuthCubit` via a fake repo, reuse the `_FakeAuth` pattern from Task 2, copying it in):
 ```dart
 // Pump SignInScreen wrapped in BlocProvider<AuthCubit>(create: (_) => AuthCubit(_FakeAuth())).
 // Assert: validation blocks empty submit; entering a valid email+password and tapping
@@ -381,7 +381,7 @@ class FirebaseAuthRepository implements AuthRepository {
       };
 }
 ```
-- [ ] **Step 2: Test with `firebase_auth_mocks`** — `test/services/firebase_auth_repository_test.dart`:
+- [ ] **Step 2: Test with `firebase_auth_mocks`** in `test/services/firebase_auth_repository_test.dart`:
 ```dart
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -485,7 +485,7 @@ class FirestoreFavoritesRepository implements FavoritesRepository {
   }
 }
 ```
-- [ ] **Step 2: Test with `fake_cloud_firestore`** — `test/services/firestore_repositories_test.dart`:
+- [ ] **Step 2: Test with `fake_cloud_firestore`** in `test/services/firestore_repositories_test.dart`:
 ```dart
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -539,7 +539,7 @@ void main() {
 **Files:** create `docs/level-3-implementation/m5-2-going-live.md`
 
 - [ ] Write a short doc capturing EXACTLY what's left to connect the real backend (so it's unambiguous later). Include:
-  1. `flutterfire configure` (or paste config) → generates gitignored `lib/firebase_options.dart`.
+  1. `flutterfire configure` (or paste config) generates gitignored `lib/firebase_options.dart`.
   2. `main()` becomes async: `await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)` inside a `try/catch`; on success set a `firebaseReady` flag.
   3. Add an `AuthGate` at the router root: `unknown`→splash, `signedOut`→`SignInScreen`, `signedIn`→current home.
   4. `dependencies.dart`: when signed in, build `FirebaseAuthRepository` + `Firestore*Repository(db, uid)`; otherwise keep the M5.1 `SharedPrefs*` repos (graceful fallback so the app still runs with no project).
@@ -562,6 +562,6 @@ void main() {
 
 **Spec coverage:** auth (email/password) → Tasks 1–4; cloud history/favourites → Task 5 (same interfaces as M5.1, scoped `/users/{uid}/...` to match the rules); UI → Task 3. Backend seam preserved (Phase A is impl-agnostic). Deferred & documented: real-project activation (Task 6).
 
-**Risk register:** (1) firebase/mocks dependency co-resolution — gated in Task 0, Phase A independent. (2) `firebase_auth_mocks`/`fake_cloud_firestore` API drift — adaptation notes inline. (3) Adding firebase plugins must not break `flutter test`/`analyze` (host VM only) — verified in Task 0 Step 3. (4) App must keep running with no real project — guaranteed by NOT wiring init/router/deps this pass.
+**Risk register:** (1) firebase/mocks dependency co-resolution: gated in Task 0, Phase A independent. (2) `firebase_auth_mocks`/`fake_cloud_firestore` API drift: adaptation notes inline. (3) Adding firebase plugins must not break `flutter test`/`analyze` (host VM only), verified in Task 0 Step 3. (4) App must keep running with no real project, guaranteed by NOT wiring init/router/deps this pass.
 
 **Type consistency:** `AuthRepository`/`AppUser` consumed by `AuthCubit` + `SignInScreen`; `FirebaseAuthRepository` implements `AuthRepository`; `Firestore*Repository` implement the M5.1 `RunHistoryRepository`/`FavoritesRepository` and reuse `RunRecord`/`ScoredRoute` `toJson`/`fromJson` + `routeKey`. No change to existing screens.

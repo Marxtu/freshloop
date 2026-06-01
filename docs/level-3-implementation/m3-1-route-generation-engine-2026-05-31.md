@@ -2,19 +2,19 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: superpowers:subagent-driven-development or superpowers:executing-plans. Steps use checkbox (`- [ ]`) syntax.
 
-**Goal:** Build the brain that turns a user's request into ranked, scored route candidates — with **no UI yet**. A `RouteGenerator` service orchestrates the M2 clients (ORS → per-candidate AQI + greenery) and the M1 scorer; a `RouteGenCubit` exposes loading/loaded/error states. Fully unit-tested with the clients backed by `MockClient` (offline, deterministic).
+**Goal:** Build the brain that turns a user's request into ranked, scored route candidates, with no UI yet. A `RouteGenerator` service orchestrates the M2 clients (ORS, then per-candidate AQI + greenery) and the M1 scorer; a `RouteGenCubit` exposes loading/loaded/error states. Fully unit-tested with the clients backed by `MockClient` (offline, deterministic).
 
-**Architecture:** New `lib/services/` (orchestration; depends on `lib/data` clients + `lib/domain` scorer) and `lib/state/` (Cubit). Pure-domain additions (`RunParams`, `ScoredRoute`, geo helpers) stay Flutter-free in `lib/domain`. The Cubit is the only Flutter-aware piece (uses `flutter_bloc` — the professor-taught state solution). Per design §11, enrichment failures (AQI/greenery) degrade to neutral values so a route still scores; only a routing (ORS) failure fails the whole request.
+**Architecture:** New `lib/services/` (orchestration; depends on `lib/data` clients + `lib/domain` scorer) and `lib/state/` (Cubit). Pure-domain additions (`RunParams`, `ScoredRoute`, geo helpers) stay Flutter-free in `lib/domain`. The Cubit is the only Flutter-aware piece (it uses `flutter_bloc`, the professor-taught state solution). Per design §11, enrichment failures (AQI/greenery) degrade to neutral values so a route still scores; only a routing (ORS) failure fails the whole request.
 
 **Tech Stack:** Flutter, `flutter_bloc`, `http` (+ testing), Dart.
 
 **Design SSOT:** [FreshLoop system design](../level-2-architecture/running-route-generator-2026-05-30.md) §3 (flow), §6 (scoring), §7 (architecture/Cubit), §8 (models), §11 (degradation). Builds on M1 scorer (`RouteScorer`, `RouteScoreInputs`, `ScoreWeights`, `ScoreBreakdown`) and M2 clients (`OrsRouteClient`, `OpenMeteoAirClient`, `OverpassClient`, `RouteGeometry`/`RoutePoint`).
 
-**Scope of M3.1:** params model + scored-route model + geo helpers + generator service + Cubit. **No screens, no map, no photos** (photos are display-only → fetched in the route-detail screen, M3.3). Params UI + candidate UI + map = M3.2; route detail + elevation chart + photo carousel = M3.3.
+**Scope of M3.1:** params model + scored-route model + geo helpers + generator service + Cubit. No screens, no map, no photos (photos are display-only, so they are fetched in the route-detail screen, M3.3). Params UI + candidate UI + map = M3.2; route detail + elevation chart + photo carousel = M3.3.
 
-**Decisions:** generate **3 candidates** (ORS seeds 1–3); subsample up to **10 points** for AQI to keep requests small; `targetAscentM` is carried on `RunParams` (the params UI derives it from a terrain choice in M3.2); `loopType` from design §8 is omitted (YAGNI — ORS round-trip already produces a loop).
+**Decisions:** generate 3 candidates (ORS seeds 1–3); subsample up to 10 points for AQI to keep requests small; `targetAscentM` is carried on `RunParams` (the params UI derives it from a terrain choice in M3.2); `loopType` from design §8 is omitted (YAGNI, since an ORS round-trip already produces a loop).
 
-**Notes:** Flutter at `$HOME/flutter/bin/flutter` if not on PATH. English, Conventional Commits, no AI/tooling attribution, per-task commits. **Run `flutter test` + `flutter analyze` green before every commit.** Touch only the files named.
+**Notes:** Flutter at `$HOME/flutter/bin/flutter` if not on PATH. English, Conventional Commits, no AI/tooling attribution, per-task commits. Run `flutter test` + `flutter analyze` green before every commit. Touch only the files named.
 
 ---
 
@@ -69,7 +69,7 @@ void main() {
 }
 ```
 
-- [ ] **Step 3: Run to verify failure** — `flutter test test/domain/models/run_params_test.dart` → FAIL (URI missing).
+- [ ] **Step 3: Run to verify failure.** `flutter test test/domain/models/run_params_test.dart` should FAIL (URI missing).
 
 - [ ] **Step 4: Implement the models**
 
@@ -112,7 +112,7 @@ class ScoredRoute {
 }
 ```
 
-- [ ] **Step 5: Run to verify pass** — `flutter test test/domain/models/run_params_test.dart` → PASS (1).
+- [ ] **Step 5: Run to verify pass.** `flutter test test/domain/models/run_params_test.dart` should PASS (1).
 
 - [ ] **Step 6: Analyze + commit**
 
@@ -179,7 +179,7 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run to verify failure** — FAIL.
+- [ ] **Step 2: Run to verify failure.** FAIL.
 
 - [ ] **Step 3: Implement**
 
@@ -237,7 +237,7 @@ List<RoutePoint> subsample(List<RoutePoint> points, int max) {
 }
 ```
 
-- [ ] **Step 4: Run to verify pass** — PASS (6).
+- [ ] **Step 4: Run to verify pass.** PASS (6).
 
 - [ ] **Step 5: Analyze + commit**
 ```bash
@@ -363,7 +363,7 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run to verify failure** — FAIL (no route_generator.dart).
+- [ ] **Step 2: Run to verify failure.** FAIL (no route_generator.dart).
 
 - [ ] **Step 3: Implement**
 
@@ -446,7 +446,7 @@ class RouteGenerator {
 }
 ```
 
-- [ ] **Step 4: Run to verify pass** — PASS (3).
+- [ ] **Step 4: Run to verify pass.** PASS (3).
 
 - [ ] **Step 5: Analyze + commit**
 ```bash
@@ -549,7 +549,7 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run to verify failure** — FAIL.
+- [ ] **Step 2: Run to verify failure.** FAIL.
 
 - [ ] **Step 3: Implement the states**
 
@@ -609,7 +609,7 @@ class RouteGenCubit extends Cubit<RouteGenState> {
 }
 ```
 
-- [ ] **Step 5: Run to verify pass** — PASS (3).
+- [ ] **Step 5: Run to verify pass.** PASS (3).
 
 - [ ] **Step 6: Analyze + commit**
 ```bash
@@ -622,18 +622,18 @@ git commit -m "feat: add RouteGenCubit with loading/loaded/error states"
 
 ## Task 5: Final verification
 
-- [ ] **Step 1:** `flutter test` → expect 51 (after M2) + 13 new (run_params 1 + geo 6 + route_generator 3 + cubit 3) = **64 tests**, all passing.
-- [ ] **Step 2:** `flutter analyze` → clean.
+- [ ] **Step 1:** `flutter test` should report 51 (after M2) + 13 new (run_params 1 + geo 6 + route_generator 3 + cubit 3) = 64 tests, all passing.
+- [ ] **Step 2:** `flutter analyze` clean.
 - [ ] **Step 3:** `git status` clean; `lib/domain/**` still has no `package:flutter/` import (only the Cubit in `lib/state/` is Flutter-aware); no real secrets tracked.
 
 ---
 
 ## Self-Review (completed by author)
 
-**Spec coverage:** §3 generate flow → `RouteGenerator` (Task 3) + `RouteGenCubit` (Task 4); §6 scoring reused via `RouteScorer`; §7 Cubit state management → Task 4; §8 `RunParams`/scored candidate → Task 1; §11 enrichment degradation → Task 3 try/catch + neutral AQI. Deferred: params/candidate/detail screens + map + photos → M3.2/M3.3.
+**Spec coverage:** §3 generate flow is `RouteGenerator` (Task 3) plus `RouteGenCubit` (Task 4); §6 scoring is reused via `RouteScorer`; §7 Cubit state management is Task 4; §8 `RunParams`/scored candidate is Task 1; §11 enrichment degradation is Task 3 try/catch plus neutral AQI. Deferred: params/candidate/detail screens, map, and photos go to M3.2/M3.3.
 
-**Placeholder scan:** none — complete code, real mock JSON, exact expected values.
+**Placeholder scan:** none. Complete code, real mock JSON, exact expected values.
 
 **Type consistency:** `RunParams`/`ScoreWeights` (Task 1) consumed by generator (Task 3) + cubit (Task 4); `ScoredRoute{seed,geometry,score}` produced by generator, consumed by `RouteGenLoaded`; `boundingBoxOf`/`subsample` (Task 2) used in generator; generator constructor `{ors, air, overpass, scorer}` matches all tests; `RouteScorer.score`/`.rank` signatures from M1 used correctly; M2 client constructors (`OrsRouteClient({apiKey,client})`, `OpenMeteoAirClient({client})`, `OverpassClient({userAgent,client})`) match the test wiring.
 
-**Layering note:** `lib/domain` stays pure; `lib/services` may import `lib/data` + `lib/domain` (orchestration); `lib/state` imports `flutter_bloc` + services. No reverse dependencies.
+**Layering note:** `lib/domain` stays pure; `lib/services` may import `lib/data` + `lib/domain` (orchestration); `lib/state` imports `flutter_bloc` plus the services. No reverse dependencies.

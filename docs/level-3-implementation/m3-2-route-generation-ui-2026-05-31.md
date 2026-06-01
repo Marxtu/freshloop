@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: superpowers:subagent-driven-development or superpowers:executing-plans. Checkbox (`- [ ]`) steps.
 
-**Goal:** The first real screens — apply the locked visual direction (Theme A), render a map (`flutter_map`), let the user set params in a bottom sheet, trigger the M3.1 `RouteGenCubit`, and show ranked candidate cards. Built to the UX checklist + visual direction; verified by widget tests and a Chrome screenshot walkthrough.
+**Goal:** The first real screens. Apply the locked visual direction (Theme A), render a map (`flutter_map`), let the user set params in a bottom sheet, trigger the M3.1 `RouteGenCubit`, and show ranked candidate cards. Built to the UX checklist + visual direction; verified by widget tests and a Chrome screenshot walkthrough.
 
-**Architecture:** UI in `lib/features/`; theme upgraded in `lib/app/theme.dart`; a reusable `RouteMap` widget wraps `flutter_map`. The home wires `RouteGenCubit` (M3.1) via `BlocProvider`; screens render from its states. Real generation needs runtime keys (`--dart-define-from-file=secrets.json`); widget tests inject canned Cubit states / a fake generator — no network in tests.
+**Architecture:** UI in `lib/features/`; theme upgraded in `lib/app/theme.dart`; a reusable `RouteMap` widget wraps `flutter_map`. The home wires `RouteGenCubit` (M3.1) via `BlocProvider`; screens render from its states. Real generation needs runtime keys (`--dart-define-from-file=secrets.json`); widget tests inject canned Cubit states or a fake generator, with no network in tests.
 
 **Tech Stack:** Flutter, `flutter_bloc`, `flutter_map` + `latlong2`, `google_fonts`, `go_router`.
 
@@ -12,9 +12,9 @@
 
 **Scope of M3.2:** theme + deps, `RouteMap` widget, params bottom sheet, home + generate wiring, candidate comparison cards, routing. **Out:** route detail (elevation chart + photo carousel) = M3.3; live run tracking = M4.
 
-**Decisions (per UX checklist + visual direction):** map-forward; params via bottom sheet (sliders + chips + one amber `FilledButton`, no button grid); terrain chips (Flat/Rolling/Hilly) → `targetAscentM = {flat:0, rolling: 12*km, hilly: 30*km}`; 3 candidates; tier color ALWAYS paired with a label.
+**Decisions (per UX checklist + visual direction):** map-forward; params via bottom sheet (sliders + chips + one amber `FilledButton`, no button grid); terrain chips (Flat/Rolling/Hilly) map to `targetAscentM = {flat:0, rolling: 12*km, hilly: 30*km}`; 3 candidates; tier color always paired with a label.
 
-**Notes:** Flutter at `$HOME/flutter/bin/flutter`. English, Conventional Commits, no AI/tooling attribution. **Run `flutter test` + `flutter analyze` green before each commit.** Touch only files named. Widget tests must not hit the network.
+**Notes:** Flutter at `$HOME/flutter/bin/flutter`. English, Conventional Commits, no AI/tooling attribution. Run `flutter test` + `flutter analyze` green before each commit. Touch only files named. Widget tests must not hit the network.
 
 ---
 
@@ -45,7 +45,7 @@ test/features/
 
 **Files:** `pubspec.yaml`; `lib/app/theme.dart`; update `test/app/smoke_test.dart`
 
-- [ ] **Step 1: Add deps** — `flutter pub add flutter_map latlong2 google_fonts`
+- [ ] **Step 1: Add deps.** `flutter pub add flutter_map latlong2 google_fonts`
 
 - [ ] **Step 2: Implement Theme A.** Replace `lib/app/theme.dart`:
 ```dart
@@ -78,7 +78,7 @@ final ThemeData freshLoopTheme = () {
 }();
 ```
 
-- [ ] **Step 3: Update the smoke test** so it still passes with the new theme. Replace `test/app/smoke_test.dart` body to pump `FreshLoopApp` and assert the home tagline renders (keep it minimal; home content changes in Task 4 — for now assert the app builds without throwing):
+- [ ] **Step 3: Update the smoke test** so it still passes with the new theme. Replace `test/app/smoke_test.dart` body to pump `FreshLoopApp` and assert the home tagline renders (keep it minimal; home content changes in Task 4, so for now assert the app builds without throwing):
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -105,7 +105,7 @@ git commit -m "feat: apply Theme A (Sora/DM Sans, trail-green + amber) and add m
 
 **Files:** `lib/features/params/terrain.dart`, `test/features/params/terrain_test.dart`
 
-- [ ] **Step 1: Failing test** — `test/features/params/terrain_test.dart`:
+- [ ] **Step 1: Failing test.** `test/features/params/terrain_test.dart`:
 ```dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:freshloop/features/params/terrain.dart';
@@ -125,9 +125,9 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run → FAIL.**
+- [ ] **Step 2: Run, expect FAIL.**
 
-- [ ] **Step 3: Implement** — `lib/features/params/terrain.dart`:
+- [ ] **Step 3: Implement.** `lib/features/params/terrain.dart`:
 ```dart
 /// How hilly the runner wants the route. Maps to a target cumulative ascent.
 enum Terrain { flat, rolling, hilly }
@@ -147,7 +147,7 @@ double targetAscentFor(Terrain terrain, double distanceM) {
 }
 ```
 
-- [ ] **Step 4: Run → PASS (3).** `flutter analyze`. Commit:
+- [ ] **Step 4: Run, expect PASS (3).** `flutter analyze`. Commit:
 ```bash
 git add lib/features/params/terrain.dart test/features/params/terrain_test.dart
 git commit -m "feat: add Terrain preference mapping to target ascent"
@@ -159,7 +159,7 @@ git commit -m "feat: add Terrain preference mapping to target ascent"
 
 **Files:** `lib/features/common/route_map.dart`, `lib/features/common/tier_badge.dart`, `test/features/candidates/candidate_card_test.dart` will use them (test added in Task 5). Add a light render test for RouteMap here.
 
-- [ ] **Step 1: Implement `TierBadge`** (color ALWAYS paired with a label — accessibility) — `lib/features/common/tier_badge.dart`:
+- [ ] **Step 1: Implement `TierBadge`** (color always paired with a label, for accessibility). `lib/features/common/tier_badge.dart`:
 ```dart
 import 'package:flutter/material.dart';
 import '../../app/theme.dart';
@@ -198,7 +198,7 @@ class TierBadge extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 2: Implement `RouteMap`** — `lib/features/common/route_map.dart`:
+- [ ] **Step 2: Implement `RouteMap`.** `lib/features/common/route_map.dart`:
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -250,7 +250,7 @@ class RouteMap extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 3:** `flutter analyze` (clean — these compile against flutter_map). Commit:
+- [ ] **Step 3:** `flutter analyze` (clean, since these compile against flutter_map). Commit:
 ```bash
 git add lib/features/common/route_map.dart lib/features/common/tier_badge.dart
 git commit -m "feat: add RouteMap (flutter_map polyline) and TierBadge widgets"
@@ -263,7 +263,7 @@ git commit -m "feat: add RouteMap (flutter_map polyline) and TierBadge widgets"
 
 **Files:** `lib/features/params/params_sheet.dart`, `lib/features/home/home_screen.dart`, `lib/app/router.dart`, `test/features/params/params_sheet_test.dart`
 
-- [ ] **Step 1: Failing widget test** — `test/features/params/params_sheet_test.dart`:
+- [ ] **Step 1: Failing widget test.** `test/features/params/params_sheet_test.dart`:
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -298,9 +298,9 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run → FAIL.**
+- [ ] **Step 2: Run, expect FAIL.**
 
-- [ ] **Step 3: Implement `ParamsSheet`** — `lib/features/params/params_sheet.dart`:
+- [ ] **Step 3: Implement `ParamsSheet`.** `lib/features/params/params_sheet.dart`:
 ```dart
 import 'package:flutter/material.dart';
 import '../../domain/models/run_params.dart';
@@ -403,9 +403,9 @@ class _ParamsSheetState extends State<ParamsSheet> {
 }
 ```
 
-- [ ] **Step 4: Run → PASS (1).**
+- [ ] **Step 4: Run, expect PASS (1).**
 
-- [ ] **Step 5: Implement the home screen** (map-forward; params in a sheet; listens to the Cubit; navigates to candidates on loaded) — `lib/features/home/home_screen.dart`:
+- [ ] **Step 5: Implement the home screen** (map-forward; params in a sheet; listens to the Cubit; navigates to candidates on loaded). `lib/features/home/home_screen.dart`:
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -481,7 +481,7 @@ git commit -m "feat: add params bottom sheet and map-forward home wired to Route
 
 **Files:** `lib/features/candidates/candidate_card.dart`, `lib/features/candidates/candidates_screen.dart`, `test/features/candidates/candidate_card_test.dart`
 
-- [ ] **Step 1: Failing widget test** — `test/features/candidates/candidate_card_test.dart`:
+- [ ] **Step 1: Failing widget test.** `test/features/candidates/candidate_card_test.dart`:
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -522,9 +522,9 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run → FAIL.**
+- [ ] **Step 2: Run, expect FAIL.**
 
-- [ ] **Step 3: Implement `CandidateCard`** — `lib/features/candidates/candidate_card.dart`:
+- [ ] **Step 3: Implement `CandidateCard`.** `lib/features/candidates/candidate_card.dart`:
 ```dart
 import 'package:flutter/material.dart';
 import '../../app/theme.dart';
@@ -596,9 +596,9 @@ class CandidateCard extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 4: Run → PASS (1).**
+- [ ] **Step 4: Run, expect PASS (1).**
 
-- [ ] **Step 5: Implement `CandidatesScreen`** (reads `RouteGenLoaded`; staggered list) — `lib/features/candidates/candidates_screen.dart`:
+- [ ] **Step 5: Implement `CandidatesScreen`** (reads `RouteGenLoaded`; staggered list). `lib/features/candidates/candidates_screen.dart`:
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -644,7 +644,7 @@ git commit -m "feat: add candidate cards and the candidate comparison screen"
 
 **Files:** `lib/app/router.dart`, `lib/app/app.dart`, `lib/main.dart`
 
-- [ ] **Step 1: Router** — `lib/app/router.dart`:
+- [ ] **Step 1: Router.** `lib/app/router.dart`:
 ```dart
 import 'package:go_router/go_router.dart';
 import '../features/home/home_screen.dart';
@@ -709,7 +709,7 @@ class FreshLoopApp extends StatelessWidget {
 ```
 (`lib/main.dart` stays `runApp(const FreshLoopApp())`.)
 
-- [ ] **Step 3: Final verification.** `flutter test` → all pass (expect 65 prior + terrain 3 + params 1 + candidate 1 = **70**, minus/plus any smoke-test delta; confirm the actual number is green). `flutter analyze` → clean. Commit:
+- [ ] **Step 3: Final verification.** `flutter test` should all pass (expect 65 prior + terrain 3 + params 1 + candidate 1 = 70, minus/plus any smoke-test delta; confirm the actual number is green). `flutter analyze` clean. Commit:
 ```bash
 git add lib/app/router.dart lib/app/app.dart lib/app/dependencies.dart
 git commit -m "feat: wire RouteGenCubit provider and the candidates route"
@@ -719,10 +719,10 @@ git commit -m "feat: wire RouteGenCubit provider and the candidates route"
 
 ## Self-Review (author)
 
-**Spec coverage:** visual direction Theme A → Task 1 (theme), Task 3 (RouteMap/TierBadge), Task 5 (cards). UX checklist: bottom sheet + sliders + chips + single amber CTA (no button grid) → Task 4; tier color+label (no color-only) → TierBadge; map-forward master-detail → home + candidates; map = "pictures > words". Engine wiring → Tasks 4/6. Deferred: route detail + elevation chart + photo carousel → M3.3; live location + tracking → M4.
+**Spec coverage:** visual direction Theme A lands in Task 1 (theme), Task 3 (RouteMap/TierBadge), and Task 5 (cards). For the UX checklist: bottom sheet + sliders + chips + single amber CTA (no button grid) is Task 4; tier color+label (no color-only) is TierBadge; map-forward master-detail is home + candidates; the map itself is "pictures > words". Engine wiring is Tasks 4/6. Deferred: route detail, elevation chart, and photo carousel go to M3.3; live location and tracking go to M4.
 
-**Placeholder scan:** none — complete widget code, exact test expectations.
+**Placeholder scan:** none. Complete widget code, exact test expectations.
 
 **Type consistency:** `RouteGenCubit`/states from M3.1 used in home/candidates; `ScoredRoute`/`ScoreBreakdown`/`Tier` from M1/M3.1 in cards/badges; `RunParams`/`ScoreWeights` in params; `RouteGeometry`/`RoutePoint` in RouteMap; `targetAscentFor` (Task 2) used by ParamsSheet; flutter_map `MapOptions(initialCenter,initialZoom,interactionOptions)` is the v6+ API; `AppConfig.orsApiKey` from M2.1.
 
-**Live-API note:** real generation runs with `flutter run --dart-define-from-file=secrets.json`; widget tests inject states / a fake generator and never hit the network. After Task 6, run the **Chrome screenshot walkthrough** (phone + tablet) and score against the visual direction + UX checklist before the PR.
+**Live-API note:** real generation runs with `flutter run --dart-define-from-file=secrets.json`; widget tests inject states or a fake generator and never hit the network. After Task 6, run the Chrome screenshot walkthrough (phone + tablet) and score against the visual direction + UX checklist before the PR.

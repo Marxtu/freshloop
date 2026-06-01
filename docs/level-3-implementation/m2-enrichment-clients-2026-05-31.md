@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development or superpowers:executing-plans. Steps use checkbox (`- [ ]`) syntax.
 
-**Goal:** Build the two scoring-data clients still missing after M2.1 — the **Open-Meteo Air Quality** client (AQI samples along a route) and the **OSM Overpass** greenery client (green-area + scenic-POI counts → greenery ratio) — each TDD'd with mocked HTTP.
+**Goal:** Build the two scoring-data clients still missing after M2.1: the **Open-Meteo Air Quality** client (AQI samples along a route) and the **OSM Overpass** greenery client (green-area and scenic-POI counts feeding the greenery ratio), each TDD'd with mocked HTTP.
 
-**Architecture:** Same as M2.1 — `lib/data/` clients take an injectable `http.Client`, return pure-Dart models with `fromJson` factories, and throw `ApiException` (from M2.1) on non-200. No new dependencies.
+**Architecture:** Same as M2.1: `lib/data/` clients take an injectable `http.Client`, return pure-Dart models with `fromJson` factories, and throw `ApiException` (from M2.1) on non-200. No new dependencies.
 
 **Tech Stack:** Flutter, `http` (+ `package:http/testing.dart`).
 
@@ -12,10 +12,10 @@
 
 **Decisions baked into this plan:**
 - **No elevation client.** ORS already returns per-point elevation + cumulative `ascentM` (M2.1 `RouteGeometry`, requested with `elevation:true`), so a separate Open-Meteo elevation client would be redundant. The elevation scoring input comes from ORS.
-- **Greenery ratio is a documented heuristic proxy** (count of green features in the route's bounding box, normalized), not a true area-coverage computation — adequate for the scenery axis at this stage and refinable later.
+- **Greenery ratio is a documented heuristic proxy** (count of green features in the route's bounding box, normalized), not a true area-coverage computation. It is adequate for the scenery axis at this stage and refinable later.
 
 **Verified API shapes (probed live, keyless):**
-- Open-Meteo Air Quality: multiple comma-joined coords → a **JSON array** of `{... "current": {"european_aqi": <num>}}`; a single coord → a **JSON object** of the same shape. Endpoint `https://air-quality-api.open-meteo.com/v1/air-quality`.
+- Open-Meteo Air Quality: multiple comma-joined coords return a JSON array of `{... "current": {"european_aqi": <num>}}`; a single coord returns a JSON object of the same shape. Endpoint `https://air-quality-api.open-meteo.com/v1/air-quality`.
 - Overpass (shape from docs; live calls were network-blocked in the dev container and will be validated at M3): `{"elements": [ {"type":"way|node","id":..,"tags":{...}}, ... ]}`. Overpass requires a descriptive `User-Agent`.
 
 **Notes for the implementer:** Flutter at `$HOME/flutter/bin/flutter` if not on PATH. English, Conventional Commits, no AI/tooling attribution, small per-task commits. Touch only the files named. No `package:flutter/` import under `lib/data/`.
@@ -112,7 +112,7 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run to verify failure** — `flutter test test/data/air/open_meteo_air_client_test.dart` → FAIL (URI missing).
+- [ ] **Step 2: Run to verify failure.** Run `flutter test test/data/air/open_meteo_air_client_test.dart`; it should FAIL (URI missing).
 
 - [ ] **Step 3: Implement**
 
@@ -157,7 +157,7 @@ class OpenMeteoAirClient {
 }
 ```
 
-- [ ] **Step 4: Run to verify pass** — `flutter test test/data/air/open_meteo_air_client_test.dart` → PASS (4).
+- [ ] **Step 4: Run to verify pass.** Run `flutter test test/data/air/open_meteo_air_client_test.dart`; expect PASS (4).
 
 - [ ] **Step 5: Analyze + commit**
 ```bash
@@ -226,7 +226,7 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run to verify failure** — `flutter test test/data/greenery/greenery_data_test.dart` → FAIL.
+- [ ] **Step 2: Run to verify failure.** Run `flutter test test/data/greenery/greenery_data_test.dart`; it should FAIL.
 
 - [ ] **Step 3: Implement**
 
@@ -275,7 +275,7 @@ class GreeneryData {
 }
 ```
 
-- [ ] **Step 4: Run to verify pass** — `flutter test test/data/greenery/greenery_data_test.dart` → PASS (4).
+- [ ] **Step 4: Run to verify pass.** Run `flutter test test/data/greenery/greenery_data_test.dart`; expect PASS (4).
 
 - [ ] **Step 5: Analyze + commit**
 ```bash
@@ -347,7 +347,7 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run to verify failure** — `flutter test test/data/greenery/overpass_client_test.dart` → FAIL.
+- [ ] **Step 2: Run to verify failure.** Run `flutter test test/data/greenery/overpass_client_test.dart`; it should FAIL.
 
 - [ ] **Step 3: Implement**
 
@@ -401,7 +401,7 @@ class OverpassClient {
 }
 ```
 
-- [ ] **Step 4: Run to verify pass** — `flutter test test/data/greenery/overpass_client_test.dart` → PASS (2).
+- [ ] **Step 4: Run to verify pass.** Run `flutter test test/data/greenery/overpass_client_test.dart`; expect PASS (2).
 
 - [ ] **Step 5: Analyze + commit**
 ```bash
@@ -417,17 +417,17 @@ User-Agent) and parse them into GreeneryData; throw ApiException on non-200."
 
 ## Task 4: Final verification
 
-- [ ] **Step 1:** `flutter test` → expect 33 (after M2.1) + 10 new (air 4 + greenery_data 4 + overpass 2) = **43 tests**, all passing.
-- [ ] **Step 2:** `flutter analyze` → clean.
+- [ ] **Step 1:** Run `flutter test`; expect 33 (after M2.1) + 10 new (air 4 + greenery_data 4 + overpass 2) = 43 tests, all passing.
+- [ ] **Step 2:** Run `flutter analyze`; expect it clean.
 - [ ] **Step 3:** `git status` clean; no `package:flutter/` under `lib/data/`; no real secrets tracked.
 
 ---
 
 ## Self-Review (completed by author)
 
-**Spec coverage:** §5 air quality → Task 1; §5 greenery/Overpass → Tasks 2-3; §6 scenery scoring inputs (greenRatio + scenicWaypoints) → Task 2 getters; §11 degradation (non-200 → ApiException; empty points → empty list) → Tasks 1-3. Elevation input intentionally sourced from ORS (M2.1), not a new client — documented above.
+**Spec coverage:** §5 air quality → Task 1; §5 greenery/Overpass → Tasks 2-3; §6 scenery scoring inputs (greenRatio + scenicWaypoints) → Task 2 getters; §11 degradation (non-200 → ApiException; empty points → empty list) → Tasks 1-3. Elevation input intentionally sourced from ORS (M2.1), not a new client, as documented above.
 
-**Placeholder scan:** none — complete code, real verified Open-Meteo shape, documented Overpass shape, exact expected values.
+**Placeholder scan:** none. Complete code, real verified Open-Meteo shape, documented Overpass shape, exact expected values.
 
 **Type consistency:** `OpenMeteoAirClient({client})` + `sampleAqi(List<RoutePoint>)` (RoutePoint from M2.1) match tests; `GreeneryData({greenCount, scenicCount})` + `fromOverpassJson` + getters match between model, client, and tests; `OverpassClient({userAgent, client})` + `fetchGreenery({south,west,north,east})` match tests; `ApiException(service, statusCode, body)` reused from M2.1.
 
