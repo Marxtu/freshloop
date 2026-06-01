@@ -2,6 +2,7 @@ import '../data/air/open_meteo_air_client.dart';
 import '../data/greenery/greenery_data.dart';
 import '../data/greenery/overpass_client.dart';
 import '../data/routing/ors_route_client.dart';
+import '../data/routing/route_geometry.dart';
 import '../domain/geo.dart';
 import '../domain/models/route_score_inputs.dart';
 import '../domain/models/run_params.dart';
@@ -26,16 +27,42 @@ class RouteGenerator {
 
   /// Generates [candidates] loop routes for [params] and returns them ranked
   /// best-first. Neutral AQI (50) is used if air data is unavailable.
+  ///
+  /// ORS `round_trip` can deviate a lot from the requested length where the
+  /// foot network is sparse (e.g. alpine valleys). So we **over-generate** a
+  /// pool of cheap geometries and keep the [candidates] whose length is closest
+  /// to the target before doing the (heavier) enrichment + scoring.
   Future<List<ScoredRoute>> generate(RunParams params, {int candidates = 3}) async {
-    final scored = <ScoredRoute>[];
-    for (var seed = 1; seed <= candidates; seed++) {
-      final geometry = await ors.roundTrip(
-        lat: params.startLat,
-        lng: params.startLng,
-        lengthM: params.targetDistanceM,
-        seed: seed,
-      );
+    Object? lastError;
+    Future<({int seed, RouteGeometry geom})?> fetch(int seed) async {
+      try {
+        final g = await ors.roundTrip(
+          lat: params.startLat,
+          lng: params.startLng,
+          lengthM: params.targetDistanceM,
+          seed: seed,
+        );
+        return (seed: seed, geom: g);
+      } catch (e) {
+        lastError = e;
+        return null;
+      }
+    }
 
+    final raw = await Future.wait([for (var s = 1; s <= candidates * 2; s++) fetch(s)]);
+    final pool = raw.whereType<({int seed, RouteGeometry geom})>().toList();
+    if (pool.isEmpty) {
+      throw lastError ?? StateError('No route could be generated');
+    }
+    // Keep the geometries closest to the requested distance.
+    pool.sort((a, b) => (a.geom.distanceM - params.targetDistanceM)
+        .abs()
+        .compareTo((b.geom.distanceM - params.targetDistanceM).abs()));
+    final chosen = pool.take(candidates).toList();
+
+    final scored = <ScoredRoute>[];
+    for (final c in chosen) {
+      final geometry = c.geom;
       List<double> aqi;
       try {
         aqi = await air.sampleAqi(subsample(geometry.points, 10));
@@ -65,7 +92,7 @@ class RouteGenerator {
       );
 
       scored.add(ScoredRoute(
-        seed: seed,
+        seed: c.seed,
         geometry: geometry,
         score: scorer.score(inputs, params.weights),
       ));

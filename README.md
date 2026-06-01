@@ -96,11 +96,12 @@ built incrementally across reviewed PRs, and **released as v1.0.0** (Android APK
 </p>
 
 FreshLoop doesn't hand-roll pathfinding — the loop **geometry** is delegated to OpenRouteService's
-round-trip routing. The original part is the **orchestration**: for each of three seeds it requests a
-*differently-shaped* loop of roughly the target length, **enriches** each candidate with live data
-(Open-Meteo AQI, OSM Overpass greenery, and the route's own ascent), **scores** it on three axes, and
-**ranks** the candidates best-first for the comparison screen. Enrichment failures degrade to neutral
-values so a route is still scored; only a routing failure stops generation. See
+round-trip routing. The original part is the **orchestration**: it **over-generates** differently-shaped
+loops and keeps the ones **closest to the requested distance** (round-trip routing can deviate a lot
+where the trail network is sparse), **enriches** each candidate with live data (Open-Meteo AQI, OSM
+Overpass greenery, and the route's own ascent), **scores** it on three axes, and **ranks** the
+candidates best-first for the comparison screen. Enrichment failures degrade to neutral values so a
+route is still scored; only a routing failure stops generation. See
 [`lib/services/route_generator.dart`](lib/services/route_generator.dart).
 
 ## How route scoring works

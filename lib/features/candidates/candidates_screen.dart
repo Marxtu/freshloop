@@ -16,11 +16,56 @@ class CandidatesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<RouteGenCubit>().state;
     final routes = state is RouteGenLoaded ? state.routes : const [];
+    final target = state is RouteGenLoaded ? state.targetDistanceM : null;
     return Scaffold(
       appBar: AppBar(title: const Text('Choose your route')),
       body: routes.isEmpty
           ? const Center(child: Text('No routes — try generating again.'))
-          : isWide(context)
+          : Column(
+              children: [
+                _distanceMismatchBanner(context, routes, target),
+                Expanded(child: _list(context, routes)),
+              ],
+            ),
+    );
+  }
+
+  /// A note shown when even the closest loop is well off the requested distance
+  /// (the trail network around the start is too sparse for that length).
+  Widget _distanceMismatchBanner(BuildContext context, List<dynamic> routes, double? target) {
+    if (target == null || target <= 0 || routes.isEmpty) return const SizedBox.shrink();
+    final closest = routes
+        .map((r) => (r.geometry.distanceM as double))
+        .reduce((a, b) => (a - target).abs() < (b - target).abs() ? a : b);
+    if ((closest - target).abs() / target <= 0.5) return const SizedBox.shrink();
+    final t = Theme.of(context);
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(12, 10, 12, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFDF6),
+        border: Border.all(color: const Color(0x59F59E0B)),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline_rounded, color: Color(0xFFB45309), size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'No ~${(target / 1000).toStringAsFixed(1)} km loop near this start — the trail network here is sparse. '
+              'Closest is ~${(closest / 1000).toStringAsFixed(1)} km. Try a longer distance, or a start nearer roads.',
+              style: t.textTheme.bodySmall?.copyWith(color: const Color(0xFF7A5B12)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _list(BuildContext context, List<dynamic> routes) {
+    return isWide(context)
               ? GridView.builder(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -42,7 +87,6 @@ class CandidatesScreen extends StatelessWidget {
                     rank: i + 1,
                     onTap: () => context.push('/detail', extra: routes[i]),
                   ),
-                ),
-    );
+                );
   }
 }

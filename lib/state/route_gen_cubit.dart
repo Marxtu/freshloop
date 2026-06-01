@@ -14,7 +14,7 @@ class RouteGenCubit extends Cubit<RouteGenState> {
     emit(const RouteGenLoading());
     try {
       final routes = await generator.generate(params, candidates: candidates);
-      emit(RouteGenLoaded(routes));
+      emit(RouteGenLoaded(routes, targetDistanceM: params.targetDistanceM));
     } catch (e) {
       emit(RouteGenError(e.toString()));
     }

@@ -75,6 +75,30 @@ void main() {
       expect(routes.first.geometry.points, isNotEmpty);
     });
 
+    test('keeps the candidates whose length is closest to the requested distance', () async {
+      // ORS encodes the seed in the distance; round_trip can deviate badly, so
+      // the generator over-generates and keeps the closest-to-target loops.
+      final ors = OrsRouteClient(
+        apiKey: 'k',
+        client: MockClient((req) async {
+          final seed = (jsonDecode(req.body) as Map)['options']['round_trip']['seed'] as int;
+          return _orsResp(1000.0 * seed); // seeds 1..N -> 1000..N000 m
+        }),
+      );
+      final air = OpenMeteoAirClient(client: MockClient((_) async => http.Response('[]', 200)));
+      final overpass = OverpassClient(userAgent: 'ua', client: MockClient((_) async => http.Response('{}', 200)));
+      final gen = RouteGenerator(ors: ors, air: air, overpass: overpass);
+
+      // target 5000; pool = candidates*2 = 4 seeds -> 1000,2000,3000,4000.
+      final routes = await gen.generate(
+        const RunParams(startLat: 45.46, startLng: 9.19, targetDistanceM: 5000),
+        candidates: 2,
+      );
+
+      // The two closest to 5000 km are 4000 and 3000 — not 1000/2000.
+      expect(routes.map((r) => r.geometry.distanceM).toSet(), {3000.0, 4000.0});
+    });
+
     test('degrades to a neutral score when enrichment APIs fail (route still scored)', () async {
       final ors = OrsRouteClient(apiKey: 'k', client: MockClient((req) async => _orsResp(3000)));
       final air = OpenMeteoAirClient(client: MockClient((req) async => http.Response('down', 500)));

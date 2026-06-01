@@ -15,7 +15,12 @@ class RouteGenLoading extends RouteGenState {
 
 class RouteGenLoaded extends RouteGenState {
   final List<ScoredRoute> routes;
-  const RouteGenLoaded(this.routes);
+
+  /// The distance the user asked for (metres), so the UI can flag when even the
+  /// closest generated loop is far off (a sparse trail network around the start).
+  final double? targetDistanceM;
+
+  const RouteGenLoaded(this.routes, {this.targetDistanceM});
 }
 
 class RouteGenError extends RouteGenState {
