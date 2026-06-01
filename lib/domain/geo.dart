@@ -53,6 +53,29 @@ List<RoutePoint> subsample(List<RoutePoint> points, int max) {
   return out;
 }
 
+/// The point [distanceM] metres from [from] along compass [bearingDeg]
+/// (0°=N, 90°=E). A small-distance equirectangular step — accurate to well
+/// under a metre over the few km we use it for (picking out-and-back turnarounds).
+RoutePoint destinationPoint(RoutePoint from, double bearingDeg, double distanceM) {
+  const earthRadiusM = 6371000.0;
+  final br = bearingDeg * math.pi / 180.0;
+  final dLat = (distanceM / earthRadiusM) * math.cos(br) * 180.0 / math.pi;
+  final dLng =
+      (distanceM / earthRadiusM) * math.sin(br) * 180.0 / math.pi / math.cos(from.lat * math.pi / 180.0);
+  return RoutePoint(lat: from.lat + dLat, lng: from.lng + dLng);
+}
+
+/// Cumulative ascent (sum of positive elevation deltas) along [points]; 0 when
+/// elevations are missing. Used to total an out-and-back's climb from its points.
+double ascentOf(List<RoutePoint> points) {
+  var ascent = 0.0;
+  for (var i = 1; i < points.length; i++) {
+    final a = points[i - 1].elevation, b = points[i].elevation;
+    if (a != null && b != null && b > a) ascent += b - a;
+  }
+  return ascent;
+}
+
 /// Great-circle distance between two points, in metres (Haversine).
 double haversineMeters(RoutePoint a, RoutePoint b) {
   const earthRadiusM = 6371000.0;

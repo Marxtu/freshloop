@@ -9,6 +9,37 @@ void main() {
     RoutePoint(lat: 45.47, lng: 9.20),
   ];
 
+  group('destinationPoint', () {
+    const milan = RoutePoint(lat: 45.46, lng: 9.19);
+    test('east moves longitude up, latitude ~unchanged, at about the distance', () {
+      final e = destinationPoint(milan, 90, 2000);
+      expect(e.lat, closeTo(45.46, 1e-4));
+      expect(e.lng, greaterThan(9.19));
+      expect(haversineMeters(milan, e), closeTo(2000, 30));
+    });
+    test('north moves latitude up by ~distance', () {
+      final n = destinationPoint(milan, 0, 1000);
+      expect(n.lat, greaterThan(45.46));
+      expect(n.lng, closeTo(9.19, 1e-9));
+      expect(haversineMeters(milan, n), closeTo(1000, 15));
+    });
+  });
+
+  group('ascentOf', () {
+    test('sums only the positive elevation deltas', () {
+      const climb = [
+        RoutePoint(lat: 0, lng: 0, elevation: 100),
+        RoutePoint(lat: 0, lng: 0, elevation: 130), // +30
+        RoutePoint(lat: 0, lng: 0, elevation: 110), // -20 (ignored)
+        RoutePoint(lat: 0, lng: 0, elevation: 150), // +40
+      ];
+      expect(ascentOf(climb), closeTo(70, 1e-9));
+    });
+    test('is zero when elevations are missing', () {
+      expect(ascentOf(const [RoutePoint(lat: 0, lng: 0), RoutePoint(lat: 1, lng: 1)]), 0);
+    });
+  });
+
   group('boundingBoxOf', () {
     test('computes min/max with padding', () {
       final b = boundingBoxOf(pts, padDeg: 0.0);

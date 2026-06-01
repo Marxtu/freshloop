@@ -6,6 +6,7 @@ import 'package:freshloop/data/air/open_meteo_air_client.dart';
 import 'package:freshloop/data/greenery/overpass_client.dart';
 import 'package:freshloop/data/routing/ors_route_client.dart';
 import 'package:freshloop/domain/models/run_params.dart';
+import 'package:freshloop/domain/models/scored_route.dart';
 import 'package:freshloop/services/route_generator.dart';
 
 http.Response _orsResp(double distance) => http.Response(
@@ -97,6 +98,31 @@ void main() {
 
       // The two closest to 5000 km are 4000 and 3000 — not 1000/2000.
       expect(routes.map((r) => r.geometry.distanceM).toSet(), {3000.0, 4000.0});
+    });
+
+    test('offers an out-and-back when no loop is near the requested distance', () async {
+      // Loops come back far (12 km); a point-to-point leg is 2.4 km → out-and-back
+      // is 4.8 km, much closer to the 5 km target, so it should win.
+      final ors = OrsRouteClient(
+        apiKey: 'k',
+        client: MockClient((req) async {
+          final body = jsonDecode(req.body) as Map<String, dynamic>;
+          final isLoop = (body['options'] as Map?)?['round_trip'] != null;
+          return _orsResp(isLoop ? 12000.0 : 2400.0);
+        }),
+      );
+      final air = OpenMeteoAirClient(client: MockClient((_) async => http.Response('[]', 200)));
+      final overpass = OverpassClient(userAgent: 'ua', client: MockClient((_) async => http.Response('{}', 200)));
+      final gen = RouteGenerator(ors: ors, air: air, overpass: overpass);
+
+      final routes = await gen.generate(
+        const RunParams(startLat: 45.73, startLng: 7.39, targetDistanceM: 5000),
+        candidates: 1,
+      );
+
+      expect(routes.length, 1);
+      expect(routes.first.kind, RouteKind.outAndBack);
+      expect(routes.first.geometry.distanceM, 4800.0); // 2 × the 2.4 km leg
     });
 
     test('degrades to a neutral score when enrichment APIs fail (route still scored)', () async {

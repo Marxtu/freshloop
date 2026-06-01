@@ -59,6 +59,7 @@ class CandidateCard extends StatelessWidget {
                     ),
                   ),
                   Positioned(top: 10, left: 10, child: _rankRibbon(t)),
+                  Positioned(top: 10, right: 10, child: _kindChip(t)),
                 ],
               ),
             ),
@@ -97,6 +98,27 @@ class CandidateCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _kindChip(ThemeData t) {
+    final ob = route.kind == RouteKind.outAndBack;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [BoxShadow(color: Color(0x22000000), blurRadius: 5, offset: Offset(0, 2))],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(ob ? Icons.swap_horiz_rounded : Icons.loop_rounded, size: 13, color: AppColors.ink),
+          const SizedBox(width: 4),
+          Text(ob ? 'Out & back' : 'Loop',
+              style: t.textTheme.labelSmall?.copyWith(color: AppColors.ink, fontWeight: FontWeight.w700)),
+        ],
       ),
     );
   }

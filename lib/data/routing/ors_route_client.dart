@@ -51,4 +51,37 @@ class OrsRouteClient {
       jsonDecode(resp.body) as Map<String, dynamic>,
     );
   }
+
+  /// Point-to-point foot route from ([fromLat],[fromLng]) to ([toLat],[toLng]).
+  /// Used to build clean out-and-back routes (route there, then mirror it back).
+  /// Throws [ApiException] on a non-200 response.
+  Future<RouteGeometry> directions({
+    required double fromLat,
+    required double fromLng,
+    required double toLat,
+    required double toLng,
+  }) async {
+    if (apiKey.isEmpty) {
+      throw ApiException('OpenRouteService', 401,
+          'API key missing — build/run with --dart-define-from-file=secrets.json');
+    }
+    final resp = await _client.post(
+      _endpoint,
+      headers: {
+        'Authorization': apiKey,
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'coordinates': [
+          [fromLng, fromLat],
+          [toLng, toLat],
+        ],
+        'elevation': true,
+      }),
+    );
+    if (resp.statusCode != 200) {
+      throw ApiException('OpenRouteService', resp.statusCode, resp.body);
+    }
+    return RouteGeometry.fromOrsGeoJson(jsonDecode(resp.body) as Map<String, dynamic>);
+  }
 }

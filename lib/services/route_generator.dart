@@ -9,6 +9,9 @@ import '../domain/models/run_params.dart';
 import '../domain/models/scored_route.dart';
 import '../domain/scoring/route_scorer.dart';
 
+/// One generated geometry awaiting enrichment, with how it was formed.
+typedef _Candidate = ({int seed, RouteGeometry geom, RouteKind kind});
+
 /// Orchestrates the data clients and the scorer to produce ranked candidates.
 /// Enrichment failures (air/greenery) degrade to neutral values so a route is
 /// still scored (design doc §11); a routing failure propagates (no route, no run).
@@ -33,8 +36,11 @@ class RouteGenerator {
   /// pool of cheap geometries and keep the [candidates] whose length is closest
   /// to the target before doing the (heavier) enrichment + scoring.
   Future<List<ScoredRoute>> generate(RunParams params, {int candidates = 3}) async {
+    final start = RoutePoint(lat: params.startLat, lng: params.startLng);
     Object? lastError;
-    Future<({int seed, RouteGeometry geom})?> fetch(int seed) async {
+
+    // A round-trip loop (ORS picks the shape from a seed).
+    Future<_Candidate?> fetchLoop(int seed) async {
       try {
         final g = await ors.roundTrip(
           lat: params.startLat,
@@ -42,19 +48,46 @@ class RouteGenerator {
           lengthM: params.targetDistanceM,
           seed: seed,
         );
-        return (seed: seed, geom: g);
+        return (seed: seed, geom: g, kind: RouteKind.loop);
       } catch (e) {
         lastError = e;
         return null;
       }
     }
 
-    final raw = await Future.wait([for (var s = 1; s <= candidates * 2; s++) fetch(s)]);
-    final pool = raw.whereType<({int seed, RouteGeometry geom})>().toList();
+    // An out-and-back: route to a turnaround ~half the distance away along a
+    // bearing, then mirror the path home. Clean and exactly on-distance even
+    // where the trail network is too sparse for a loop.
+    Future<_Candidate?> fetchOutAndBack(int i, double bearing) async {
+      final half = params.targetDistanceM / 2 / 1.3; // crow-flies, minus a typical detour
+      final turn = destinationPoint(start, bearing, half);
+      try {
+        final leg = await ors.directions(
+          fromLat: params.startLat,
+          fromLng: params.startLng,
+          toLat: turn.lat,
+          toLng: turn.lng,
+        );
+        if (leg.points.length < 2) return null;
+        final pts = [...leg.points, ...leg.points.reversed.skip(1)];
+        final geom = RouteGeometry(points: pts, distanceM: leg.distanceM * 2, ascentM: ascentOf(pts));
+        return (seed: 100 + i, geom: geom, kind: RouteKind.outAndBack);
+      } catch (e) {
+        lastError = e;
+        return null;
+      }
+    }
+
+    const bearings = [0.0, 90.0, 180.0, 270.0];
+    final raw = await Future.wait(<Future<_Candidate?>>[
+      for (var s = 1; s <= candidates * 2; s++) fetchLoop(s),
+      for (var i = 0; i < bearings.length; i++) fetchOutAndBack(i, bearings[i]),
+    ]);
+    final pool = raw.whereType<_Candidate>().toList();
     if (pool.isEmpty) {
       throw lastError ?? StateError('No route could be generated');
     }
-    // Keep the geometries closest to the requested distance.
+    // Keep the geometries closest to the requested distance (loop or out-and-back).
     pool.sort((a, b) => (a.geom.distanceM - params.targetDistanceM)
         .abs()
         .compareTo((b.geom.distanceM - params.targetDistanceM).abs()));
@@ -95,6 +128,7 @@ class RouteGenerator {
         seed: c.seed,
         geometry: geometry,
         score: scorer.score(inputs, params.weights),
+        kind: c.kind,
       ));
     }
     return scorer.rank(scored, (r) => r.score.total);

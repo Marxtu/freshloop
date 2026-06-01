@@ -95,13 +95,15 @@ built incrementally across reviewed PRs, and **released as v1.0.0** (Android APK
   <img src="docs/screenshots/route-gen-flow.png" alt="Route-generation data flow: generate candidates via OpenRouteService → enrich with Open-Meteo AQI and OSM Overpass greenery → score on three axes → rank best-first" width="720">
 </p>
 
-FreshLoop doesn't hand-roll pathfinding — the loop **geometry** is delegated to OpenRouteService's
-round-trip routing. The original part is the **orchestration**: it **over-generates** differently-shaped
-loops and keeps the ones **closest to the requested distance** (round-trip routing can deviate a lot
-where the trail network is sparse), **enriches** each candidate with live data (Open-Meteo AQI, OSM
-Overpass greenery, and the route's own ascent), **scores** it on three axes, and **ranks** the
-candidates best-first for the comparison screen. Enrichment failures degrade to neutral values so a
-route is still scored; only a routing failure stops generation. See
+FreshLoop doesn't hand-roll pathfinding — the **geometry** is delegated to OpenRouteService. The
+original part is the **orchestration**: it **over-generates** a pool of candidates — both round-trip
+**loops** and **out-and-back** routes (route to a turnaround ~half the distance away, then mirror it
+home) — and keeps the ones **closest to the requested distance**. Out-and-backs matter where the trail
+network is too sparse for a clean loop (an alpine valley returns tangled ~13 km loops for a 5 km
+request, but a ~4.5 km out-and-back). It then **enriches** each kept candidate with live data
+(Open-Meteo AQI, OSM Overpass greenery, and the route's own ascent), **scores** it on three axes, and
+**ranks** them best-first for the comparison screen. Enrichment failures degrade to neutral values so
+a route is still scored; only a routing failure stops generation. See
 [`lib/services/route_generator.dart`](lib/services/route_generator.dart).
 
 ## How route scoring works
