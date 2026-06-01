@@ -87,11 +87,28 @@ class RouteGenerator {
     if (pool.isEmpty) {
       throw lastError ?? StateError('No route could be generated');
     }
-    // Keep the geometries closest to the requested distance (loop or out-and-back).
-    pool.sort((a, b) => (a.geom.distanceM - params.targetDistanceM)
-        .abs()
-        .compareTo((b.geom.distanceM - params.targetDistanceM).abs()));
-    final chosen = pool.take(candidates).toList();
+
+    double errOf(_Candidate c) => (c.geom.distanceM - params.targetDistanceM).abs();
+    final loops = pool.where((c) => c.kind == RouteKind.loop).toList();
+    final backs = pool.where((c) => c.kind == RouteKind.outAndBack).toList();
+    final closestLoop = loops.isEmpty ? null : loops.reduce((a, b) => errOf(a) <= errOf(b) ? a : b);
+    final loopFits = closestLoop != null && errOf(closestLoop) / params.targetDistanceM <= 0.5;
+
+    final List<_Candidate> chosen;
+    if (loopFits || backs.isEmpty) {
+      // A loop near the target exists (or we have no out-and-backs): show the
+      // candidates closest to the requested distance.
+      final sorted = [...pool]..sort((a, b) => errOf(a).compareTo(errOf(b)));
+      chosen = sorted.take(candidates).toList();
+    } else {
+      // No loop fits the requested distance here (sparse trail network): offer
+      // the out-and-back closest to the target plus the shortest loop, so the
+      // runner can choose. The screen explains why.
+      final bestBack = backs.reduce((a, b) => errOf(a) <= errOf(b) ? a : b);
+      final shortestLoop =
+          loops.isEmpty ? null : loops.reduce((a, b) => a.geom.distanceM <= b.geom.distanceM ? a : b);
+      chosen = [bestBack, ?shortestLoop];
+    }
 
     final scored = <ScoredRoute>[];
     for (final c in chosen) {

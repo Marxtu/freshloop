@@ -100,9 +100,9 @@ void main() {
       expect(routes.map((r) => r.geometry.distanceM).toSet(), {3000.0, 4000.0});
     });
 
-    test('offers an out-and-back when no loop is near the requested distance', () async {
-      // Loops come back far (12 km); a point-to-point leg is 2.4 km → out-and-back
-      // is 4.8 km, much closer to the 5 km target, so it should win.
+    test('when no loop fits the distance, offers an out-and-back + the shortest loop', () async {
+      // Loops come back far (12 km, off the 5 km target); a point-to-point leg is
+      // 2.4 km → out-and-back is 4.8 km, near the target.
       final ors = OrsRouteClient(
         apiKey: 'k',
         client: MockClient((req) async {
@@ -117,12 +117,19 @@ void main() {
 
       final routes = await gen.generate(
         const RunParams(startLat: 45.73, startLng: 7.39, targetDistanceM: 5000),
-        candidates: 1,
+        candidates: 3,
       );
 
-      expect(routes.length, 1);
-      expect(routes.first.kind, RouteKind.outAndBack);
-      expect(routes.first.geometry.distanceM, 4800.0); // 2 × the 2.4 km leg
+      // Exactly two curated options: a near-distance out-and-back and the shortest loop.
+      expect(routes.length, 2);
+      expect(
+        routes.any((r) => r.kind == RouteKind.outAndBack && r.geometry.distanceM == 4800.0),
+        isTrue,
+      );
+      expect(
+        routes.any((r) => r.kind == RouteKind.loop && r.geometry.distanceM == 12000.0),
+        isTrue,
+      );
     });
 
     test('degrades to a neutral score when enrichment APIs fail (route still scored)', () async {

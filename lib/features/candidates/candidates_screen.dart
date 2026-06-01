@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../app/responsive.dart';
+import '../../domain/models/scored_route.dart';
 import '../../state/route_gen_cubit.dart';
 import '../../state/route_gen_state.dart';
 import 'candidate_card.dart';
@@ -30,14 +31,17 @@ class CandidatesScreen extends StatelessWidget {
     );
   }
 
-  /// A note shown when even the closest loop is well off the requested distance
-  /// (the trail network around the start is too sparse for that length).
+  /// A note shown when no loop near the requested distance was possible (sparse
+  /// trail network), explaining the out-and-back + shortest-loop fallback.
   Widget _distanceMismatchBanner(BuildContext context, List<dynamic> routes, double? target) {
     if (target == null || target <= 0 || routes.isEmpty) return const SizedBox.shrink();
-    final closest = routes
-        .map((r) => (r.geometry.distanceM as double))
-        .reduce((a, b) => (a - target).abs() < (b - target).abs() ? a : b);
-    if ((closest - target).abs() / target <= 0.5) return const SizedBox.shrink();
+    final loops = routes.where((r) => r.kind == RouteKind.loop).toList();
+    if (loops.isEmpty) return const SizedBox.shrink();
+    final loopDists = loops.map((r) => (r.geometry.distanceM as double)).toList();
+    final closestLoop = loopDists.reduce((a, b) => (a - target).abs() < (b - target).abs() ? a : b);
+    if ((closestLoop - target).abs() / target <= 0.5) return const SizedBox.shrink(); // a loop fits
+    final shortestLoop = loopDists.reduce((a, b) => a < b ? a : b);
+    final hasBack = routes.any((r) => r.kind == RouteKind.outAndBack);
     final t = Theme.of(context);
     return Container(
       width: double.infinity,
@@ -55,7 +59,8 @@ class CandidatesScreen extends StatelessWidget {
           Expanded(
             child: Text(
               'No ~${(target / 1000).toStringAsFixed(1)} km loop near this start — the trail network here is sparse. '
-              'Closest is ~${(closest / 1000).toStringAsFixed(1)} km. Try a longer distance, or a start nearer roads.',
+              '${hasBack ? "Showing an out-and-back near your distance, plus " : "Showing "}'
+              'the shortest loop (~${(shortestLoop / 1000).toStringAsFixed(1)} km). Try a denser start or a longer distance.',
               style: t.textTheme.bodySmall?.copyWith(color: const Color(0xFF7A5B12)),
             ),
           ),
