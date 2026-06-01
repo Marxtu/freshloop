@@ -51,6 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _searching = false;
   bool _located = false;
   List<GeoPlace> _suggestions = const [];
+  bool _noMatches = false; // a search ran and returned nothing (show a hint)
   Timer? _debounce;
 
   @override
@@ -72,7 +73,12 @@ class _HomeScreenState extends State<HomeScreen> {
     final q = raw.trim();
     _debounce?.cancel();
     if (q.length < 2) {
-      if (_suggestions.isNotEmpty) setState(() => _suggestions = const []);
+      if (_suggestions.isNotEmpty || _noMatches) {
+        setState(() {
+          _suggestions = const [];
+          _noMatches = false;
+        });
+      }
       return;
     }
     _debounce = Timer(const Duration(milliseconds: 250), () async {
@@ -83,7 +89,12 @@ class _HomeScreenState extends State<HomeScreen> {
       } catch (_) {
         r = const [];
       }
-      if (mounted) setState(() => _suggestions = _byDistance(r));
+      if (mounted) {
+        setState(() {
+          _suggestions = _byDistance(r);
+          _noMatches = r.isEmpty;
+        });
+      }
     });
   }
 
@@ -96,6 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _lng = p.lng;
       _located = true;
       _suggestions = const [];
+      _noMatches = false;
     });
   }
 
@@ -115,6 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _lng = p.longitude;
       _located = true;
       _suggestions = const [];
+      _noMatches = false;
     });
     GeoPlace? place;
     try {
@@ -234,6 +247,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 8),
                       if (_suggestions.isNotEmpty)
                         _suggestionsCard(t)
+                      else if (_noMatches)
+                        _noMatchesCard(t)
                       else
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -390,6 +405,28 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _noMatchesCard(ThemeData t) {
+    return Material(
+      elevation: 3,
+      borderRadius: BorderRadius.circular(16),
+      shadowColor: Colors.black26,
+      color: t.colorScheme.surface,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Icon(Icons.search_off_rounded, color: t.colorScheme.onSurfaceVariant),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text('No matches — check the spelling, or pan the map and search again.',
+                  style: t.textTheme.bodyMedium?.copyWith(color: t.colorScheme.onSurfaceVariant)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _searchBar(ThemeData t) {
     return Material(
       elevation: 3,
@@ -430,7 +467,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () {
                         _debounce?.cancel();
                         _searchController.clear();
-                        setState(() => _suggestions = const []);
+                        setState(() {
+                          _suggestions = const [];
+                          _noMatches = false;
+                        });
                       },
                     ),
             ),

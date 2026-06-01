@@ -85,6 +85,28 @@ void main() {
         lessThan(tester.getTopLeft(find.text('6.5 km')).dy));
   });
 
+  testWidgets('shows a "no matches" hint when a search returns nothing', (tester) async {
+    final geocoder = PhotonClient(
+      userAgent: 'ua',
+      client: MockClient((req) async => http.Response(_fc(const []), 200)),
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: BlocProvider(
+        create: (_) => RouteGenCubit(_idleGenerator()),
+        child: HomeScreen(locationSource: _FixedLocation(), geocoder: geocoder),
+      ),
+    ));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.enterText(find.byType(TextField), 'zzqqxx');
+    await tester.pump(const Duration(milliseconds: 300)); // fire the 250ms debounce
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    expect(find.textContaining('No matches'), findsOneWidget);
+  });
+
   testWidgets('submitting the search (Enter) is location-biased, not global', (tester) async {
     final requests = <Uri>[];
     final geocoder = PhotonClient(
